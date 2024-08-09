@@ -1,0 +1,296 @@
+#include "../headerFiles/struct.h"
+#include "../headerFiles/api.h"
+#include "../headerFiles/config.h"
+#include "../headerFiles/features.h"
+#include "../headerFiles/githubAPI.h"
+#include "../headerFiles/helperFunctions.h"
+#include "../headerFiles/markdownToPDF.h"
+#include "../headerFiles/slackAPI.h"
+#include "../headerFiles/stringTools.h"
+#include "../headerFiles/wikiAPI.h"
+#include "../headerFiles/sheetAPI.h"
+
+
+char *template_pages_singles_query = "{\"query\":\"{pages {single(id: DefaultID){id, path, title, content, description, updatedAt, createdAt}}}\"}";
+char *template_list_pages_sortByPath_query = "{\"query\":\"{pages {list(orderBy: PATH){path, title, id, updatedAt}}}\"}";
+char *template_list_pages_sortByTime_query = "{\"query\":\"{pages {list(orderBy: UPDATED, orderByDirection: DESC){path, title, id, updatedAt}}}\"}";
+char *template_update_page_mutation = "{\"query\":\"mutation { pages { update(id: DefaultID, content: \\\"DefaultContent\\\", isPublished: true) { responseResult { succeeded, message } } } }\"}";
+char *template_render_page_mutation = "{\"query\":\"mutation { pages { render(id: DefaultID) { responseResult { succeeded, message } } } }\"}";
+char *template_create_user_mutation = "{\"query\":\"mutation { users { create(email: \\\"DefaultEmail\\\", name: \\\"DefaultName\\\", prodiverKey: DefaultProviderKey, groups: DefaultGroup, mustChangePassword: true, passwordRaw: \\\"DefaultPassword\\\") { responseResult { succeeded, message } } } }";
+char *template_move_page_mutation = "{\"query\":\"mutation { pages { move(id: DefaultID, destinationPath: \\\"DefaultPath\\\", destinationLocale: \\\"en\\\") { responseResult { succeeded, message } } } }\"}";
+
+
+//Code used to execute mutation and queries, hardcoded for rocket team wiki (void but modifies chunk.response)
+void wikiApi(char *query){
+  CURL *curl;
+  CURLcode res;
+  struct curl_slist *headers = NULL;
+  curl_global_init(CURL_GLOBAL_ALL);
+  curl = curl_easy_init();
+
+  chunk.response = malloc(1);  /* grown as needed by the realloc above */
+  chunk.size = 0;    /* no data at this point */
+
+    if (curl) {
+        // Set the API URL
+        curl_easy_setopt(curl, CURLOPT_URL, "https://rocket-team.epfl.ch/graphql");
+        // Set the HTTP method to POST
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        // Set the Content-Type header
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+        // Set the GraphQL query as the request payload
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, query);
+        // Add Authorization header with the API key
+        char auth_header[1024];
+        snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s ", WIKI_API_TOKEN);
+        headers = curl_slist_append(headers, auth_header);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        // Set the callback function to handle the response
+        // Send all data to this function
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+        /* we pass our 'chunk' struct to the callback function */
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+        // Perform the HTTP request
+        res = curl_easy_perform(curl);
+        // Check for errors
+        if (res != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        }
+        // Check the HTTP status code
+        long http_code = 0;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+        if (http_code != 200) {
+            fprintf(stderr, "wikiApi: HTTP request failed with status code %ld\n", http_code);
+            exit(-1);;
+        }
+        // Clean up
+        curl_easy_cleanup(curl);
+        curl_slist_free_all(headers);
+    }
+    curl_global_cleanup();
+}
+
+//Fills in the default get page content from id query and calls execute (void but modifies chunk.response)
+void getPageContentQuery(char* id){
+    char *temp_query = strdup(template_pages_singles_query); // Make a copy to modify
+    char *modified_query = replaceWord(temp_query, default_page.id, id);
+    wikiApi(modified_query);
+    free(temp_query);
+    free(modified_query);
+}
+
+//Gets the list of all pages can either be sorted by "path" or "time" (void but modified chunk.response)
+void getListQuery(char *sort){
+    if(strcmp(sort, "path") == 0 || strcmp(sort, "exact path") == 0){
+        char *temp_query = strdup(template_list_pages_sortByPath_query); // Make a copy to modify
+        wikiApi(temp_query);
+        free(temp_query); 
+    }
+    else if(strcmp(sort, "time") == 0){
+        char *temp_query = strdup(template_list_pages_sortByTime_query); // Make a copy to modify
+        wikiApi(temp_query);
+        free(temp_query);
+    }
+    else{
+        printf("Error: inappropriate sort type in getListQuery function call");
+    }
+}
+
+//Uses page.id to get all of the other information for a given page and parses the information into the page struct (modifies the linked list it receives and gives back pointer to head)
+pageList* getPage(pageList** head){
+    pageList* current = *head;
+    getPageContentQuery(current->id);
+    sscanf(chunk.response, "{ \"id\": %s", current->id);
+    current->title = jsonParserGetStringValue(chunk.response, "\"title\"");
+    current->path = jsonParserGetStringValue(chunk.response, "\"path\"");
+    current->description = jsonParserGetStringValue(chunk.response, "\"description\"");
+    current->content = jsonParserGetStringValue(chunk.response, "\"content\"");
+    current->updatedAt = jsonParserGetStringValue(chunk.response, "\"updatedAt\"");
+    current->createdAt = jsonParserGetStringValue(chunk.response, "\"createdAt\"");
+    //fprintf(stderr, "title: %s\n, path: %s\n, description: %s\n, content: %s\n, updatedAt: %s\n", current->title, current->path, current->description, current->content, current->updatedAt);
+    free(chunk.response);
+    return current;
+}
+
+// Function to filter and parse the JSON string into a Node linked list
+pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* filterCondition) {
+
+    
+    if (strstr(filterCondition, "\\") != NULL) {
+        filterCondition = replaceWord(filterCondition, "\\", "");
+    }
+
+    char* start = strstr(jsonString, "\"list\":");
+    if (start == NULL) {
+        fprintf(stderr, "Invalid JSON format.\n");
+        return *head;
+    }
+
+    // Start parsing from "list"
+    char* current = start;
+    const char* pathKey = "\"path\":\"";
+    size_t lengthPathKey = strlen(pathKey);
+    const char* titleKey = "\"title\":\"";
+    size_t lengthTitleKey = strlen(titleKey);
+    const char* idKey = "\"id\":";
+    size_t lengthIdKey = strlen(idKey);
+    const char* updatedAtKey = "\"updatedAt\":";
+    size_t lengthUpdatedAtKey = strlen(updatedAtKey);
+    while (1) {
+        // Find "path"
+        char* pathStart = strstr(current, pathKey);
+        if (pathStart == NULL) break;
+        pathStart += lengthPathKey;
+        char* pathValueEnd = strchr(pathStart, '\"');
+        if (pathValueEnd == NULL) break;
+        size_t pathLength = pathValueEnd - pathStart;
+        char* path = (char*)malloc(pathLength + 1);
+        strncpy(path, pathStart, pathLength);
+        path[pathLength] = '\0';
+
+        // Find "title"
+        char* titleStart = strstr(current, titleKey);
+        if (titleStart == NULL) {
+            free(path);
+            break;
+        }
+        titleStart += lengthTitleKey;
+        char* titleValueEnd = strchr(titleStart, '\"');
+        if (titleValueEnd == NULL) {
+            free(path);
+            break;
+        }
+        size_t titleLength = titleValueEnd - titleStart;
+        char* title = (char*)malloc(titleLength + 1);
+        strncpy(title, titleStart, titleLength);
+        title[titleLength] = '\0';
+
+        // Find "id"
+        char* idStart = strstr(current, idKey);
+        if (idStart == NULL) {
+            free(path);
+            free(title);
+            break;
+        }
+        idStart += lengthIdKey;
+        char* idValueEnd = strchr(idStart, ',');
+        if (idValueEnd == NULL) {
+            free(path);
+            free(title);
+            break;
+        }
+        size_t idLength = idValueEnd - idStart;
+        char* id = (char*)malloc(idLength + 1);
+        strncpy(id, idStart, idLength);
+        id[idLength] = '\0';
+
+        // Find "updatedAt"
+        char* updatedAtStart = strstr(current, updatedAtKey);
+        if (updatedAtStart == NULL) {
+            free(path);
+            free(title);
+            free(id);
+            break;
+        }
+        updatedAtStart += lengthUpdatedAtKey + 1;
+        char* updatedAtValueEnd = strchr(updatedAtStart, '\"');
+        if (updatedAtValueEnd == NULL) {
+            free(path);
+            free(title);
+            free(id);
+            break;
+        }
+        size_t updatedAtLength = updatedAtValueEnd - updatedAtStart;
+        char* updatedAt = (char*)malloc(updatedAtLength + 1);
+        strncpy(updatedAt, updatedAtStart, updatedAtLength);
+        updatedAt[updatedAtLength] = '\0';
+
+        // Add page to list based on the filter condition
+        if (strcmp(filterType, "path") == 0 && (strstr(path, filterCondition) != NULL || strcmp(filterCondition, "none") == 0)) {
+            printf("Page found after filtering by path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
+            *head = addPageToList(head, id, title, path, "", "", updatedAt, "");
+            printf("Page added to list\n");
+        }
+
+        if (strcmp(filterType, "time") == 0 && (strcmp(filterCondition, "none") == 0 || compareTimes(filterCondition, updatedAt) != 1)) {
+            printf("Page found after filtering by time:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
+            *head = addPageToList(head, id, title, path, "", "", updatedAt, "");
+            printf("Page added to list\n");
+        }
+
+        if (strcmp(filterType, "exact path") == 0 && strcmp(path, filterCondition) == 0) {
+            printf("Page found after filtering by exact path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
+            *head = addPageToList(head, id, title, path, "", "", updatedAt, "");
+            printf("Page added to list\n");
+            free(path);
+            free(title);
+            free(id);
+            free(updatedAt);
+            break;
+        }
+
+        if (strcmp(filterType, "time") == 0 && strcmp(filterCondition, "none") != 0 && compareTimes(filterCondition, updatedAt) == 1) {
+            fprintf(stderr, "Last page found\n");
+            free(id);
+            free(title);
+            free(path);
+            free(updatedAt);
+            break;
+        }
+
+        // Move to next page in received JSON
+        current = strchr(pathValueEnd, '}');
+        if (current == NULL) break;
+        current++;
+        free(id);
+        free(title);
+        free(path);
+        free(updatedAt);
+    }
+
+    fprintf(stderr, "Finished searching for pages\n");
+    return *head;
+}
+
+//Fills in the default update page mutation query (void but modifies pages on the wiki)
+void updatePageContentMutation(pageList* head){
+    char *temp_query = template_update_page_mutation;
+    //fprintf(stderr,"About to update page (id: %s) to content: %s", head->id, head->content);
+    temp_query = replaceWord(temp_query, default_page.id, head->id);
+    temp_query = replaceWord(temp_query, default_page.content, head->content);
+
+    //fprintf(stderr,"About to update send query: %s\n", temp_query);
+
+    wikiApi(temp_query);
+}
+
+//renders the argument page (equivalent to refreshing the page once changes have been made to it) (void but modifies wiki)
+void renderMutation(pageList** head){
+    pageList* current = *head;
+    while (current)  {
+        char *temp_query = template_render_page_mutation;
+        temp_query = replaceWord(temp_query, default_page.id, current->id);
+        wikiApi(temp_query);
+        current = current->next;
+    }
+}
+
+//Fills in the default update page mutation query (void but modifies wiki)
+void movePageContentMutation(pageList** head){
+    pageList* current = *head;
+    while (current)  {
+        char *temp_query = template_move_page_mutation;
+        temp_query = replaceWord(temp_query, default_page.id, current->id);
+        temp_query = replaceWord(temp_query, default_page.path, current->path);
+        wikiApi(temp_query);
+        current = current->next;
+    }
+}
+
+//populates a linked list with a filtered and ordered list of pages (modifies the linked list it receives and gives back pointer to head)
+pageList* populatePageList(pageList** head, char *filterType, char *filterCondition){
+    pageList* temp = *head;
+    getListQuery(filterType);
+    temp = parseJSON(&temp, chunk.response, filterType, filterCondition);
+    return temp;
+}
