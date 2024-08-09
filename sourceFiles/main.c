@@ -10,7 +10,7 @@
 #include "../headerFiles/wikiAPI.h"
 #include "../headerFiles/sheetAPI.h"
 
-//gcc -o wikiToolbox sourceFiles/main.c sourceFiles/api.c sourceFiles/features.c sourceFiles/githubAPI.c sourceFiles/helperFunctions.c sourceFiles/markdownToPDF.c sourceFiles/slackAPI.c sourceFiles/stringTools.c sourceFiles/wikiAPI.c -I../headerFiles -lcurl
+//gcc -o wikiToolbox sourceFiles/main.c sourceFiles/api.c sourceFiles/features.c sourceFiles/githubAPI.c sourceFiles/helperFunctions.c sourceFiles/markdownToPDF.c sourceFiles/slackAPI.c sourceFiles/stringTools.c sourceFiles/wikiAPI.c sourceFiles/sheetAPI.c -I../headerFiles -lcurl -lcjson
 
 //searches for commmands on the slack channel, parses the command and calls the appropriate function in features.c
 
