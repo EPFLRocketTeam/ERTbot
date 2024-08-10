@@ -100,7 +100,7 @@ void refreshOAuthToken() {
 
     if (GOOGLE_CLIENT_ID == NULL || GOOGLE_CLIENT_SECRET == NULL || GOOGLE_REFRESH_TOKEN == NULL) {
         fprintf(stderr, "Environment variables not set.\n");
-        return 1;
+        return;
     }
 
     // Set up the data for the POST request
@@ -137,7 +137,7 @@ void refreshOAuthToken() {
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         } else {
             // Output the response
-            fprintf(stderr, "Response: %s\n", chunk.memory);
+            fprintf(stderr, "Response: %s\n", chunk.response);
 
             // Here you would parse the JSON response to extract the access token.
             // The response would look something like this:
@@ -158,5 +158,5 @@ void refreshOAuthToken() {
 
     curl_global_cleanup();
 
-    return 0;
+    return;
 }
