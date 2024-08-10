@@ -7,4 +7,6 @@ void batchUpdateSheet(char *sheetId, char *range, char *values);
 
 void batchGetSheet(char *sheetId, char *range);
 
+void refreshOAuthToken();
+
 #endif

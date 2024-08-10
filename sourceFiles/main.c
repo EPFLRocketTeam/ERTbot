@@ -120,6 +120,12 @@ int main(){
             goto complete;
         }
 
+        else if (cmd.function && strcmp(cmd.function, "refreshOAuthToken") == 0){
+            refreshOAuthToken();
+            sendMessageToSlack("Token Refreshed");
+            goto complete;
+        }
+
         /*
         else if (cmd.function && strcmp(cmd.function, "getPDF") == 0){
             sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");

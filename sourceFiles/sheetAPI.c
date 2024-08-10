@@ -93,3 +93,70 @@ void batchGetSheet(char *sheetId, char *range){
     free(temp_url);
     free(modified_url);
 }
+
+void refreshOAuthToken() {
+    CURL *curl;
+    CURLcode res;
+
+    if (GOOGLE_CLIENT_ID == NULL || GOOGLE_CLIENT_SECRET == NULL || GOOGLE_REFRESH_TOKEN == NULL) {
+        fprintf(stderr, "Environment variables not set.\n");
+        return 1;
+    }
+
+    // Set up the data for the POST request
+    char postfields[1024];
+    snprintf(postfields, sizeof(postfields), "client_id=%s&client_secret=%s&refresh_token=%s&grant_type=refresh_token", GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN);
+
+    chunk.response = malloc(1);  /* grown as needed by the realloc above */
+    chunk.size = 0;    /* no data at this point */
+
+    curl_global_init(CURL_GLOBAL_ALL);
+    curl = curl_easy_init();
+
+    if(curl) {
+        // Set the URL for the token request
+        curl_easy_setopt(curl, CURLOPT_URL, "https://oauth2.googleapis.com/token");
+
+        // Specify that we want to send a POST request
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+
+        // Set the POST fields
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postfields);
+
+        // Pass the callback function to handle the response
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+
+        // Pass the memory structure to the callback function
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+
+        // Perform the request and get the response code
+        res = curl_easy_perform(curl);
+
+        // Check for errors
+        if(res != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        } else {
+            // Output the response
+            fprintf(stderr, "Response: %s\n", chunk.memory);
+
+            // Here you would parse the JSON response to extract the access token.
+            // The response would look something like this:
+            // {
+            //   "access_token": "ya29.a0AfH6SM...",
+            //   "expires_in": 3599,
+            //   "scope": "https://www.googleapis.com/auth/spreadsheets",
+            //   "token_type": "Bearer"
+            // }
+            //
+            // You can use a JSON parser to extract the "access_token" from this response.
+        }
+
+        // Clean up
+        curl_easy_cleanup(curl);
+        free(chunk.memory);
+    }
+
+    curl_global_cleanup();
+
+    return 0;
+}

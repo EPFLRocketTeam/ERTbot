@@ -5,6 +5,9 @@ extern char *GITHUB_API_TOKEN;
 extern char *WIKI_API_TOKEN;
 extern char *SLACK_API_TOKEN;
 extern char *SHEET_API_TOKEN;
+extern char *GOOGLE_CLIENT_ID;
+extern char *GOOGLE_CLIENT_SECRET;
+extern char *GOOGLE_REFRESH_TOKEN;
 
 //Callback function to handle the HTTP response, alocates memory for chunk.response
 size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp);
