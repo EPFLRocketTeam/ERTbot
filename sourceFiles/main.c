@@ -20,6 +20,8 @@ pageList default_page = {"DefaultID", "DefaultTitle", "DefaultPath", "DefauDefau
 
 int main(){
 
+    initializeApiTokenVariables();
+
     // Initialize command struct (used to pass commands from the slack to the program)
     command cmd;
     slackMessage slackMsg;

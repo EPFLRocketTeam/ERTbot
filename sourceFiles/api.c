@@ -10,6 +10,20 @@
 #include "../headerFiles/wikiAPI.h"
 #include "../headerFiles/sheetAPI.h"
 
+
+char *GITHUB_API_TOKEN;
+char *WIKI_API_TOKEN;
+char *SLACK_API_TOKEN;
+char *SHEET_API_TOKEN;
+
+void initializeApiTokenVariables() {
+    GITHUB_API_TOKEN = getenv("GITHUB_API_TOKEN");
+    WIKI_API_TOKEN = getenv("WIKI_API_TOKEN");
+    SLACK_API_TOKEN = getenv("SLACK_API_TOKEN");
+    SHEET_API_TOKEN = getenv("SHEET_API_TOKEN");
+    return;
+}
+
 //Callback function to handle the HTTP response, alocates memory for chunk.response
 size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp) {
     // size us allways 1
@@ -62,3 +76,4 @@ char *jsonParserGetStringValue(char *json, char *key) {
 
     return value;
 }
+

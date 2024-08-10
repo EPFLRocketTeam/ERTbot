@@ -1,13 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 //Github
-#define GITHUB_API_TOKEN getenv("GITHUB_API_TOKEN")
+//#define GITHUB_API_TOKEN getenv("GITHUB_API_TOKEN")
 #define USER_AGENT "My-CURL-Program-ZUGMA" //User-Agent header required by GitHub API
 #define REPO_URL "https://api.github.com/repos/EPFLRocketTeam/ert_wiki/contents" //GitHub repository URL and image path
 
 
 //Wiki
-#define WIKI_API_TOKEN getenv("WIKI_API_TOKEN")
+//#define WIKI_API_TOKEN getenv("WIKI_API_TOKEN")
 #define LINK_TRACKER_PAGE_ID "896"
 #define AUTOMATIC_UPDATE_TRACKER_PAGE_ID "897"
 #define IMAGE_TRACKER_PAGE_ID "898"
@@ -20,11 +20,11 @@
 
 //Slack
 //Define your Slack API token and the channel where you want to upload the file
-#define SLACK_API_TOKEN getenv("SLACK_API_TOKEN")
+//#define SLACK_API_TOKEN getenv("SLACK_API_TOKEN")
 #define SLACK_WIKI_TOOLBOX_CHANNEL "C06RQGVRKPU"
 
 //Sheet
-#define SHEET_API_TOKEN getenv("SHEET_API_TOKEN")
+//#define SHEET_API_TOKEN getenv("SHEET_API_TOKEN")
 
 
 
