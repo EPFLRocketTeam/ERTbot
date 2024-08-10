@@ -153,7 +153,7 @@ void refreshOAuthToken() {
 
         // Clean up
         curl_easy_cleanup(curl);
-        free(chunk.memory);
+        free(chunk.response);
     }
 
     curl_global_cleanup();
