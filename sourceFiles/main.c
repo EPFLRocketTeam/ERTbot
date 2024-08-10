@@ -14,6 +14,7 @@
 
 //searches for commmands on the slack channel, parses the command and calls the appropriate function in features.c
 
+
 memory chunk;
 
 pageList default_page = {"DefaultID", "DefaultTitle", "DefaultPath", "DefauDefaultDescription", "DefaultContent", "DefaultUpdatedAt", NULL};
