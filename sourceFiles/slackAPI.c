@@ -38,7 +38,11 @@ int sendMessageToSlack( char *message) {
         // Add headers
         headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
         headerlist = curl_slist_append(headerlist, "charset: utf-8");
-        headerlist = curl_slist_append(headerlist, "Authorization: Bearer " SLACK_API_TOKEN);
+
+        char auth_header[128];
+        snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s", SLACK_API_TOKEN);
+        headerlist = curl_slist_append(headerlist, auth_header);
+
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
 
         // Perform the request
@@ -154,7 +158,9 @@ int addSlackMember(char *channels, char *email) {
         // Add headers
         headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
         headerlist = curl_slist_append(headerlist, "charset: utf-8");
-        headerlist = curl_slist_append(headerlist, "Authorization: Bearer " SLACK_API_TOKEN);
+        char auth_header[128];
+        snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s", SLACK_API_TOKEN);
+        headerlist = curl_slist_append(headerlist, auth_header);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
         // Perform the request
         res = curl_easy_perform(curl);

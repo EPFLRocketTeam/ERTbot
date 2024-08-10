@@ -1668,7 +1668,7 @@ char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, i
     return updated_json_str;
 }
 
-
+/*
 char *extractVerificationStatsForAReview(cJSON *requirementList){
 
     //VERIFICAITON
@@ -1732,3 +1732,4 @@ char *extractVerificationStatsForAReview(cJSON *requirementList){
     }
 
 }
+*/
