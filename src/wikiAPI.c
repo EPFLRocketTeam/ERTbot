@@ -1,14 +1,22 @@
-#include "../headerFiles/struct.h"
-#include "../headerFiles/api.h"
-#include "../headerFiles/config.h"
-#include "../headerFiles/features.h"
-#include "../headerFiles/githubAPI.h"
-#include "../headerFiles/helperFunctions.h"
-#include "../headerFiles/markdownToPDF.h"
-#include "../headerFiles/slackAPI.h"
-#include "../headerFiles/stringTools.h"
-#include "../headerFiles/wikiAPI.h"
-#include "../headerFiles/sheetAPI.h"
+/**
+ * @file wikiAPI.c
+ * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
+ * @brief Contains all of the functions which are only used to interact with the wiki APIs.
+ * 
+ * @todo Tidy up how the query templates are stored/defined/decalred use snprintf wiht %s instead of default values...
+ */
+
+#include "../include/struct.h"
+#include "../include/api.h"
+#include "../include/config.h"
+#include "../include/features.h"
+#include "../include/githubAPI.h"
+#include "../include/helperFunctions.h"
+#include "../include/markdownToPDF.h"
+#include "../include/slackAPI.h"
+#include "../include/stringTools.h"
+#include "../include/wikiAPI.h"
+#include "../include/sheetAPI.h"
 
 
 char *template_pages_singles_query = "{\"query\":\"{pages {single(id: DefaultID){id, path, title, content, description, updatedAt, createdAt}}}\"}";
@@ -20,7 +28,19 @@ char *template_create_user_mutation = "{\"query\":\"mutation { users { create(em
 char *template_move_page_mutation = "{\"query\":\"mutation { pages { move(id: DefaultID, destinationPath: \\\"DefaultPath\\\", destinationLocale: \\\"en\\\") { responseResult { succeeded, message } } } }\"}";
 
 
-//Code used to execute mutation and queries, hardcoded for rocket team wiki (void but modifies chunk.response)
+/**
+ * @brief Sends a GraphQL query to the Wiki API using a POST request.
+ * 
+ * @param[in] query Pointer to a string containing the GraphQL query to be sent.
+ * 
+ * @details This function initializes libcurl, sets up a POST request to the specified Wiki API endpoint with the provided
+ *          GraphQL query. It includes necessary headers such as Content-Type and Authorization. The response is handled
+ *          by the `writeCallback` function. After performing the request, the function checks for errors and the HTTP status
+ *          code to ensure successful completion.
+ * 
+ * @note Ensure that `WIKI_API_TOKEN` is set correctly and the `writeCallback` function is properly defined to handle the
+ *       API response.
+ */
 void wikiApi(char *query){
   CURL *curl;
   CURLcode res;
@@ -70,7 +90,18 @@ void wikiApi(char *query){
     curl_global_cleanup();
 }
 
-//Fills in the default get page content from id query and calls execute (void but modifies chunk.response)
+/**
+ * @brief Constructs and sends a GraphQL query to retrieve the content of a page.
+ * 
+ * @param[in] id Pointer to a string containing the ID of the page to retrieve.
+ * 
+ * @details This function creates a query based on a template by replacing a placeholder with the provided page ID. It
+ *          then sends the constructed query to the Wiki API using the `wikiApi` function. Memory for the query strings is
+ *          dynamically allocated and freed after use.
+ * 
+ * @note Ensure that `template_pages_singles_query` and `default_page.id` are correctly defined and that the `wikiApi`
+ *       function is properly set up to handle the API request.
+ */
 void getPageContentQuery(char* id){
     char *temp_query = strdup(template_pages_singles_query); // Make a copy to modify
     char *modified_query = replaceWord(temp_query, default_page.id, id);
@@ -79,7 +110,22 @@ void getPageContentQuery(char* id){
     free(modified_query);
 }
 
-//Gets the list of all pages can either be sorted by "path" or "time" (void but modified chunk.response)
+/**
+ * @brief Constructs and sends a GraphQL query to retrieve a list of pages, sorted by the specified criteria.
+ * 
+ * @param[in] sort Pointer to a string indicating the sorting criteria. Possible values are:
+ *                 - "path" or "exact path" for sorting by path.
+ *                 - "time" for sorting by time.
+ * 
+ * @details This function selects and constructs a query based on the provided sorting criteria. It creates a query by
+ *          duplicating a template query string and sends it to the Wiki API using the `wikiApi` function. Memory for the
+ *          query string is dynamically allocated and freed after use.
+ * 
+ * @note If the `sort` parameter does not match one of the expected values, an error message is printed.
+ * 
+ * @warning Ensure that `template_list_pages_sortByPath_query` and `template_list_pages_sortByTime_query` are correctly
+ *          defined, and that the `wikiApi` function is properly set up to handle the API request.
+ */
 void getListQuery(char *sort){
     if(strcmp(sort, "path") == 0 || strcmp(sort, "exact path") == 0){
         char *temp_query = strdup(template_list_pages_sortByPath_query); // Make a copy to modify
@@ -96,7 +142,6 @@ void getListQuery(char *sort){
     }
 }
 
-//Uses page.id to get all of the other information for a given page and parses the information into the page struct (modifies the linked list it receives and gives back pointer to head)
 pageList* getPage(pageList** head){
     pageList* current = *head;
     getPageContentQuery(current->id);
@@ -252,7 +297,6 @@ pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* f
     return *head;
 }
 
-//Fills in the default update page mutation query (void but modifies pages on the wiki)
 void updatePageContentMutation(pageList* head){
     char *temp_query = template_update_page_mutation;
     //fprintf(stderr,"About to update page (id: %s) to content: %s", head->id, head->content);
@@ -264,7 +308,6 @@ void updatePageContentMutation(pageList* head){
     wikiApi(temp_query);
 }
 
-//renders the argument page (equivalent to refreshing the page once changes have been made to it) (void but modifies wiki)
 void renderMutation(pageList** head){
     pageList* current = *head;
     while (current)  {
@@ -275,7 +318,6 @@ void renderMutation(pageList** head){
     }
 }
 
-//Fills in the default update page mutation query (void but modifies wiki)
 void movePageContentMutation(pageList** head){
     pageList* current = *head;
     while (current)  {
@@ -287,7 +329,6 @@ void movePageContentMutation(pageList** head){
     }
 }
 
-//populates a linked list with a filtered and ordered list of pages (modifies the linked list it receives and gives back pointer to head)
 pageList* populatePageList(pageList** head, char *filterType, char *filterCondition){
     pageList* temp = *head;
     getListQuery(filterType);

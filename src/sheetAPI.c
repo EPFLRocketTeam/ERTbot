@@ -1,14 +1,21 @@
-#include "../headerFiles/struct.h"
-#include "../headerFiles/api.h"
-#include "../headerFiles/config.h"
-#include "../headerFiles/features.h"
-#include "../headerFiles/githubAPI.h"
-#include "../headerFiles/helperFunctions.h"
-#include "../headerFiles/markdownToPDF.h"
-#include "../headerFiles/slackAPI.h"
-#include "../headerFiles/stringTools.h"
-#include "../headerFiles/wikiAPI.h"
-#include "../headerFiles/sheetAPI.h"
+/**
+ * @file sheetAPI.c
+ * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
+ * @brief Contains all of the functions which are only used to interact with the Google Sheets APIs.
+ *
+ */
+
+#include "../include/struct.h"
+#include "../include/api.h"
+#include "../include/config.h"
+#include "../include/features.h"
+#include "../include/githubAPI.h"
+#include "../include/helperFunctions.h"
+#include "../include/markdownToPDF.h"
+#include "../include/slackAPI.h"
+#include "../include/stringTools.h"
+#include "../include/wikiAPI.h"
+#include "../include/sheetAPI.h"
 
 
 char *template_batch_update_url = "https://sheets.googleapis.com/v4/spreadsheets/DefaultSheetID/values:batchUpdate";
@@ -17,7 +24,6 @@ char *template_batch_update_query = "{\"valueInputOption\": \"USER_ENTERED\",\"d
 
 //char *query = "{\"valueInputOption\": \"USER_ENTERED\",\"data\": [{\"range\": \"Sheet1!A1:C4\",\"majorDimension\": \"ROWS\",\"values\": [[\"Item\", \"Cost\", \"Review\"],[\"Coffee\", 2.50, 5]]}],\"includeValuesInResponse\": true,\"responseValueRenderOption\": \"FORMATTED_VALUE\",\"responseDateTimeRenderOption\": \"SERIAL_NUMBER\"}";
 
-//Function to call google sheets API
 void sheetAPI(char *query, char *url, char *requestType) {
     CURL *curl;
     CURLcode res;
@@ -61,7 +67,6 @@ void sheetAPI(char *query, char *url, char *requestType) {
     curl_global_cleanup();
 }
 
-//Function to update cells
 void batchUpdateSheet(char *sheetId, char *range, char *values){
     char *requestType = "POST";
     char *temp_url = strdup(template_batch_update_url); // Make a copy to modify

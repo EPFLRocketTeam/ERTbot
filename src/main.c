@@ -1,19 +1,33 @@
-#include "../headerFiles/struct.h"
-#include "../headerFiles/api.h"
-#include "../headerFiles/config.h"
-#include "../headerFiles/features.h"
-#include "../headerFiles/githubAPI.h"
-#include "../headerFiles/helperFunctions.h"
-#include "../headerFiles/markdownToPDF.h"
-#include "../headerFiles/slackAPI.h"
-#include "../headerFiles/stringTools.h"
-#include "../headerFiles/wikiAPI.h"
-#include "../headerFiles/sheetAPI.h"
+/**
+ * @file main.c
+ * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
+ * @brief Contains the program initalisation and loop functions
+ * 
+ * @details Goal of this file is to initalise the program, search for incoming commands (from slack chat,
+ *          inline commands on wiki and periodic commands), recognise the command, call the appropriate
+ *          function in the features.c file.
+ * 
+ * @todo Separate the different functions in order to only have a initialise and a loop function in 
+ *       the main function, write functions for the two other command sending options which are check
+ *       latest modified pages and check time, modify the featues.c functions to send back the text
+ *       which can then be send to slack or added to a wiki page and add function to handle features.c 
+ *       function returned text
+ * 
+ */
 
-//gcc -o wikiToolbox sourceFiles/main.c sourceFiles/api.c sourceFiles/features.c sourceFiles/githubAPI.c sourceFiles/helperFunctions.c sourceFiles/markdownToPDF.c sourceFiles/slackAPI.c sourceFiles/stringTools.c sourceFiles/wikiAPI.c sourceFiles/sheetAPI.c -I../headerFiles -lcurl -lcjson
+#include "../include/struct.h"
+#include "../include/api.h"
+#include "../include/config.h"
+#include "../include/features.h"
+#include "../include/githubAPI.h"
+#include "../include/helperFunctions.h"
+#include "../include/markdownToPDF.h"
+#include "../include/slackAPI.h"
+#include "../include/stringTools.h"
+#include "../include/wikiAPI.h"
+#include "../include/sheetAPI.h"
 
-//searches for commmands on the slack channel, parses the command and calls the appropriate function in features.c
-
+//gcc -o wikiToolbox src/main.c src/api.c src/features.c src/githubAPI.c src/helperFunctions.c src/markdownToPDF.c src/slackAPI.c src/stringTools.c src/wikiAPI.c src/sheetAPI.c -I../include -lcurl -lcjson
 
 memory chunk;
 
@@ -77,13 +91,13 @@ int main(){
         }
 
         else if (cmd.function && strcmp(cmd.function, "buildLinksTracker") == 0){ //Works
-            buildLinksTracker(cmd);
+            buildLinksTracker();
             sendMessageToSlack("Page created.");
             goto complete;
         }
         
         else if (cmd.function && strcmp(cmd.function, "updateLinksTracker") == 0){ //Works
-            updateLinksTracker(cmd);
+            updateLinksTracker( );
         }
 
         else if (cmd.function && strcmp(cmd.function, "buildLocalGraph") == 0){ //Works

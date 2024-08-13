@@ -1,20 +1,40 @@
-#include "../headerFiles/struct.h"
-#include "../headerFiles/api.h"
-#include "../headerFiles/config.h"
-#include "../headerFiles/features.h"
-#include "../headerFiles/githubAPI.h"
-#include "../headerFiles/helperFunctions.h"
-#include "../headerFiles/markdownToPDF.h"
-#include "../headerFiles/slackAPI.h"
-#include "../headerFiles/stringTools.h"
-#include "../headerFiles/wikiAPI.h"
-#include "../headerFiles/sheetAPI.h"
-
+/**
+ * @file markdownToPDF.c
+ * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
+ * @brief File which contains all of the helper functions which are only used during the conversion of wiki pages to latex files
+ * 
+ * 
+ * @warning The code is extremely messy and needs to be refactored
+ * @todo refactor all of the code, redocument, add functionality to scale image automatically, add functionality to compile the
+ *       latex document locally, remove folder after sending it to slack
+ */
+#include "../include/struct.h"
+#include "../include/api.h"
+#include "../include/config.h"
+#include "../include/features.h"
+#include "../include/githubAPI.h"
+#include "../include/helperFunctions.h"
+#include "../include/markdownToPDF.h"
+#include "../include/slackAPI.h"
+#include "../include/stringTools.h"
+#include "../include/wikiAPI.h"
+#include "../include/sheetAPI.h"
 
 #define MAX_COMMAND_LENGTH 5000
 
-/*Function which call pandoc on terminal. 
-Inputs: inputMarkdownFile(full with markdown), outputLatexFile(empty)*/
+/**
+ * @brief Converts a Markdown file to a LaTeX file using Pandoc.
+ * 
+ * This function constructs and executes a system command to use Pandoc for converting a Markdown file to LaTeX.
+ * 
+ * @param inputMarkdownFile The path to the Markdown file to be converted.
+ * @param outputLatexFile The path where the resulting LaTeX file will be saved.
+ * 
+ * @details
+ * - Constructs a command string for Pandoc to convert the input Markdown file to the specified LaTeX file.
+ * - Executes the command using the `system` function.
+ * - Outputs a success message if the conversion is successful, otherwise an error message.
+ */
 void markdownToLatex(char* inputMarkdownFile, char* outputLatexFile) {
     char command[MAX_COMMAND_LENGTH]; // Assuming command won't exceed 500 characters
 
@@ -32,7 +52,22 @@ void markdownToLatex(char* inputMarkdownFile, char* outputLatexFile) {
     }
 }
 
-//Function used to remove tabsets from the wiki.js markdown, replaces with appropriate headings
+/**
+ * @brief Fixes tabset headers in a string by adjusting the level of Markdown headers before and after a tabset.
+ * 
+ * This function processes a string containing Markdown content to handle tabsets by:
+ * - Identifying occurrences of the `{.tabset}` tag.
+ * - Adjusting the level of headers before and after the tabset by recalculating and removing excess hash symbols (`#`).
+ * 
+ * @param str The input string containing Markdown content with potential tabset headers.
+ * 
+ * @return char* A modified version of the input string with fixed tabsets.
+ * 
+ * @details
+ * - The function searches for `{.tabset}` in the string.
+ * - For each occurrence, it counts the number of headers (hash symbols) preceding and following the tabset.
+ * - Adjustments are made to realign the headers as necessary by shifting characters and removing extra hashes.
+ */
 char* fixTabsets(char *str) {
     char* input = str;
     int count1 = 0;
@@ -87,8 +122,6 @@ char* fixTabsets(char *str) {
                      
                 }
             }
-
-
         }
         count1 = 0;
         count2 = 0;
@@ -99,7 +132,23 @@ char* fixTabsets(char *str) {
     return input;
 }
 
-//Used to remove the image scales from the wiki markodwn's image links (such as =100x) 
+/**
+ * @brief Removes image scaling parameters from a string.
+ * 
+ * This function searches for occurrences of a specified substring in the input string and removes the part of the string 
+ * following each occurrence of the substring until it reaches a closing parenthesis `)` or square bracket `]`. 
+ * If no closing character is found, it truncates the string at the end of the substring.
+ * 
+ * @param input The input string containing image references or other content.
+ * @param sub The substring to search for and remove scaling parameters following it.
+ * 
+ * @return char* The modified version of the input string with specified image scaling parameters removed.
+ * 
+ * @details
+ * - The function uses `strstr` to locate occurrences of the specified substring.
+ * - It checks for closing parenthesis or square bracket and adjusts the string accordingly.
+ * - The function handles cases where these characters might not be present by truncating the string after the substring.
+ */
 char* removeImagesScale(char *input, char *sub) {
     char *found;
     char* str = input;
@@ -126,7 +175,20 @@ char* removeImagesScale(char *input, char *sub) {
     return str;
 }
 
-//(Honnestly I'm not sure, it's something that's got to do with image formatting in Latex)
+/**
+ * @brief Modifies LaTeX strings to close figure environments properly.
+ * 
+ * This function searches for image file extensions (e.g., `.jpeg}`, `.png}`, `.jpg}`, `.gif}`) in the given LaTeX string 
+ * and checks if the subsequent content is not a caption. If the image file extension is found and is not followed by a caption, 
+ * it appends `\n\end{figure}` to close the figure environment properly.
+ * 
+ * @param str The LaTeX string to be modified.
+ * 
+ * @details
+ * - The function processes multiple image file extensions including `.jpeg}`, `.png}`, `.PNG}`, `.jpg}`, and `.gif}`.
+ * - For each image type, it appends `\n\end{figure}` to properly close any open figure environments.
+ * - The function uses `strstr` to find occurrences of the image extensions and `memmove` and `memcpy` to insert the closing tags.
+ */
 void endCenteringLatex(char *str) {
     char *jpeg = ".jpeg}";
     char *png = ".png}";
@@ -202,8 +264,25 @@ void endCenteringLatex(char *str) {
     }
 }
 
-/*Finds occurences of {.is-success\\} in latex and stylizese it as
-     a green list starting with "+" for each lines*/
+/**
+ * @brief Stylizes LaTeX text by modifying quote environments and special markers.
+ * 
+ * This function searches for occurrences of the `\begin{quote}` and `\end{quote}` tags in the input LaTeX string. Within 
+ * these quote environments, it looks for the `\{.is-success\}` marker. If found, it replaces the content as follows:
+ * 
+ * - Replaces `\begin{quote}\n` with `\noindent Main advantages:\n\begin{itemize}\n\tightlist\n\color{issuccess}\n\item [\bf+]`
+ * - Replaces double newlines `\n\n` with `\n\item [\bf+]`
+ * - Removes the `\{.is-success\}` marker
+ * - Replaces `\end{quote}` with `\end{itemize}`
+ * 
+ * The function iterates through the string and applies these changes until all relevant quote environments are processed.
+ * 
+ * @param str The LaTeX string to be stylized.
+ * 
+ * @details
+ * - The function uses `strstr` to locate the beginning and end of quote environments and the `\{.is-success\}` marker.
+ * - The function uses `extractParagraphWithPointerDelimiters`, `replaceWord`, and `replaceParagraph` to perform the necessary text replacements.
+ */
 void stylizeMainAdvantages(char *str) {
     char *begin_quote = "\\begin{quote}";
     char *danger = "\\{.is-success\\}";
@@ -246,8 +325,25 @@ void stylizeMainAdvantages(char *str) {
     }
 }
 
-/*Finds occurences of {.is-danger\\} in latex and stylizese it as
-     a red list starting with "-" for each lines*/
+/**
+ * @brief Stylizes LaTeX text by modifying quote environments and special markers for main disadvantages.
+ * 
+ * This function searches for occurrences of the `\begin{quote}` and `\end{quote}` tags in the input LaTeX string. Within 
+ * these quote environments, it looks for the `\{.is-danger\}` marker. If found, it replaces the content as follows:
+ * 
+ * - Replaces `\begin{quote}\n` with `\noindent Main disadvantages:\n\begin{itemize}\n\tightlist\n\color{isdanger}\n\item [\bf-]`
+ * - Replaces double newlines `\n\n` with `\n\item [\bf-]`
+ * - Removes the `\{.is-danger\}` marker
+ * - Replaces `\end{quote}` with `\end{itemize}`
+ * 
+ * The function iterates through the string and applies these changes until all relevant quote environments are processed.
+ * 
+ * @param str The LaTeX string to be stylized.
+ * 
+ * @details
+ * - The function uses `strstr` to locate the beginning and end of quote environments and the `\{.is-danger\}` marker.
+ * - The function uses `extractParagraphWithPointerDelimiters`, `replaceWord`, and `replaceParagraph` to perform the necessary text replacements.
+ */
 void stylizeMainDisadvantages(char *str) {
     char *begin_quote = "\\begin{quote}";
     char *danger = "\\{.is-danger\\}";
@@ -292,7 +388,26 @@ void stylizeMainDisadvantages(char *str) {
     }
 }
 
-//Makes {.is-danger} lists in the markdown
+/**
+ * @brief Transforms LaTeX text by inserting line breaks before markers indicating danger lists.
+ * 
+ * This function processes an input LaTeX string to find occurrences of the `{.is-danger}` marker. For each occurrence, 
+ * it inserts a newline before the marker, ensuring that lists marked as "danger" are formatted correctly.
+ * 
+ * The function performs the following steps:
+ * - Locates occurrences of `{.is-danger}` in the input string.
+ * - Identifies the last occurrence of `\n\n` before each `{.is-danger}` marker.
+ * - Inserts a newline before the `{.is-danger}` marker by replacing `>` with `>\n`.
+ * - Updates the input string with the modified paragraphs.
+ * 
+ * @param input The LaTeX string to be transformed.
+ * @return A pointer to the transformed LaTeX string.
+ * 
+ * @details
+ * - The function uses `strstr` to find markers and newline patterns.
+ * - `extractParagraphWithPointerDelimiters` is used to isolate sections of text.
+ * - `replaceWord` and `replaceParagraph` are used to perform text replacements.
+ */
 char* makeDangerLists(char* input) {
 
     char* is_danger = "{.is-danger}";
@@ -339,7 +454,26 @@ char* makeDangerLists(char* input) {
     return input;
 }
 
-//Makes {.is-success} lists in the markdown
+/**
+ * @brief Transforms LaTeX text by inserting line breaks before markers indicating success lists.
+ * 
+ * This function processes an input LaTeX string to find occurrences of the `{.is-success}` marker. For each occurrence, 
+ * it inserts a newline before the marker to ensure correct formatting for success lists.
+ * 
+ * The function performs the following steps:
+ * - Locates occurrences of `{.is-success}` in the input string.
+ * - Identifies the last occurrence of `\n\n` before each `{.is-success}` marker.
+ * - Inserts a newline before the `{.is-success}` marker by replacing `>` with `>\n`.
+ * - Updates the input string with the modified paragraphs.
+ * 
+ * @param input The LaTeX string to be transformed.
+ * @return A pointer to the transformed LaTeX string.
+ * 
+ * @details
+ * - The function uses `strstr` to find markers and newline patterns.
+ * - `extractParagraphWithPointerDelimiters` is used to isolate sections of text.
+ * - `replaceWord` and `replaceParagraph` are used to perform text replacements.
+ */
 char* makeSuccessLists(char* input) {
 
     char* is_danger = "{.is-success}";
@@ -385,7 +519,30 @@ char* makeSuccessLists(char* input) {
     return input;
 }
 
-//Removes the 2024_P_SS_ and _DJF _SDD _DDF from the docID to make the title of the document
+/**
+ * @brief Processes a string to generate a document title by removing specific characters 2024_P_SS_ and _DJF _SDD _DDF
+ *        from the docID to make the title of the document.
+ * 
+ * This function modifies an input string to create a document title by removing the first 10 characters and optionally 
+ * the last 3 characters based on a predefined list. It also replaces certain characters with LaTeX formatting.
+ * 
+ * The function performs the following steps:
+ * - Removes the first 10 characters from the input string.
+ * - Checks if the last 3 characters of the remaining string match any in a predefined list (`"SDD"`, `"DJF"`, `"DDF"`).
+ * - If a match is found, also removes the last 4 characters of the string.
+ * - Replaces occurrences of `"-"` and `"_"` with LaTeX formatting for spacing.
+ * 
+ * @param input The input string from which the document title will be generated.
+ * 
+ * @return A pointer to the newly allocated string containing the processed document title. If the input string is too 
+ * short or if memory allocation fails, the function returns `NULL`.
+ * 
+ * @details
+ * The function assumes that the input string is valid and has at least 11 characters. It uses `strncpy` to copy parts of 
+ * the string and `replaceWord` to perform the character replacements. Memory for the result is dynamically allocated, 
+ * and the caller is responsible for freeing this memory. The function handles cases where the input string is too short 
+ * or where memory allocation fails gracefully.
+ */
 char* makeDocTitle(char *input) {
     // Remove the first 10 characters
     size_t len = strlen(input);
@@ -425,8 +582,27 @@ char* makeDocTitle(char *input) {
     return result;
 }
 
-/*replaces "\\includegraphics{/" with "\\begin{center}\n\\includegraphics[width=0.5\\textwidth]{"
-    and calls stylizeMainAdvantages and stylizeMainDisadvantages*/
+/**
+ * @brief Applies default image scaling and positioning to a LaTeX file.
+ * 
+ * This function reads the contents of a LaTeX file, modifies image inclusion commands and centering, and updates 
+ * the file with the changes. It also applies specific stylizations to sections of the document.
+ * 
+ * The function performs the following steps:
+ * - Opens the specified file for reading and determines its size.
+ * - Allocates memory to read the file contents into a buffer.
+ * - Replaces LaTeX commands for centering and image inclusion with default settings for image scaling and positioning.
+ * - Applies additional stylizations for advantages and disadvantages sections.
+ * - Writes the modified contents back to the file.
+ * 
+ * @param filename The name of the LaTeX file to be modified.
+ *  
+ * @details
+ * The function uses `fopen`, `fread`, `fwrite`, and `fclose` to handle file operations and `malloc` to allocate memory for 
+ * file contents. It performs text replacements and stylistic changes using helper functions like `replaceWord`, `endCenteringLatex`, 
+ * `stylizeMainAdvantages`, and `stylizeMainDisadvantages`. The function assumes the file is a valid LaTeX file and that 
+ * sufficient memory is available. Error handling is included for file operations and memory allocation.
+ */
 void applyDefaultImageScaleAndPosition(char *filename) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -458,14 +634,10 @@ void applyDefaultImageScaleAndPosition(char *filename) {
     buffer = replaceWord(buffer, "\\begin{figure}\n", "");
     endCenteringLatex(buffer);
     
-    
-
     stylizeMainAdvantages(buffer);
     stylizeMainDisadvantages(buffer);
 
-
     bytesRead = strlen(buffer);
-
 
     // Write modified buffer back to the file
     FILE *newFile = fopen(filename, "w");
@@ -487,7 +659,29 @@ void applyDefaultImageScaleAndPosition(char *filename) {
     free(buffer);
 }
 
-//Populates the Title Page and Header with the appropriate information
+/**
+ * @brief Populates the title and header of a document based on its type and ID.
+ * 
+ * This function modifies a LaTeX file to include the appropriate document ID, title, and document type header based 
+ * on information retrieved from a document path. The function reads the file, performs replacements based on the document 
+ * type, and writes the modified content back to the file.
+ * 
+ * The function performs the following steps:
+ * - Opens the specified file and determines its size.
+ * - Allocates memory to read the file contents into a buffer.
+ * - Retrieves the document ID, document type, and title.
+ * - Replaces placeholders for document ID, title, and document type header with actual values.
+ * - Appends a closing `\end{document}` command to the buffer.
+ * - Writes the modified contents back to the file.
+ * 
+ * @param[in] filename The name of the LaTeX file to be modified.
+ * @param[in] docPath The path used to retrieve the document ID and type.
+ *  
+ * @details
+ * The function uses `fopen`, `fread`, `fwrite`, and `fclose` for file operations and `malloc` for memory allocation. It assumes 
+ * the existence of helper functions `getDocId`, `getDocType`, and `makeDocTitle` for retrieving document details, and 
+ * `replaceWord` for performing text replacements. Error handling is included for file operations and memory allocation.
+ */
 void populateTitleAndHeader( char *filename, char *docPath) {
     char *docID;
     char *docType;
@@ -559,7 +753,28 @@ void populateTitleAndHeader( char *filename, char *docPath) {
     free(buffer);
 }
 
-/* Removes Drawio diagrams from markdown and replaces with a link to an image*/
+/**
+ * @brief Removes Draw.io diagrams from a given string.
+ * 
+ * This function searches for and removes embedded Draw.io diagrams from the input string. Draw.io diagrams are identified 
+ * by specific markers and are removed, along with their placeholders. The function modifies the string in place and 
+ * returns the modified string.
+ * 
+ * The function performs the following steps:
+ * - Searches for the start marker of a Draw.io diagram in the input string.
+ * - If the start marker is found, it searches for the corresponding end marker.
+ * - If both markers are found, it removes the section between them, including the markers, and replaces it with a placeholder.
+ * - Continues searching for additional diagrams in the string.
+ * 
+ * @param input The input string containing potential Draw.io diagrams.
+ * 
+ * @return A modified string with Draw.io diagrams removed and placeholders inserted.
+ * 
+ * @details
+ * The function uses `strstr` to find markers in the input string and `replaceParagraph` to remove and replace sections of the 
+ * string. It assumes the existence of `replaceParagraph` for modifying parts of the string and processes the string in-place. 
+ * Error handling for `replaceParagraph` is not included.
+ */
 char* removeDrawio(char *input) {
     char *begin_quote = "```diagram\nPHN2ZyB4";
     char *end_quote = "=\n```";
@@ -590,7 +805,27 @@ char* removeDrawio(char *input) {
     return str;
 }
 
-/*Removes image caption form markdown if the caption contains a "." */
+/**
+ * @brief Removes image captions from a given string if the image caption contains a full stop character".".
+ * 
+ * This function searches for and removes image captions from the input string. Image captions are identified by specific 
+ * markers and are replaced with a placeholder. The function modifies the string in place and returns the modified string.
+ * 
+ * The function performs the following steps:
+ * - Searches for the start marker of an image caption.
+ * - Identifies the section of the string that includes the caption and image URL.
+ * - Replaces this section with a placeholder that only includes the image URL.
+ * - Continues searching for additional image captions in the string.
+ * 
+ * @param input The input string containing potential image captions.
+ * 
+ * @return char* A modified string with image captions removed and placeholders inserted.
+ * 
+ * @details
+ * The function uses `strstr` to locate the start and end markers of image captions in the input string and `replaceParagraph` 
+ * to replace these sections. It processes the string in-place, assuming the existence of `replaceParagraph` for modifying 
+ * parts of the string. Error handling for `replaceParagraph` is not included.
+ */
 char* removeImageCaptions(char *input) {
     char *begin_quote = "![";
     char *danger = ".";
@@ -628,7 +863,26 @@ char* removeImageCaptions(char *input) {
     return str;
 }
 
-//Compiles PlantUML code (a string) into an image saved at iamgePath
+/**
+ * @brief Compiles PlantUML code into a PNG image file.
+ * 
+ * This function writes the provided PlantUML code to a temporary file, compiles it into a PNG image using the `plantuml` 
+ * command-line tool, and then cleans up the temporary file.
+ * 
+ * The function performs the following steps:
+ * - Extracts the file name from the provided image path.
+ * - Writes the PlantUML code to a temporary file with a `.uml` extension.
+ * - Uses the `plantuml` command to compile the `.uml` file into a PNG image and saves it to the specified image path.
+ * - Deletes the temporary `.uml` file after compilation.
+ * 
+ * @param plantUMLCode The PlantUML code to be compiled.
+ * @param imagePath The path where the compiled PNG image should be saved.
+ *   
+ * @details
+ * - The function assumes that the `plantuml` command is available and properly configured in the system's PATH.
+ * - The length of the command string is assumed to be within safe limits.
+ * - Error handling is provided for file operations and the `plantuml` command execution.
+ */
 void compilePlantUML( char *plantUMLCode,  char *imagePath) {
     // Extract the file name from the provided imagePath
      char *lastSlash = strrchr(imagePath, '/');
@@ -661,7 +915,28 @@ void compilePlantUML( char *plantUMLCode,  char *imagePath) {
     printf("PlantUML compiled to %s\n", imagePath);
 }
 
-/*Extracts PlantUML diagrams and makes them images*/
+/**
+ * @brief Extracts PlantUML diagrams from a given text, compiles them into PNG images, and replaces the diagrams in the text with image references.
+ * 
+ * This function searches for PlantUML diagrams embedded in a text, compiles each diagram into a PNG image using the `compilePlantUML` function, 
+ * and replaces the PlantUML diagram blocks in the text with references to the generated PNG images.
+ * 
+ * The function performs the following steps:
+ * - Searches for PlantUML code blocks marked with ```````plantuml`` and ```````end``.
+ * - Extracts each PlantUML diagram code, compiles it into a PNG image, and saves it using the `compilePlantUML` function.
+ * - Replaces the PlantUML code block in the text with a Markdown image reference to the compiled PNG file.
+ * 
+ * @param input The text containing embedded PlantUML diagrams.
+ * @param docID The document identifier used to name the PNG files.
+ * 
+ * @return A pointer to the modified text with PlantUML diagrams replaced by image references.
+ * 
+ * @details
+ * - The function generates unique names for each PlantUML diagram and uses these names to save the PNG files.
+ * - The generated PNG file names are based on a combination of the document ID and a sequential number.
+ * - The function assumes that the `LOCAL_FILE_PATH` macro is defined and points to the directory where PNG files should be saved.
+ * - Error handling for the `compilePlantUML` function and file operations is assumed to be handled elsewhere.
+ */
 char* extractPlantUML(char *input, char * docID) {
     char *str = input;
     char *begin_quote = "\n```plantuml\n";
@@ -713,7 +988,22 @@ char* extractPlantUML(char *input, char * docID) {
     return str;
 }
 
-//Goes through link list which contains all of the links to the images and calls fetch image for each image
+/**
+ * @brief Downloads images specified in a linked list of pages.
+ * 
+ * This function iterates through a linked list of pages, and for each page, it attempts to download the images specified by the page's path 
+ * to a given directory. If an image fails to download, the function will attempt to download it again.
+ * 
+ * @param head A pointer to the head of the linked list of `pageList` nodes, where each node contains a path to an image.
+ * @param pagePath The path to the directory where images should be downloaded.
+ * 
+ * @details
+ * - The function uses the `fetchImage` function to perform the image download.
+ * - If an error occurs during the image download (indicated by a non-zero return value from `fetchImage`), the function will print an error message 
+ *   and attempt to download the image again.
+ * - The function processes each node in the linked list, downloading images as specified by the node's `path`.
+ * - Error handling for specific issues in `fetchImage` and memory management for the linked list are assumed to be handled elsewhere.
+ */
 void getImages(pageList** head, char* pagePath) {
     pageList* current = *head;
     int error;
@@ -727,7 +1017,21 @@ void getImages(pageList** head, char* pagePath) {
     }
 }
 
-//download the images linked in a text from github
+/**
+ * @brief Downloads images from the content of a page.
+ * 
+ * This function processes the content of a page to find image links, filters those links, and then downloads the images to a directory 
+ * specified by the document ID extracted from the page's path.
+ * 
+ * @param head A pointer to the head of the linked list of `pageList` nodes, where each node contains the content and path of a page.
+ * 
+ * @details
+ * - `findImageLinks` is used to extract image links from the content of the page pointed to by `(*head)`.
+ * - `filterLinks` is used to filter the extracted image links.
+ * - `getDocId` retrieves the document ID from the path of the page.
+ * - `getImages` downloads the images based on the filtered links and the document ID.
+ * - `freePageList` cleans up and deallocates the memory used by the list of image links.
+ */
 void downloadImages(pageList** head){
     char *docID;
     pageList* imageLinks;
@@ -738,7 +1042,28 @@ void downloadImages(pageList** head){
     freePageList(&imageLinks);
 }
 
-//text preprocessing before the markdown-latex conversion
+/**
+ * @brief Processes and transforms the content of a page for further handling.
+ * 
+ * This function performs various preprocessing steps on the page content, including removing or modifying image scales, adjusting newline
+ * characters, replacing specific patterns with others, and handling PlantUML diagrams. The function aims to clean and format the content
+ * according to predefined rules.
+ * 
+ * @param pageContent The original content of the page to be processed.
+ * @param docID The document ID used for identifying and processing specific elements within the content.
+ * 
+ * @return A modified version of the page content with applied transformations.
+ * 
+ * @details
+ * - `fixTabsets` adjusts tab settings in the content.
+ * - `removeImagesScale` removes or adjusts image scales for various image formats (e.g., PNG, JPEG, JPG, GIF).
+ * - `reformatNewLineCharacter` reformats newline characters.
+ * - `replaceWord` replaces specific placeholders or patterns in the content with predefined text.
+ * - `makeDangerLists` and `makeSuccessLists` handle list formatting for danger and success items.
+ * - `removeDrawio` removes or adjusts Draw.io diagram entries.
+ * - `removeImageCaptions` removes captions from image entries.
+ * - `extractPlantUML` extracts and processes PlantUML diagrams from the content.
+ */
 char* preProcessing(char* pageContent, char *docID){
 
     char *tempPageContent = pageContent;

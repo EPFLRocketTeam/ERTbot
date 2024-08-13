@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "sheetapi.h": "c"
+        "sheetapi.h": "c",
+        "githubapi.h": "c",
+        "wikiapi.h": "c",
+        "api.h": "c",
+        "features.h": "c",
+        "struct.h": "c"
     }
 }

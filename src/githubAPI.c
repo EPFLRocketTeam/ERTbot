@@ -1,17 +1,24 @@
-#include "../headerFiles/struct.h"
-#include "../headerFiles/api.h"
-#include "../headerFiles/config.h"
-#include "../headerFiles/features.h"
-#include "../headerFiles/githubAPI.h"
-#include "../headerFiles/helperFunctions.h"
-#include "../headerFiles/markdownToPDF.h"
-#include "../headerFiles/slackAPI.h"
-#include "../headerFiles/stringTools.h"
-#include "../headerFiles/wikiAPI.h"
-#include "../headerFiles/sheetAPI.h"
+/**
+ * @file githubAPI.c
+ * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
+ * @brief Contains all of the functions which are only used to interact with the Github APIs.
+ * 
+ * @todo reactivate a github api key, test the functions on the ERTbot_server
+ */
+
+#include "../include/struct.h"
+#include "../include/api.h"
+#include "../include/config.h"
+#include "../include/features.h"
+#include "../include/githubAPI.h"
+#include "../include/helperFunctions.h"
+#include "../include/markdownToPDF.h"
+#include "../include/slackAPI.h"
+#include "../include/stringTools.h"
+#include "../include/wikiAPI.h"
+#include "../include/sheetAPI.h"
 
 
-//Receives imagePath and pagePath get the image from github using it's API, save the image to (LOCAL_FILE_PATH/pagePath/imagePath)
 int fetchImage(char* imagePath, char * pagePath){
     CURL *curl;
         CURLcode res;

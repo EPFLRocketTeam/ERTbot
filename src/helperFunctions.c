@@ -1,14 +1,22 @@
-#include "../headerFiles/struct.h"
-#include "../headerFiles/api.h"
-#include "../headerFiles/config.h"
-#include "../headerFiles/features.h"
-#include "../headerFiles/githubAPI.h"
-#include "../headerFiles/helperFunctions.h"
-#include "../headerFiles/markdownToPDF.h"
-#include "../headerFiles/slackAPI.h"
-#include "../headerFiles/stringTools.h"
-#include "../headerFiles/wikiAPI.h"
-#include "../headerFiles/sheetAPI.h"
+/**
+ * @file helperFunctions.c
+ * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
+ * @brief Contains all of the general purpouse helper functions which can not be sorted into one of the other files.
+ * 
+ * @todo organise the document to make clearer which helper functions are used for which features and the type of helper function
+ */
+
+#include "../include/struct.h"
+#include "../include/api.h"
+#include "../include/config.h"
+#include "../include/features.h"
+#include "../include/githubAPI.h"
+#include "../include/helperFunctions.h"
+#include "../include/markdownToPDF.h"
+#include "../include/slackAPI.h"
+#include "../include/stringTools.h"
+#include "../include/wikiAPI.h"
+#include "../include/sheetAPI.h"
 
 #define MAX_ARGUMENTS 10
 #define MAX_ARGUMENT_LENGTH 100
@@ -16,8 +24,7 @@
 char *template_DRL = "# General Design Requirements List\n\n\n# table {.tabset}\n\n## General\n";
 char *template_REQ = "";
 
-//Status: UP
-//Function to insert a pageList at the end of the linked list
+
 pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt) {
     pageList* newNode = (pageList *)malloc(sizeof(pageList));
     if (!newNode) {
@@ -66,19 +73,6 @@ pageList* addPageToList(pageList** head,  char *id, char *title, char *path, cha
     return *head;
 }
 
-//Status: unknown
-//prints the argument linked list
-void printList(pageList** paths) {
-    pageList* current = *paths;
-    printf("Paths and IDs in Linked List:\n");
-    while (current != NULL) {
-        printf("Path: %s, Title: %s, Id: %s, updatedAt: %s\n", current->path, current->title, current->id, current->updatedAt);
-        current = current->next;
-    }
-}
-
-//Status: unknown
-//returns the number of '/' characters in a string.
 int countSlashes(char *str) {
     int count = 0;
     
@@ -92,30 +86,6 @@ int countSlashes(char *str) {
     return count;
 }
 
-//Status: unknown
-//append string to file
-void appendToFile(char *filePath, char *str) {
-    // File pointer
-    FILE *filePtr;
-
-    // Open file in append mode ("a" mode)
-    filePtr = fopen(filePath, "a");
-
-    // Check if file opened successfully
-    if (filePtr == NULL) {
-        printf("Error opening file!\n");
-        return;
-    }
-
-    // Write string to the file
-    fprintf(filePtr, "%s\n", str);
-
-    // Close the file
-    fclose(filePtr);
-}
-
-//Status: unknown
-//Prepends source_filename to destination_filename (used for adding the template to the latex file)
 void prepend_file(char *source_filename, char *destination_filename) {
     // Open source file for reading
     FILE *source_file = fopen(source_filename, "r");
@@ -172,8 +142,6 @@ void prepend_file(char *source_filename, char *destination_filename) {
     printf("Contents prepended successfully.\n");
 }
 
-//Status: unknown
-//zips the folder
 int zipFolder(char *folderPath) {
     char zipCommand[1024];
     snprintf(zipCommand, sizeof(zipCommand), "cd \"%s\" && zip -r \"%s.zip\" .", folderPath, folderPath);
@@ -189,8 +157,6 @@ int zipFolder(char *folderPath) {
     return 0;
 }
 
-//Status: unknown
-//Creates the missing folders (locally) for a given path
 void createMissingFolders(char *path) {
     char *dup_path = strdup(path);  // Duplicate the path to modify
     dup_path = removeLastFolder(dup_path);
@@ -221,8 +187,6 @@ void createMissingFolders(char *path) {
     free(dup_path);
 }
 
-//Status: unknown
-//returns the current time (wiki.js timezone)
 char *currentTime() {
     char iso8601[25]; // To store the formatted time
 
@@ -236,11 +200,9 @@ char *currentTime() {
     // Print the ISO 8601 formatted time
     printf("Current time in ISO 8601 format: %s\n", iso8601);
 
-    return 0;
+    return iso8601;
 }
 
-//Status: UP
-//returns -1 if time1 < time2, 1 if if time1 > time2
 int compareTimes(char* time1, char* time2) {
     struct tm tm1, tm2;
     memset(&tm1, 0, sizeof(struct tm));
@@ -271,10 +233,7 @@ int compareTimes(char* time1, char* time2) {
         return 0;
 }
 
-//Status: unknown
-//replaces every occurence of oldString in the pages in paths *paths with newString
 void replaceStringInWiki(pageList** head, char* oldString, char* newString) {
-    sendMessageToSlack("List of pages I have updated:\n");
     pageList* current = *head;
     while (current != NULL) {
         current = getPage(&current);
@@ -289,8 +248,6 @@ void replaceStringInWiki(pageList** head, char* oldString, char* newString) {
     freePageList(head);
 }
 
-//Status: UP
-//Creates plantUML diagram for the wikiMMaps
 char* createMapWBS(pageList** paths) {
     pageList* current = *paths;
     pageList* previous = *paths;
@@ -358,8 +315,6 @@ char* createMapWBS(pageList** paths) {
     return map;
 }
 
-//Status: UP
-//adds elements to a wiki list along with its properties
 char* createList(char *list, pageList** sectionTitle, pageList* links){
     char *tempList = list;
     tempList = appendStrings(tempList, "\\\\n\\\\n");
@@ -380,7 +335,6 @@ char* createList(char *list, pageList** sectionTitle, pageList* links){
     return tempList;
 }
 
-//Status: code written but requires more tests
 char* updateList(char *list, pageList *sectionTitle, pageList *links) {
     // Ensure proper memory allocation for the tempList
     pageList *link = links;
@@ -428,33 +382,6 @@ char* updateList(char *list, pageList *sectionTitle, pageList *links) {
     return list;
 }
 
-//Prepend the current time on a new line on the automaticUpdateTracker page
-void updateLastAutomaticUpdate(){
-    pageList* AutomaticUpdateTrackerPage;
-    AutomaticUpdateTrackerPage->id = AUTOMATIC_UPDATE_TRACKER_PAGE_ID;
-    AutomaticUpdateTrackerPage = getPage(&AutomaticUpdateTrackerPage);
-    char iso8601[25]; // To store the formatted time
-    // Get the current time
-    time_t currentTime = time(NULL);
-    struct tm *utcTime = gmtime(&currentTime);
-    // Format the time in ISO 8601 format
-    strftime(iso8601, sizeof(iso8601), "%Y-%m-%dT%H:%M:%S.000Z", utcTime);
-    AutomaticUpdateTrackerPage->content = appendStrings("\n", AutomaticUpdateTrackerPage->content);
-    AutomaticUpdateTrackerPage->content = appendStrings(iso8601, AutomaticUpdateTrackerPage->content);
-    updatePageContentMutation(AutomaticUpdateTrackerPage);
-}
-
-//get the time at which the last automatic update happened from the automaticUpdateTracker page
-char *getLastAutomaticUpdateTime(){
-    pageList* AutomaticUpdateTrackerPage;
-    AutomaticUpdateTrackerPage->id = AUTOMATIC_UPDATE_TRACKER_PAGE_ID;
-    AutomaticUpdateTrackerPage = getPage(&AutomaticUpdateTrackerPage);
-
-    char *lastAutomaticUpdate = returnTextUntil(AutomaticUpdateTrackerPage->content, "\n");
-    return lastAutomaticUpdate;
-}
-
-//used to find and parse wikiFlags for a given string
 wikiFlag *parseFlags(char* text, wikiFlag flag) {
     wikiFlag *head = NULL;
     wikiFlag *current = NULL;
@@ -505,8 +432,6 @@ wikiFlag *parseFlags(char* text, wikiFlag flag) {
     return head;
 }
 
-//Status: UP
-//used to breakdown the command line sent through the slack into individual arguments
 void breakdownCommand(char* sentence, command* cmd) {
     char* words[MAX_ARGUMENTS];
     char* token;
@@ -582,7 +507,6 @@ void breakdownCommand(char* sentence, command* cmd) {
     free(sentence_copy);
 }
 
-//Creates plantUML diagram for the local graphs
 char* createLocalGraphMindMap(pageList** tempPage, pageList** incomingPaths, pageList** outgoingPaths){
     pageList *currentIncomingLink = *incomingPaths;
     pageList *currentOutgoingLink = *outgoingPaths;
@@ -628,8 +552,6 @@ char* createLocalGraphMindMap(pageList** tempPage, pageList** incomingPaths, pag
     return localGraph;
 }
 
-//Status: UP
-//Function to free the links list
 void freePageList(pageList** head) {
     while (*head) {
         pageList* temp = *head;
@@ -671,7 +593,6 @@ void freePageList(pageList** head) {
     }
 }
 
-//Finds accronyms in a string and appends the accronyms to the path give in argument (void but modifies local accronymList) 
 void printAcronymsToFile(char* pathToAccronymList, char *str) {
     int len = strlen(str);
     int i;
@@ -701,14 +622,12 @@ void printAcronymsToFile(char* pathToAccronymList, char *str) {
             if(j>1){
                 strncpy(acronym, &str[i], j);
                 acronym[j] = '\0';
-                appendToFile(pathToAccronymList, acronym);
             }
             i = i+j;
             j = 1;
         }
     }
 }
-
 
 void sortWords(char words[MAX_WORDS][MAX_WORD_LENGTH], int numWords) {
     // Bubble sort algorithm
@@ -723,7 +642,6 @@ void sortWords(char words[MAX_WORDS][MAX_WORD_LENGTH], int numWords) {
         }
     }
 }
-
 
 void removeDuplicatesAndSort(char *filename) {
     FILE *file = fopen(filename, "r");
@@ -764,7 +682,6 @@ void removeDuplicatesAndSort(char *filename) {
     fclose(file);
 }
 
-//Status: UP
 pageList* findPageLinks(char *content, pageList **links) {
     char *startFlag1 = "[";
     char *startFlag2 = "](";
@@ -829,7 +746,6 @@ pageList* findPageLinks(char *content, pageList **links) {
     return *links;
 }
 
-//Find image links in a string
 pageList* findImageLinks(char *input, pageList** head) {
     pageList* imageLinks = *head;
     int count = 0;
@@ -879,7 +795,6 @@ pageList* findImageLinks(char *input, pageList** head) {
     return imageLinks;
 }
 
-// Function to filter the linked list
 void filterLinks(pageList** head) {
     pageList* current = *head;
     while (current != NULL) {
@@ -887,7 +802,6 @@ void filterLinks(pageList** head) {
         current = current->next;
     }
 }
-
 
 void printPages(pageList** head) {
     pageList* current = *head;
@@ -903,7 +817,6 @@ void printPages(pageList** head) {
     }
 }
 
-//Status: UP
 pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *subjectPagePath) {
     pageList *incomingLinks = *head;
     char *contentCopy = strdup(linkTrackerContent);
@@ -968,7 +881,6 @@ pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *sub
     return incomingLinks;
 }
 
-//Status: UP
 pageList* findOutgoingLinks(pageList** head, char *linkTrackerContent, char *subjectPagePath) {
     pageList *outgoingLinks = *head;
     char *contentCopy = strdup(linkTrackerContent);
@@ -1192,7 +1104,6 @@ char* parseJSONRequirementListInToArray(cJSON* requirements){
 
 }
 
-// Function to parse a string representing an array of arrays and convert it to a JSON string
 cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
 
     fprintf(stderr, "input_str: %s\n", input_str);
@@ -1355,8 +1266,6 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList){
 
 }
 
-//Uses json requirement list, extracts all of the information for the given requirement,
-//parses all of the information into a pageList.content which represents the content of a req page
 pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, char *requirementId){
     // Get the requirements array from the requirementList object
     cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
@@ -1567,7 +1476,6 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
 }
 
-//Appends a new section called metioned in which contains a list of all of the incoming links
 void appendMentionedIn(pageList** head){
 
     pageList* subjectPage = *head;
@@ -1599,7 +1507,6 @@ void appendMentionedIn(pageList** head){
     return;
 }
 
-
 char *createVcdPieChart(char *unverifiedPopulation, char *partiallyVerifiedPopulation, char *verifiedPopulation){
 
     char *pieChart = "```kroki\nvega\n\n{\n  \"$schema\": \"https://vega.github.io/schema/vega/v5.0.json\",\n  \"width\": 350,\n  \"height\": 350,\n  \"autosize\": \"pad\",\n  \"signals\": [\n    {\"name\": \"startAngle\", \"value\": 0},\n    {\"name\": \"endAngle\", \"value\": 6.29},\n    {\"name\": \"padAngle\", \"value\": 0},\n    {\"name\": \"sort\", \"value\": true},\n    {\"name\": \"strokeWidth\", \"value\": 2},\n    {\n      \"name\": \"selected\",\n      \"value\": \"\",\n      \"on\": [{\"events\": \"mouseover\", \"update\": \"datum\"}]\n    }\n  ],\n  \"data\": [\n    {\n      \"name\": \"table\",\n      \"values\": [\n        {\"continent\": \"Unverified\", \"population\": DefaultUnverifiedPopulation},\n        {\"continent\": \"Partially Verified\", \"population\": DefaultPartiallyVerifiedPopulation},\n        {\"continent\": \"Verified\", \"population\": DefaultVerifiedPopulation}\n      ],\n      \"transform\": [\n        {\n          \"type\": \"pie\",\n          \"field\": \"population\",\n          \"startAngle\": {\"signal\": \"startAngle\"},\n          \"endAngle\": {\"signal\": \"endAngle\"},\n          \"sort\": {\"signal\": \"sort\"}\n        }\n      ]\n    },\n    {\n      \"name\": \"fieldSum\",\n      \"source\": \"table\",\n      \"transform\": [\n        {\n          \"type\": \"aggregate\",\n          \"fields\": [\"population\"],\n          \"ops\": [\"sum\"],\n          \"as\": [\"sum\"]\n        }\n      ]\n    }\n  ],\n  \"legends\": [\n    {\n      \"fill\": \"color\",\n      \"title\": \"Legends\",\n      \"orient\": \"none\",\n      \"padding\": {\"value\": 10},\n      \"encode\": {\n        \"symbols\": {\"enter\": {\"fillOpacity\": {\"value\": 1}}},\n        \"legend\": {\n          \"update\": {\n            \"x\": {\n              \"signal\": \"(width / 2) + if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.1 * 0.8, if(width >= height, height, width) / 2 * 0.8)\",\n              \"offset\": 20\n            },\n            \"y\": {\"signal\": \"(height / 2)\", \"offset\": -50}\n          }\n        }\n      }\n    }\n  ],\n  \"scales\": [\n    {\"name\": \"color\", \"type\": \"ordinal\", \"range\": [\"#cf2608\", \"#ff9900\", \"#67b505\"]}\n  ],\n  \"marks\": [\n    {\n      \"type\": \"arc\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"fill\": {\"scale\": \"color\", \"field\": \"continent\"},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"}\n        },\n        \"update\": {\n          \"startAngle\": {\"field\": \"startAngle\"},\n          \"endAngle\": {\"field\": \"endAngle\"},\n          \"cornerRadius\": {\"value\": 15},\n          \"padAngle\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.015, 0.015)\"\n          },\n          \"innerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 0.45, if(width >= height, height, width) / 2 * 0.5)\"\n          },\n          \"outerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.8, if(width >= height, height, width) / 2 * 0.8)\"\n          },\n          \"opacity\": {\n            \"signal\": \"if(selected && selected.continent !== datum.continent, 1, 1)\"\n          },\n          \"stroke\": {\"signal\": \"scale('color', datum.continent)\"},\n          \"strokeWidth\": {\"signal\": \"strokeWidth\"},\n          \"fillOpacity\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.8, 0.8)\"\n          }\n        }\n      }\n    },\n    {\n      \"type\": \"text\",\n      \"encode\": {\n        \"enter\": {\"fill\": {\"value\": \"#525252\"}, \"text\": {\"value\": \"\"}},\n        \"update\": {\n          \"opacity\": {\"value\": 1},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"},\n          \"fontSize\": {\"signal\": \"if(width >= height, height, width) * 0.05\"},\n          \"text\": {\"value\": \"Verification Status\"}\n        }\n      }\n    },\n    {\n      \"name\": \"mark_population\",\n      \"type\": \"text\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"text\": {\n            \"signal\": \"if(datum['endAngle'] - datum['startAngle'] < 0.3, '', format(datum['population'] / 1, '.0f'))\"\n          },\n          \"x\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"y\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"radius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.65, if(width >= height, height, width) / 2 * 0.65)\"\n          },\n          \"theta\": {\"signal\": \"(datum['startAngle'] + datum['endAngle'])/2\"},\n          \"fill\": {\"value\": \"#FFFFFF\"},\n          \"fontSize\": {\"value\": 12},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"}\n        }\n      }\n    }\n  ]\n}\n\n```";
@@ -1612,7 +1519,6 @@ char *createVcdPieChart(char *unverifiedPopulation, char *partiallyVerifiedPopul
 
 }
 
-// Function to add three new items to the "values" array
 char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue) {
     fprintf(stderr, "JSON string: %s\n", json_str);
     

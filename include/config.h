@@ -9,7 +9,6 @@
 //Wiki
 //#define WIKI_API_TOKEN getenv("WIKI_API_TOKEN")
 #define LINK_TRACKER_PAGE_ID "896"
-#define AUTOMATIC_UPDATE_TRACKER_PAGE_ID "897"
 #define IMAGE_TRACKER_PAGE_ID "898"
 #define SYNC_TRACKER_PAGE_ID "899"
 #define PAGE_SUBSCRIPTION_TRACKER_PAGE_ID "900"
@@ -30,7 +29,7 @@
 
 //Local
 #define ACCRONYM_LIST_PATH "./accronymList"
-#define LOCAL_FILE_PATH "Users/Ryan/Desktop/Code/Wiki_Toolbox/ERTWikiToolbox-Structure-Change/test/headerFiles"
+#define LOCAL_FILE_PATH "Users/Ryan/Desktop/Code/Wiki_Toolbox/ERTWikiToolbox-Structure-Change/test/include"
 
 //Requirements
 #define REQ_ID_COL 0

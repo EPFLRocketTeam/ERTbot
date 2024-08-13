@@ -1,17 +1,21 @@
-#include "../headerFiles/struct.h"
-#include "../headerFiles/api.h"
-#include "../headerFiles/config.h"
-#include "../headerFiles/features.h"
-#include "../headerFiles/githubAPI.h"
-#include "../headerFiles/helperFunctions.h"
-#include "../headerFiles/markdownToPDF.h"
-#include "../headerFiles/slackAPI.h"
-#include "../headerFiles/stringTools.h"
-#include "../headerFiles/wikiAPI.h"
-#include "../headerFiles/sheetAPI.h"
+/**
+ * @file stringTools.c
+ * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
+ * @brief This file contains all of the helper functions which do string manipulations
+ */
 
+#include "../include/struct.h"
+#include "../include/api.h"
+#include "../include/config.h"
+#include "../include/features.h"
+#include "../include/githubAPI.h"
+#include "../include/helperFunctions.h"
+#include "../include/markdownToPDF.h"
+#include "../include/slackAPI.h"
+#include "../include/stringTools.h"
+#include "../include/wikiAPI.h"
+#include "../include/sheetAPI.h"
 
-/*Replace all of occurences of wordToReplace in inputString with newWord*/
 char* replaceWord( char* inputString,  char* wordToReplace,  char* newWord) { 
   char* result; 
   int i, cnt = 0; 
@@ -36,25 +40,23 @@ char* replaceWord( char* inputString,  char* wordToReplace,  char* newWord) {
   while (*inputString) { 
       // compare the substring with the result 
       if (strstr(inputString, wordToReplace) == inputString) { 
-          strcpy(&result[i], newWord); 
-          i += newWordLength; 
-          inputString += wordToReplaceLength; 
+        strcpy(&result[i], newWord); 
+        i += newWordLength; 
+        inputString += wordToReplaceLength; 
       } 
       else
-          result[i++] = *inputString++; 
+        result[i++] = *inputString++; 
   } 
 
   result[i] = '\0'; 
   return result; 
 }
 
-//Replace all occurences of "\\n" in the input string with "\n" 
 char* reformatNewLineCharacter(char *inputString) {
     int i, j;
     char *tempstr = inputString;
     int len = strlen(tempstr);
     
-
     // Loop through the string
     for (i = 0; i < len - 1; i++) {
         // Check for "\n"
@@ -73,7 +75,6 @@ char* reformatNewLineCharacter(char *inputString) {
     return tempstr;
 }
 
-//Removes the character at index of str.
 char* remove_char_at_index(char *str, int index) {
     int length = strlen(str);
     if (index < 0 || index >= length) {
@@ -90,8 +91,6 @@ char* remove_char_at_index(char *str, int index) {
     return str;
 }
 
-/*Replace all of the string found in between startOfParagraph and
-    endOfParagraph in inputString with replacementString*/
 char* replaceParagraph(char *original, char *newSubstring, char *startPtr, char *endPtr) {
     // Calculate the lengths
     int originalLen = strlen(original);
@@ -116,8 +115,6 @@ char* replaceParagraph(char *original, char *newSubstring, char *startPtr, char 
     return temp;
 }
 
-/*Returns a string which is equal to the substring found in between
-    startOfParagraph and endOfParagraph of inputString*/
 char* extractParagraphWithPointerDelimiters( char *inputString,  char *startOfParagraph,  char *endOfParagraph) {
     if (inputString == NULL || startOfParagraph == NULL || endOfParagraph == NULL 
         || startOfParagraph > endOfParagraph) {
@@ -137,7 +134,6 @@ char* extractParagraphWithPointerDelimiters( char *inputString,  char *startOfPa
     return substring;
 }
 
-//Returns the substring after the last '/' (used to extract a documents name)
 char* getDocId( char* str) {
     // Find the last occurrence of '/'
     char* lastSlash = strrchr(str, '/');
@@ -152,7 +148,6 @@ char* getDocId( char* str) {
     }
 }
 
-// Returns the parent folder name before the last '/' (e.g., "to" from "/path/to/document.txt")
 char* getParentFolder(char* str) {
     // Find the last occurrence of '/'
     char* lastSlash = strrchr(str, '/');
@@ -193,7 +188,6 @@ char* getParentFolder(char* str) {
     }
 }
 
-// Returns the substring before the last '/' (used to extract the directory path)
 char* getDirPath(char* str) {
     // Find the last occurrence of '/'
     char* lastSlash = strrchr(str, '/');
@@ -222,7 +216,6 @@ char* getDirPath(char* str) {
     }
 }
 
-// Return a pointer to the substring starting from 3rd character from the end
 char* getDocType(char* str) {
     int length = strlen(str);
     
@@ -234,7 +227,6 @@ char* getDocType(char* str) {
     return (char*)(str + length - 3);
 }
 
-//Append str2 to str1
 char* appendStrings(char *str1,  char *str2) {
     // Calculate the length of str1 and str2
     size_t len1 = strlen(str1);
@@ -255,7 +247,6 @@ char* appendStrings(char *str1,  char *str2) {
     return combined;
 }
 
-//Remove all characters after first ' ' (space character)
 char* removeAfterSpace(char *str) {
     char *tempstr = str;
     char *space_pos = strchr(tempstr, ' ');
@@ -266,7 +257,6 @@ char* removeAfterSpace(char *str) {
     return tempstr;
 }
 
-//removes whatever comes after the last "/" of a string
 char* removeLastFolder(char *path) {
 
     char* tempPath = path;
@@ -286,7 +276,6 @@ char* removeLastFolder(char *path) {
     return tempPath;
 }
 
-//removes all of the content which comes after the delimiter argument
 char* returnTextUntil(char* str, char* delimiter) {
     // Find the position of the first newline character
      char* newline_pos = strstr(str, delimiter);
@@ -309,7 +298,6 @@ char* returnTextUntil(char* str, char* delimiter) {
     }
 }
 
-//extract strings inbetween
 char* extractText(char *inputString, char *startDelimiter, char *endDelimiter, bool includeStart, bool includeEnd) {
     if (inputString == NULL || startDelimiter == NULL || endDelimiter == NULL) {
         return NULL; // Invalid parameters

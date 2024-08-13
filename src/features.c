@@ -1,19 +1,21 @@
+/**
+ * @file features.c
+ * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
+ * @brief Contains all of the functions which represent a single feature
+ */
 
+#include "../include/struct.h"
+#include "../include/api.h"
+#include "../include/config.h"
+#include "../include/features.h"
+#include "../include/githubAPI.h"
+#include "../include/helperFunctions.h"
+#include "../include/markdownToPDF.h"
+#include "../include/slackAPI.h"
+#include "../include/stringTools.h"
+#include "../include/wikiAPI.h"
+#include "../include/sheetAPI.h"
 
-#include "../headerFiles/struct.h"
-#include "../headerFiles/api.h"
-#include "../headerFiles/config.h"
-#include "../headerFiles/features.h"
-#include "../headerFiles/githubAPI.h"
-#include "../headerFiles/helperFunctions.h"
-#include "../headerFiles/markdownToPDF.h"
-#include "../headerFiles/slackAPI.h"
-#include "../headerFiles/stringTools.h"
-#include "../headerFiles/wikiAPI.h"
-#include "../headerFiles/sheetAPI.h"
-
-//Status: UP
-//builds a wikimap starting from cmd.argument_1 all the way down
 char* buildMap(command cmd) {
     pageList* listOfDaughterPages = NULL;
     printf("about to call populatePageList\n");
@@ -24,9 +26,7 @@ char* buildMap(command cmd) {
     return map;
 }
 
-//Status: UP
-//Finds all of the page links on the wiki and saves the to LINK_TRACKER_PAGE_ID
-void buildLinksTracker(command cmd) {
+void buildLinksTracker() {
     
     pageList* linkTrackerPage = NULL;
     linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "");
@@ -81,10 +81,7 @@ void buildLinksTracker(command cmd) {
     freePageList(&listOfAllPages);// Free the memory used by the linked list
 }
 
-//Status: code written but requires more tests
-//Finds all of the page links on the wiki and saves the to LINK_TRACKER_PAGE_ID
-void updateLinksTracker(command cmd) {
-    
+void updateLinksTracker() {   
     pageList* linkTrackerPage = (pageList*) malloc(sizeof(pageList)); // Allocate memory for linkTrackerPage
     if (linkTrackerPage == NULL) {
         fprintf(stderr, "Memory allocation failed for linkTrackerPage\n");
@@ -153,9 +150,7 @@ void updateLinksTracker(command cmd) {
     //freePageList(&listOfAllPages);// Free the memory used by the linked list
 }
 
-
-//Build local graph
-void buildLocalGraph(command cmd) {
+char* buildLocalGraph(command cmd) {
     // Allocate memory for linkTrackerPage
     pageList* linkTrackerPage = NULL;
     linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "");
@@ -174,9 +169,8 @@ void buildLocalGraph(command cmd) {
 
     char *tempGraph = createLocalGraphMindMap(&subjectPage, &IncomingLinks, &OutgoingLinks);
 
-    sendMessageToSlack(tempGraph);
+    return tempGraph;
 }
-
 
 /*
 //Finds all of the image links on the wiki and saves the to IMAGE_TRACKER_PAGE_ID
@@ -205,8 +199,6 @@ void buildImageTracker(command cmd) {
 }
 */
 
-
-//Build accronyme list and save locally
 void buildAcronymsList(command cmd) {
     pageList* listOfAllPages;
     if (cmd.argument_1 == NULL){
@@ -227,7 +219,6 @@ void buildAcronymsList(command cmd) {
     removeDuplicatesAndSort(ACCRONYM_LIST_PATH);
 }
 
-//Status: UP
 void getPages(command cmd) {
     pageList* head = NULL;
     printf("about to call populatePageList\n");
@@ -248,7 +239,6 @@ void replaceText(command cmd) {
     freePageList(&head);
 }
 
-//Moves the page at argument_1 to argument_2 and then replaces all occurence of argument_1 with argument_2 on all pages in the wiki
 void movePage(command cmd){
 
     cmd.argument_1 = replaceWord(cmd.argument_1, "\\", "");

@@ -1,15 +1,22 @@
-#include "../headerFiles/struct.h"
-#include "../headerFiles/api.h"
-#include "../headerFiles/config.h"
-#include "../headerFiles/features.h"
-#include "../headerFiles/githubAPI.h"
-#include "../headerFiles/helperFunctions.h"
-#include "../headerFiles/markdownToPDF.h"
-#include "../headerFiles/slackAPI.h"
-#include "../headerFiles/stringTools.h"
-#include "../headerFiles/wikiAPI.h"
-#include "../headerFiles/sheetAPI.h"
+/**
+ * @file api.c
+ * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
+ * @brief contains helper functions which are used by several api handling functions
+ * 
+ * @todo revamp jsonParserGetStringValue to uses cJSON
+ */
 
+#include "../include/struct.h"
+#include "../include/api.h"
+#include "../include/config.h"
+#include "../include/features.h"
+#include "../include/githubAPI.h"
+#include "../include/helperFunctions.h"
+#include "../include/markdownToPDF.h"
+#include "../include/slackAPI.h"
+#include "../include/stringTools.h"
+#include "../include/wikiAPI.h"
+#include "../include/sheetAPI.h"
 
 char *GITHUB_API_TOKEN;
 char *WIKI_API_TOKEN;
@@ -31,17 +38,15 @@ void initializeApiTokenVariables() {
     return;
 }
 
-//Callback function to handle the HTTP response, alocates memory for chunk.response
 size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp) {
-    // size us allways 1
-    // nmemb is the size of the chunk of memory getting passed to writeCallback
-    // data points to the delivered data 
+    
     size_t realsize = size * nmemb; // set the size of the chunk of memory
     struct memory *mem = (struct memory *)clientp; //points to a struct which is the buffer to store data in
 
     char *ptr = realloc(mem->response, mem->size + realsize + 1);
-    if(!ptr)
-        return 0;  /* out of memory! */
+    if(!ptr){
+        return 0;
+    }
 
     mem->response = ptr;
     memcpy(&(mem->response[mem->size]), data, realsize);
@@ -51,7 +56,6 @@ size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp) {
     return realsize;
 }
 
-//Function to extract a string value from a JSON object*/
 char *jsonParserGetStringValue(char *json, char *key) {
     char *start = strstr(json, key);
     if (start == NULL) {
@@ -83,4 +87,3 @@ char *jsonParserGetStringValue(char *json, char *key) {
 
     return value;
 }
-

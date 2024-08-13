@@ -1,19 +1,25 @@
-#include "../headerFiles/struct.h"
-#include "../headerFiles/api.h"
-#include "../headerFiles/config.h"
-#include "../headerFiles/features.h"
-#include "../headerFiles/githubAPI.h"
-#include "../headerFiles/helperFunctions.h"
-#include "../headerFiles/markdownToPDF.h"
-#include "../headerFiles/slackAPI.h"
-#include "../headerFiles/stringTools.h"
-#include "../headerFiles/wikiAPI.h"
-#include "../headerFiles/sheetAPI.h"
+/**
+ * @file slackAPI.c
+ * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
+ * @brief 
+ * 
+ * @details Contains all of the functions which are only used to interact with the Slack APIs.
+ */
 
+#include "../include/struct.h"
+#include "../include/api.h"
+#include "../include/config.h"
+#include "../include/features.h"
+#include "../include/githubAPI.h"
+#include "../include/helperFunctions.h"
+#include "../include/markdownToPDF.h"
+#include "../include/slackAPI.h"
+#include "../include/stringTools.h"
+#include "../include/wikiAPI.h"
+#include "../include/sheetAPI.h"
 
 #define MAX_MESSAGE_LENGTH 100000
 
-//send a message to _wiki-toolbox
 int sendMessageToSlack( char *message) {
     CURL *curl;
     CURLcode res;
@@ -66,7 +72,6 @@ int sendMessageToSlack( char *message) {
     return 0;
 }
 
-//looks at the last message on _wiki-toolbox
 void checkLastSlackMessage() {
     CURL *curl;
     CURLcode res;
@@ -124,7 +129,6 @@ void checkLastSlackMessage() {
     curl_global_cleanup();
 }
 
-// gets the last message on _wiki-toolbox and parses it to a slackMsg struct
 slackMessage getSlackMessage(slackMessage slackMsg) {
     checkLastSlackMessage();
 
@@ -135,10 +139,8 @@ slackMessage getSlackMessage(slackMessage slackMsg) {
     free(chunk.response);
 
     return slackMsg;
-
 }
 
-//add a slack member
 int addSlackMember(char *channels, char *email) {
     CURL *curl;
     CURLcode res;
