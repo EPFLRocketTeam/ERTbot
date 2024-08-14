@@ -19,5 +19,4 @@ rm -r xml
 # Export API key
 # Run Program
 
-
 echo "Documentation updated and converted to markdown"

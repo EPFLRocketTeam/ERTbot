@@ -7,11 +7,10 @@
  *          inline commands on wiki and periodic commands), recognise the command, call the appropriate
  *          function in the features.c file.
  * 
- * @todo Separate the different functions in order to only have a initialise and a loop function in 
- *       the main function, write functions for the two other command sending options which are check
- *       latest modified pages and check time, modify the featues.c functions to send back the text
- *       which can then be send to slack or added to a wiki page and add function to handle features.c 
- *       function returned text
+ * @todo - Separate the different functions in order to only have a initialise and a loop function in the main function,
+ *       - write functions for the two other command sending options which are check latest modified pages and check time,
+ *       - modify the featues.c functions to send back the text which can then be send to slack or added to a wiki page and
+ *       - add function to handle features.c function returned text
  * 
  */
 
@@ -234,3 +233,108 @@ int main(){
     return 0;
 
 }
+
+/*
+main(){
+    initialise(); //initaliseApiCommands, testAPIKeysValidity, print status message on slack and log turn on
+    loop();
+    sendMessageToSlack("Shutting Down");
+    fprintf(stderr, "Shutting Down");
+    return
+}
+
+initialise(){
+    initializeApiTokenVariables();
+    char* lastPageUpdateCheck;//Global variable
+}
+
+
+loop(){
+    cmd = checkForCommand();
+    executeCommand(cmd);
+}
+
+checkForCommand(){
+    lookForCommandOnSlack();
+    if(cmd){return cmd};
+    lookForNewlyUpdatedPages();
+    if(cmd){return cmd};
+    checkIfPeriodicCommandIsDue();
+    if(cmd){return cmd};
+}
+
+executeCommand(){
+    callFeatureFunction()
+    switch (medium)
+    {
+    case slack:
+        sendMessageToSlack(text);
+        break;
+    
+    case appendToPage:
+        appendTextTowikiPage(page.id, text);
+        break;
+    
+    case prependToWikiPage:
+        appendTextTowikiPage(page.id, text);
+        break;
+
+    case placeInBetweenWikiFlags:
+        placeTextInBetweenWikiFlags(page.id, text, wikiFlagId);
+        break;
+
+    case confirmExecutionOnSlack:
+        snprintf(confirmationMessage, "I succesfully excecuted %s", cmd.function);
+        sendMessageToSlack(confirmationMessage);
+
+    default:
+        sendMessageToSlack(text);
+        break;
+    }
+
+    
+}
+
+callFeatureFunction(){
+    switch(cmd.function);
+    case(featurefunction);
+    featurefunction(cmd);
+}
+
+cmd lookForCommandOnSlack(){
+    
+    slackMsg = getSlackMessage(slackMsg);
+
+    //If received a message which was not sent by bot, breakdown message into command structure and return command 
+    if(strcmp(slackMsg.sender, "U06RQCAT0H1") != 0){return breakdownCommand(slackMsg.message, &cmd);}
+    
+    //If last message was sent by bot, free allocated memory and return emtpy command
+    else{
+        printf("No commands sent\n");
+        free(slackMsg.message);
+        free(slackMsg.sender);
+        free(slackMsg.timestamp);
+    }
+    
+    if (chunk.response) {
+        chunk.response = NULL;
+        chunk.size = 0;
+    }
+
+    return cmd;
+};
+
+
+lookForNewlyUpdatedPages(){
+    intialisePageList();
+    populatePageList(head, "time", lastPageUpdateCheck);
+    if(head.id){
+        while(current){
+            cmd = parseWikiCommands(current);
+            current = current.next;
+        }
+    }
+
+    lastPageUpdateCheck = now;
+}
+*/
