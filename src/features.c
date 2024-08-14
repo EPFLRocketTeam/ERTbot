@@ -2,6 +2,8 @@
  * @file features.c
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
  * @brief Contains all of the functions which represent a single feature
+ * 
+ * @todo - Add "onPageUpdateFeature"
  */
 
 #include "../include/struct.h"
@@ -15,6 +17,7 @@
 #include "../include/stringTools.h"
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
+#include "../include/command.h"
 
 char* buildMap(command cmd) {
     pageList* listOfDaughterPages = NULL;

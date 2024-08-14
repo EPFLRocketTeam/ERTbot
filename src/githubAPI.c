@@ -17,6 +17,7 @@
 #include "../include/stringTools.h"
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
+#include "../include/command.h"
 
 
 int fetchImage(char* imagePath, char * pagePath){

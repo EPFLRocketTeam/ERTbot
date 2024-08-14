@@ -5,6 +5,9 @@
         "wikiapi.h": "c",
         "api.h": "c",
         "features.h": "c",
-        "struct.h": "c"
+        "struct.h": "c",
+        "stringtools.h": "c",
+        "markdowntopdf.h": "c",
+        "command.h": "c"
     }
 }

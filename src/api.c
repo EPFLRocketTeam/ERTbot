@@ -17,6 +17,7 @@
 #include "../include/stringTools.h"
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
+#include "../include/command.h"
 
 char *GITHUB_API_TOKEN;
 char *WIKI_API_TOKEN;

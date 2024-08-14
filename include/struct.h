@@ -12,6 +12,8 @@
 #include <time.h>
 #include <cjson/cJSON.h>
 
+extern char *lastPageRefreshCheck;
+
 /**
  * @struct memory
  * @brief Structure to store response data in memory.
@@ -145,6 +147,7 @@ extern pageList default_page;
  * 
  * @todo - change command struct to linked list to allow multithreading/queing commands and allow queing commands for page containing multiple commands
  *       - Add return medium variable
+ *       - update documentation
  */
 typedef struct command {
     char *function;
@@ -157,6 +160,7 @@ typedef struct command {
     char *argument_7;
     char *argument_8;
     char *argument_9;
+    struct command *next;
 }command;
 
 /**
@@ -180,5 +184,16 @@ typedef struct wikiFlag {
     char* pointer_2;
     struct wikiFlag *next;
 }wikiFlag;
+
+
+typedef struct PeriodicCommand {
+    struct command* command;      // Command to be executed
+    int period;         // Period in seconds
+    time_t next_time;   // Next time to execute the command
+    struct PeriodicCommand* next;  // Next periodic command in the list
+} PeriodicCommand;
+
+extern PeriodicCommand listOfPeriodicCommands;
+
 
 #endif

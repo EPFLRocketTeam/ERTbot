@@ -15,6 +15,7 @@
 #include "../include/stringTools.h"
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
+#include "../include/command.h"
 
 char* replaceWord( char* inputString,  char* wordToReplace,  char* newWord) { 
   char* result; 

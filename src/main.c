@@ -7,11 +7,9 @@
  *          inline commands on wiki and periodic commands), recognise the command, call the appropriate
  *          function in the features.c file.
  * 
- * @todo - Separate the different functions in order to only have a initialise and a loop function in the main function,
- *       - write functions for the two other command sending options which are check latest modified pages and check time,
- *       - modify the featues.c functions to send back the text which can then be send to slack or added to a wiki page and
- *       - add function to handle features.c function returned text
- * 
+ * @todo - Add an option to run through terminal commands instead of slack commands
+ *       - Add Logging
+ *       - Add Feature: appendToListOfPages and prependToListOfPages
  */
 
 #include "../include/struct.h"
@@ -25,316 +23,40 @@
 #include "../include/stringTools.h"
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
+#include "../include/command.h"
 
-//gcc -o wikiToolbox src/main.c src/api.c src/features.c src/githubAPI.c src/helperFunctions.c src/markdownToPDF.c src/slackAPI.c src/stringTools.c src/wikiAPI.c src/sheetAPI.c -I../include -lcurl -lcjson
+//gcc -o wikiToolbox src/main.c src/api.c src/features.c src/githubAPI.c src/helperFunctions.c src/markdownToPDF.c src/slackAPI.c src/stringTools.c src/wikiAPI.c src/sheetAPI.c src/command.c -I../include -lcurl -lcjson
 
 memory chunk;
 
 pageList default_page = {"DefaultID", "DefaultTitle", "DefaultPath", "DefauDefaultDescription", "DefaultContent", "DefaultUpdatedAt", NULL};
 
+char *lastPageRefreshCheck;
+
+
 int main(){
-
-    initializeApiTokenVariables();
-
-    // Initialize command struct (used to pass commands from the slack to the program)
-    command cmd;
-    slackMessage slackMsg;
-    slackMsg.message = malloc(200);
-    if (slackMsg.message == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        return 1;
-    }
-    int i = 0;
-
-    sendMessageToSlack("Wiki-Toolbox is Online");
-
-    while(1){
-
-        while(i==0){ //While the last message is a message sent by Wiki-Toolbox
-
-            slackMsg = getSlackMessage(slackMsg);
-
-            if(strcmp(slackMsg.sender, "U06RQCAT0H1") != 0){
-                i = 1;
-            }
-            else{
-                printf("No commands sent\n");
-                sleep(1);
-                free(slackMsg.message);
-                free(slackMsg.sender);
-                free(slackMsg.timestamp);
-            }
-            
-            if (chunk.response) {
-                chunk.response = NULL;
-                chunk.size = 0;
-            }
-
-        }
-
-        breakdownCommand(slackMsg.message, &cmd);
-
-
-        if(cmd.function && strcmp(cmd.function, "getPages") == 0){ //works
-            getPages(cmd);
-        }
-
-        else if(cmd.function && strcmp(cmd.function, "shutdown") == 0){ //works
-            sendMessageToSlack("Shutting down");
-            return 0;
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "buildMap") == 0){ //works
-            sendMessageToSlack(buildMap(cmd));
-            goto complete;         
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "buildLinksTracker") == 0){ //Works
-            buildLinksTracker();
-            sendMessageToSlack("Page created.");
-            goto complete;
-        }
-        
-        else if (cmd.function && strcmp(cmd.function, "updateLinksTracker") == 0){ //Works
-            updateLinksTracker( );
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "buildLocalGraph") == 0){ //Works
-            buildLocalGraph(cmd);
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "movePage") == 0){ //Works
-            movePage(cmd);
-            sendMessageToSlack("Page has been moved and links have been updated");
-            goto complete;
-            
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "syncSheetToDRL") == 0){
-            syncSheetToDrl(cmd);
-            sendMessageToSlack("Finished parsing.");
-            goto complete;
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "syncDRLToSheet") == 0){
-            syncDrlToSheet(cmd);
-            sendMessageToSlack("Finished parsing.");
-            goto complete;
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "createRequirementPage") == 0){
-            createRequirementPage(cmd);
-            sendMessageToSlack("Page created.");
-            goto complete;
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "createVCDPage") == 0){
-            createVcdPage(cmd);
-            sendMessageToSlack("Page created.");
-            goto complete;
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "refreshOAuthToken") == 0){
-            refreshOAuthToken();
-            sendMessageToSlack("Token Refreshed");
-            goto complete;
-        }
-
-        /*
-        else if (cmd.function && strcmp(cmd.function, "getPDF") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        if(cmd.function && strcmp(cmd.function, "getZip") == 0){
-            getZip(cmd);
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "buildImageTracker") == 0){
-            //buildImageTracker(cmd);
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        //update
-
-        else if (cmd.function && strcmp(cmd.function, "updateImageTracker") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "updateLocalGraph") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "updateMap") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "notifyMe") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "stopNotifyMe") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "updateAccronymTracker") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "updateBrokenLinksTracker") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "updateSync") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "spellCheckAI") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "summariesAI") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "suggestionsAI") == 0){
-            sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-        }
-
-        else if (cmd.function && strcmp(cmd.function, "replaceText") == 0){
-            replaceText(cmd);
-        }
-        */
-
-        else if (cmd.function && strcmp(cmd.function, "help") == 0){
-            sendMessageToSlack("Here is a list of the possible commands: ");
-        }
-
-        else{
-            sendMessageToSlack("Uknown Command :rayane_side_eyeing:");
-        }
-
-    complete:
-
-        free(cmd.function);
-        free(cmd.argument_1);
-        free(cmd.argument_2);
-        free(cmd.argument_3);
-        free(cmd.argument_4);
-        free(cmd.argument_5);
-        free(cmd.argument_6);
-        free(cmd.argument_7);
-        free(cmd.argument_8);
-        free(cmd.argument_9);
-        free(slackMsg.message);
-
-        i = 0;
-    }
-
-    return 0;
-
-}
-
-/*
-main(){
-    initialise(); //initaliseApiCommands, testAPIKeysValidity, print status message on slack and log turn on
+    initialise();
     loop();
     sendMessageToSlack("Shutting Down");
     fprintf(stderr, "Shutting Down");
-    return
+    return 0;
 }
 
-initialise(){
-    initializeApiTokenVariables();
-    char* lastPageUpdateCheck;//Global variable
+void initialise(){
+    initializeApiTokenVariables(); 
+    initalizePeriodicCommands();
+    lastPageRefreshCheck = "none";
+
+    return;
 }
 
+void loop(){
+    command* commandQueue = NULL;
 
-loop(){
-    cmd = checkForCommand();
-    executeCommand(cmd);
-}
-
-checkForCommand(){
-    lookForCommandOnSlack();
-    if(cmd){return cmd};
-    lookForNewlyUpdatedPages();
-    if(cmd){return cmd};
-    checkIfPeriodicCommandIsDue();
-    if(cmd){return cmd};
-}
-
-executeCommand(){
-    callFeatureFunction()
-    switch (medium)
-    {
-    case slack:
-        sendMessageToSlack(text);
-        break;
-    
-    case appendToPage:
-        appendTextTowikiPage(page.id, text);
-        break;
-    
-    case prependToWikiPage:
-        appendTextTowikiPage(page.id, text);
-        break;
-
-    case placeInBetweenWikiFlags:
-        placeTextInBetweenWikiFlags(page.id, text, wikiFlagId);
-        break;
-
-    case confirmExecutionOnSlack:
-        snprintf(confirmationMessage, "I succesfully excecuted %s", cmd.function);
-        sendMessageToSlack(confirmationMessage);
-
-    default:
-        sendMessageToSlack(text);
-        break;
+    while(1){
+        commandQueue = checkForCommand(&commandQueue);
+        commandQueue = executeCommand(&commandQueue);
     }
 
-    
+    return;
 }
-
-callFeatureFunction(){
-    switch(cmd.function);
-    case(featurefunction);
-    featurefunction(cmd);
-}
-
-cmd lookForCommandOnSlack(){
-    
-    slackMsg = getSlackMessage(slackMsg);
-
-    //If received a message which was not sent by bot, breakdown message into command structure and return command 
-    if(strcmp(slackMsg.sender, "U06RQCAT0H1") != 0){return breakdownCommand(slackMsg.message, &cmd);}
-    
-    //If last message was sent by bot, free allocated memory and return emtpy command
-    else{
-        printf("No commands sent\n");
-        free(slackMsg.message);
-        free(slackMsg.sender);
-        free(slackMsg.timestamp);
-    }
-    
-    if (chunk.response) {
-        chunk.response = NULL;
-        chunk.size = 0;
-    }
-
-    return cmd;
-};
-
-
-lookForNewlyUpdatedPages(){
-    intialisePageList();
-    populatePageList(head, "time", lastPageUpdateCheck);
-    if(head.id){
-        while(current){
-            cmd = parseWikiCommands(current);
-            current = current.next;
-        }
-    }
-
-    lastPageUpdateCheck = now;
-}
-*/
