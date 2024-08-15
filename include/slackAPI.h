@@ -49,7 +49,7 @@ void checkLastSlackMessage();
  * @note The function assumes that `chunk.response` contains the JSON response from Slack, and that the `slackMessage` 
  *       struct has fields for `message`, `sender`, and `timestamp` that are of type `char*`.
  */
-slackMessage getSlackMessage(slackMessage slackMsg);
+slackMessage* getSlackMessage(slackMessage* slackMsg);
 
 /**
  * @brief Invites a user to one or more Slack channels using the Slack API.

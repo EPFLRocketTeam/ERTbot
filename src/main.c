@@ -33,30 +33,39 @@ pageList default_page = {"DefaultID", "DefaultTitle", "DefaultPath", "DefauDefau
 
 char *lastPageRefreshCheck;
 
+PeriodicCommand** headOfPeriodicCommands;
+
+command** headOfCommandQueue;
+
 
 int main(){
-    initialise();
-    loop();
+
+    initializeApiTokenVariables();
+    headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
+    lastPageRefreshCheck = "none";
+
+    headOfCommandQueue = (command**)malloc(sizeof(command*));
+    *headOfCommandQueue = NULL;
+
+    sendMessageToSlack("Wiki-Toolbox is Online");
+    
+    while(1){
+        fprintf(stderr, "Going to check for commands\n");
+        headOfCommandQueue = checkForCommand(headOfCommandQueue, headOfPeriodicCommands);
+        fprintf(stderr, "Going to execute command\n");
+
+        if(*headOfCommandQueue){
+            fprintf(stderr, "command received\n");
+            headOfCommandQueue = executeCommand(headOfCommandQueue);
+        }
+
+        else{fprintf(stderr, "No command received.\n");}
+
+        sleep(5);
+    }
+
+
     sendMessageToSlack("Shutting Down");
     fprintf(stderr, "Shutting Down");
     return 0;
-}
-
-void initialise(){
-    initializeApiTokenVariables(); 
-    initalizePeriodicCommands();
-    lastPageRefreshCheck = "none";
-
-    return;
-}
-
-void loop(){
-    command* commandQueue = NULL;
-
-    while(1){
-        commandQueue = checkForCommand(&commandQueue);
-        commandQueue = executeCommand(&commandQueue);
-    }
-
-    return;
 }

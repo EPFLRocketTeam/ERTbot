@@ -231,6 +231,8 @@ void getPages(command cmd) {
     sendMessageToSlack("All Pages Printed\n");
     // Free the memory used by the linked list
     freePageList(&head);
+
+    return; 
 }
 
 // Mass replace all strings
@@ -417,7 +419,7 @@ void createVcdPage(command cmd){
     
     //free(extractedText);
 
-    //cJSON_Delete(requirementList);
+    cJSON_Delete(requirementList);
     freePageList(&C_ST_VCD_DRAFT);
     return;
 }

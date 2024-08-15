@@ -8,6 +8,11 @@
         "struct.h": "c",
         "stringtools.h": "c",
         "markdowntopdf.h": "c",
-        "command.h": "c"
-    }
+        "command.h": "c",
+        "helperfunctions.h": "c"
+    },
+    "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
+        "clang-analyzer-security.insecureAPI.strcpy",
+        "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
+    ]
 }

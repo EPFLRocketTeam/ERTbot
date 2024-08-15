@@ -101,7 +101,7 @@ void createMissingFolders(char *path);
  *          to the standard output. The function uses `strftime` to format the time according to the ISO 8601 standard, and it returns a
  *          static buffer containing the formatted time.
  */
-char *currentTime();
+char *getCurrentEDTTimeString();
 
 /**
  * @brief Compares two ISO 8601 formatted timestamps.

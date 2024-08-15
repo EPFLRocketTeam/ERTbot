@@ -188,18 +188,24 @@ void createMissingFolders(char *path) {
     free(dup_path);
 }
 
-char *currentTime() {
-    char iso8601[25]; // To store the formatted time
-
+char* getCurrentEDTTimeString() {
+    // Allocate static memory for the ISO 8601 string
+    static char iso8601[26];  // Size 26 for "YYYY-MM-DDTHH:MM:SS-04:00\0"
+    
     // Get the current time
-    time_t currentTime = time(NULL);
-    struct tm *utcTime = gmtime(&currentTime);
+    time_t now = time(NULL);
 
-    // Format the time in ISO 8601 format
-    strftime(iso8601, sizeof(iso8601), "%Y-%m-%dT%H:%M:%S.000Z", utcTime);
+    // Convert to local time (in EDT)
+    struct tm *edtTime = localtime(&now);
 
-    // Print the ISO 8601 formatted time
-    printf("Current time in ISO 8601 format: %s\n", iso8601);
+    // Check if we are in Daylight Saving Time (EDT)
+    if (edtTime->tm_isdst > 0) {
+        // EDT timezone is UTC-4
+        strftime(iso8601, sizeof(iso8601), "%Y-%m-%dT%H:%M:%S-04:00", edtTime);
+    } else {
+        // If not DST, fallback to EST (UTC-5)
+        strftime(iso8601, sizeof(iso8601), "%Y-%m-%dT%H:%M:%S-05:00", edtTime);
+    }
 
     return iso8601;
 }
@@ -807,6 +813,7 @@ void filterLinks(pageList** head) {
 void printPages(pageList** head) {
     pageList* current = *head;
     while (current != NULL) {
+        sleep(2);
         current = getPage(&current);
         sendMessageToSlack("Page Title: \n");
         sendMessageToSlack(current->title);

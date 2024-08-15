@@ -130,12 +130,12 @@ void checkLastSlackMessage() {
     curl_global_cleanup();
 }
 
-slackMessage getSlackMessage(slackMessage slackMsg) {
+slackMessage* getSlackMessage(slackMessage* slackMsg) {
     checkLastSlackMessage();
 
-    slackMsg.message = jsonParserGetStringValue(chunk.response, "\"text\"");
-    slackMsg.sender = jsonParserGetStringValue(chunk.response, "\"user\"");
-    slackMsg.timestamp = jsonParserGetStringValue(chunk.response, "\"ts\"");
+    slackMsg->message = jsonParserGetStringValue(chunk.response, "\"text\"");
+    slackMsg->sender = jsonParserGetStringValue(chunk.response, "\"user\"");
+    slackMsg->timestamp = jsonParserGetStringValue(chunk.response, "\"ts\"");
 
     free(chunk.response);
 

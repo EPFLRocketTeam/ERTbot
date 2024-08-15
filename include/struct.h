@@ -163,6 +163,8 @@ typedef struct command {
     struct command *next;
 }command;
 
+extern command** headOfCommandQueue;
+
 /**
  * @struct wikiFlag
  * @brief Represents a flag in the wiki system that contains a command, pointers, and a link to the next flag.
@@ -193,7 +195,7 @@ typedef struct PeriodicCommand {
     struct PeriodicCommand* next;  // Next periodic command in the list
 } PeriodicCommand;
 
-extern PeriodicCommand listOfPeriodicCommands;
+extern PeriodicCommand** headOfPeriodicCommands;
 
 
 #endif
