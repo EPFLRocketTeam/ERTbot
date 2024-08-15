@@ -124,6 +124,8 @@ static command* addCommmandToQueue(command** head,  char *function, char *argume
     }
 
 
+    fprintf(stderr, "All arguments added to command Queue\n");
+
     newNode->next = NULL;  // New node will be the last node
 
     // If the list is empty, make the new node the first node
@@ -140,6 +142,9 @@ static command* addCommmandToQueue(command** head,  char *function, char *argume
 
     // Link the new node after the last node
     lastNode->next = newNode;
+
+    fprintf(stderr, "Command added to queue\n");
+
     return *head;
 }
 
@@ -224,17 +229,17 @@ void removeFirstCommand(command **head) {
 }
 
 static command** checkAndEnqueuePeriodicCommands(command** commandQueue, PeriodicCommand** headOfPeriodicCommands) {
-    time_t getCurrentEDTTimeString = time(NULL);
+    time_t currentTime = time(NULL);
     PeriodicCommand* periodicCommand = (*headOfPeriodicCommands);
 
     while (periodicCommand != NULL) {
-        if (periodicCommand->next_time <= getCurrentEDTTimeString) {
+        if (periodicCommand->next_time <= currentTime) {
             // Enqueue the command into the commandQueue
             command cmd = *periodicCommand->command;
             *commandQueue = addCommmandToQueue(commandQueue, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
 
             // Update the next execution time
-            periodicCommand->next_time = getCurrentEDTTimeString + periodicCommand->period;
+            periodicCommand->next_time = currentTime + periodicCommand->period;
         }
         periodicCommand = periodicCommand->next;
     }
@@ -308,19 +313,22 @@ command** checkForCommand(command** headOfCommandQueue, PeriodicCommand** headOf
 }
 
 PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicCommands){
-
-    
-    command getRyansHomePage;
-    getRyansHomePage.function = "getPages";
-    getRyansHomePage.argument_1 = "competition/firehorn/systems_engineering/other/ryan_homepage";
-
+    command* getRyansHomePage = (command*)malloc(sizeof(command));
+    getRyansHomePage->function = "getPages";
+    getRyansHomePage->argument_1 = "competition/firehorn/systems_engineering/other/ryan_homepage/bababoui";
+    getRyansHomePage->argument_2 = NULL;
+    getRyansHomePage->argument_3 = NULL;
+    getRyansHomePage->argument_4 = NULL;
+    getRyansHomePage->argument_5 = NULL;
+    getRyansHomePage->argument_6 = NULL;
+    getRyansHomePage->argument_7 = NULL;
+    getRyansHomePage->argument_8 = NULL;
+    getRyansHomePage->argument_9 = NULL;
+    getRyansHomePage->next = NULL;
 
     headOfPeriodicCommands = (PeriodicCommand**)malloc(sizeof(PeriodicCommand*));
-
     *headOfPeriodicCommands = NULL;
-
-    *headOfPeriodicCommands = addPeriodicCommand(headOfPeriodicCommands, &getRyansHomePage, 150);
-
+    *headOfPeriodicCommands = addPeriodicCommand(headOfPeriodicCommands, getRyansHomePage, 10);
 
     return headOfPeriodicCommands;
 }

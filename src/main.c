@@ -64,7 +64,6 @@ int main(){
         sleep(5);
     }
 
-
     sendMessageToSlack("Shutting Down");
     fprintf(stderr, "Shutting Down");
     return 0;
