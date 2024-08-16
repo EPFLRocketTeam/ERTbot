@@ -18,6 +18,7 @@
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
+#include "../include/log.h"
 
 #define MAX_ARGUMENTS 10
 #define MAX_ARGUMENT_LENGTH 100

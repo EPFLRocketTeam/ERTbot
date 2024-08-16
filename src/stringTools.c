@@ -16,6 +16,7 @@
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
+#include "../include/log.h"
 
 char* replaceWord( char* inputString,  char* wordToReplace,  char* newWord) { 
   char* result; 

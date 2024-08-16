@@ -1,17 +1,8 @@
 /**
  * @file command.c
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
- * @brief 
- * 
- * @details
- * 
- * 
- * 
- * @warning AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHH!
- * - Out here dereferencing NULL Pointers 
- * @todo
+ * @brief Contains functions used to handle commands.
  */
-
 #include "../include/struct.h"
 #include "../include/api.h"
 #include "../include/config.h"
@@ -24,6 +15,7 @@
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
+#include "../include/log.h"
 
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands, command* command, int period) {
     PeriodicCommand* newCommand = (PeriodicCommand*)malloc(sizeof(PeriodicCommand));
@@ -304,7 +296,7 @@ command** checkForCommand(command** headOfCommandQueue, PeriodicCommand** headOf
     
     headOfCommandQueue = lookForCommandOnSlack(headOfCommandQueue);//done
     fprintf(stderr, "Checked Slack\n");
-    headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);//done
+    //headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);//done
     fprintf(stderr, "Checked wiki\n");
     headOfCommandQueue = checkAndEnqueuePeriodicCommands(headOfCommandQueue, headOfPeriodicCommands);//done
     fprintf(stderr, "Checked periodic commands\n");

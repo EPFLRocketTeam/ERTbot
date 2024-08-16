@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <time.h>
 #include <cjson/cJSON.h>
+#include <stdarg.h>
 
 extern char *lastPageRefreshCheck;
 

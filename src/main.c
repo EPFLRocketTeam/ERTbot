@@ -24,8 +24,9 @@
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
+#include "../include/log.h"
 
-//gcc -o wikiToolbox src/main.c src/api.c src/features.c src/githubAPI.c src/helperFunctions.c src/markdownToPDF.c src/slackAPI.c src/stringTools.c src/wikiAPI.c src/sheetAPI.c src/command.c -I../include -lcurl -lcjson
+//gcc -o wikiToolbox src/main.c src/api.c src/features.c src/githubAPI.c src/helperFunctions.c src/markdownToPDF.c src/slackAPI.c src/stringTools.c src/wikiAPI.c src/sheetAPI.c src/command.c src/log.c -I../include -lcurl -lcjson
 
 memory chunk;
 
@@ -48,6 +49,10 @@ int main(){
     *headOfCommandQueue = NULL;
 
     sendMessageToSlack("Wiki-Toolbox is Online");
+
+    log_message(LOG_INFO, "This is an information log test");
+    log_message(LOG_ERROR, "This is an error log test");
+    log_message(LOG_DEBUG, "This is an debug log test");
     
     while(1){
         fprintf(stderr, "Going to check for commands\n");

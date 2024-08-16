@@ -20,6 +20,7 @@
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
+#include "../include/log.h"
 
 #define MAX_COMMAND_LENGTH 5000
 
