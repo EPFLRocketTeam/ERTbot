@@ -18,6 +18,8 @@
 #include "../include/log.h"
 
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands, command* command, int period) {
+    log_message(LOG_DEBUG, "Entering function addPeriodicCommand");
+    
     PeriodicCommand* newCommand = (PeriodicCommand*)malloc(sizeof(PeriodicCommand));
     newCommand->command = command;  // Duplicate the command string
     newCommand->period = period;
@@ -38,10 +40,14 @@ static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicComma
 
     // Link the new node after the last node
     lastNode->next = newCommand;
+    log_message(LOG_DEBUG, "Exiting function addPeriodicCommand");
+
     return *headOfPeriodicCommands;
 }
 
 static command* addCommmandToQueue(command** head,  char *function, char *argument_1, char *argument_2, char *argument_3, char *argument_4, char *argument_5, char *argument_6, char *argument_7, char *argument_8, char *argument_9) {
+    log_message(LOG_DEBUG, "Entering function addCommandToQueue");
+        
     command* newNode = (command *)malloc(sizeof(command));
     if (!newNode) {
         fprintf(stderr, "Memory allocation error\n");
@@ -136,12 +142,14 @@ static command* addCommmandToQueue(command** head,  char *function, char *argume
     lastNode->next = newNode;
 
     fprintf(stderr, "Command added to queue\n");
-
+    
+    log_message(LOG_DEBUG, "Exiting function addCommandToQueue");
     return *head;
 }
 
 void removeFirstCommand(command **head) {
-
+    log_message(LOG_DEBUG, "Entering function removeFirstCommand");
+    
     fprintf(stderr, "About to remove first command\n");
 
     if (*head == NULL) {
@@ -218,9 +226,12 @@ void removeFirstCommand(command **head) {
 
     fprintf(stderr, "freed struct\n");
     
+    log_message(LOG_DEBUG, "Exiting function removeFirstCommand"); 
 }
 
 static command** checkAndEnqueuePeriodicCommands(command** commandQueue, PeriodicCommand** headOfPeriodicCommands) {
+    log_message(LOG_DEBUG, "Entering function checkAndEnqueuePeriodicCommands");
+    
     time_t currentTime = time(NULL);
     PeriodicCommand* periodicCommand = (*headOfPeriodicCommands);
 
@@ -235,11 +246,14 @@ static command** checkAndEnqueuePeriodicCommands(command** commandQueue, Periodi
         }
         periodicCommand = periodicCommand->next;
     }
-
+    
+    log_message(LOG_DEBUG, "Exiting function checkAndEnquePeriodicCommands");
     return commandQueue;
 }
 
 static command** lookForCommandOnSlack(command** headOfCommandQueue){
+    log_message(LOG_DEBUG, "Entering function lookForCommandonSlack");
+
     command cmd;
     slackMessage* slackMsg = (slackMessage*)malloc(sizeof(slackMessage*));;
 
@@ -271,12 +285,15 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
     free(slackMsg->message);
     free(slackMsg->sender);
     free(slackMsg->timestamp);
-
+    
+    log_message(LOG_DEBUG, "Exiting function lookForCommandOnSlack");
     return headOfCommandQueue;
 
 }
 
 static command** lookForNewlyUpdatedPages(command** commandQueue){
+    log_message(LOG_DEBUG, "Entering function lookForNewlyUpdatedPages");
+    
     pageList* updatedPages = NULL;
     updatedPages = populatePageList(&updatedPages, "time", lastPageRefreshCheck);
     pageList* updatedPagesHead = updatedPages;
@@ -288,11 +305,13 @@ static command** lookForNewlyUpdatedPages(command** commandQueue){
 
     freePageList(&updatedPagesHead);
     lastPageRefreshCheck = getCurrentEDTTimeString();
-
+    
+    log_message(LOG_DEBUG, "Exiting function lookForNewlyUpdatedPages");
     return commandQueue;
 }
 
 command** checkForCommand(command** headOfCommandQueue, PeriodicCommand** headOfPeriodicCommands){
+    log_message(LOG_DEBUG, "Entering function checkForCommand");
     
     headOfCommandQueue = lookForCommandOnSlack(headOfCommandQueue);//done
     fprintf(stderr, "Checked Slack\n");
@@ -300,11 +319,14 @@ command** checkForCommand(command** headOfCommandQueue, PeriodicCommand** headOf
     fprintf(stderr, "Checked wiki\n");
     headOfCommandQueue = checkAndEnqueuePeriodicCommands(headOfCommandQueue, headOfPeriodicCommands);//done
     fprintf(stderr, "Checked periodic commands\n");
-
+    
+    log_message(LOG_DEBUG, "Exiting function checkForCommand");
     return headOfCommandQueue;
 }
 
 PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicCommands){
+    log_message(LOG_DEBUG, "Entering function initializePeriodicCommands");
+    
     command* getRyansHomePage = (command*)malloc(sizeof(command));
     getRyansHomePage->function = "getPages";
     getRyansHomePage->argument_1 = "competition/firehorn/systems_engineering/other/ryan_homepage/bababoui";
@@ -321,11 +343,14 @@ PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicComm
     headOfPeriodicCommands = (PeriodicCommand**)malloc(sizeof(PeriodicCommand*));
     *headOfPeriodicCommands = NULL;
     *headOfPeriodicCommands = addPeriodicCommand(headOfPeriodicCommands, getRyansHomePage, 10);
-
+    
+    log_message(LOG_DEBUG, "Exiting function initializePeriodicCommands");
     return headOfPeriodicCommands;
 }
 
 command** executeCommand(command** commandQueue){
+    log_message(LOG_DEBUG, "Entering function executeCommand");
+    
     //TerminalCommandFeatures
     if((*commandQueue)->function && strcmp((*commandQueue)->function, "getPages") == 0){ //works
         getPages(**commandQueue);
@@ -456,7 +481,8 @@ command** executeCommand(command** commandQueue){
     fprintf(stderr, "about to run removeFirstCommand\n");
 
     removeFirstCommand(commandQueue);
-
+    
+    log_message(LOG_DEBUG, "Exiting function executeCommand");
     return commandQueue;
     
 }

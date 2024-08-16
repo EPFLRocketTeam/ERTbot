@@ -15,6 +15,13 @@
 void log_message(int level, const char *format, ...) {
     FILE *log_file;
     const char *filename;
+
+    // If debug logging is disabled, skip debug messages
+    #ifndef DEBUG
+    if (level == LOG_DEBUG) {
+        return;
+    }
+    #endif
     
     // Set the file name based on log level
     switch(level) {

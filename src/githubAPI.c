@@ -22,6 +22,8 @@
 
 
 int fetchImage(char* imagePath, char * pagePath){
+    log_message(LOG_DEBUG, "Entering function fetchImage");
+    
     CURL *curl;
         CURLcode res;
         FILE *fp;
@@ -38,7 +40,7 @@ int fetchImage(char* imagePath, char * pagePath){
             createMissingFolders(localImagePath);
             fp = fopen(localImagePath, "wb");
             if (fp == NULL) {
-                printf("Error opening file.\n");
+                log_message(LOG_ERROR, "Error opening file.");
                 return 0;
             }
 
@@ -77,19 +79,21 @@ int fetchImage(char* imagePath, char * pagePath){
             fclose(fp);
 
             if (res != CURLE_OK) {
-                printf("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+                log_message(LOG_ERROR, "curl_easy_perform() failed: %s", curl_easy_strerror(res));
                 return 0;
             }
 
                 printf("%s downloaded successfully!\n", imagePath);
 
         } else {
-            printf("Failed to initialize CURL.\n");
+            log_message(LOG_ERROR, "Failed to initialize CURL.");
             return 0;
         }
 
         curl_global_cleanup();
 
+    
+    log_message(LOG_DEBUG, "Exiting function fetchImage");
     return 1;
 }
 

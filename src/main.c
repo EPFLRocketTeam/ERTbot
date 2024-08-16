@@ -8,7 +8,6 @@
  *          function in the features.c file.
  * 
  * @todo - Add an option to run through terminal commands instead of slack commands
- *       - Add Logging
  *       - Add Feature: appendToListOfPages and prependToListOfPages
  */
 
@@ -40,7 +39,8 @@ command** headOfCommandQueue;
 
 
 int main(){
-
+    log_message(LOG_DEBUG, "Entering function main");
+    
     initializeApiTokenVariables();
     headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
     lastPageRefreshCheck = "none";
@@ -72,4 +72,6 @@ int main(){
     sendMessageToSlack("Shutting Down");
     fprintf(stderr, "Shutting Down");
     return 0;
+    
+    log_message(LOG_DEBUG, "Exiting function main");
 }

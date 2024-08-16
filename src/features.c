@@ -21,16 +21,20 @@
 #include "../include/log.h"
 
 char* buildMap(command cmd) {
+    log_message(LOG_DEBUG, "Starting the buildMap function");
+
     pageList* listOfDaughterPages = NULL;
-    printf("about to call populatePageList\n");
     listOfDaughterPages = populatePageList(&listOfDaughterPages, "path",  cmd.argument_1); // Parse JSON and populate linked list
     sendMessageToSlack("Finished gathering pages");
     char *map = createMapWBS(&listOfDaughterPages);
     freePageList(&listOfDaughterPages); // Free the memory used by the linked list
+
+    log_message(LOG_DEBUG, "Exiting the buildMap function");
     return map;
 }
 
 void buildLinksTracker() {
+    log_message(LOG_DEBUG, "Starting the buildLinksTracker function");
     
     pageList* linkTrackerPage = NULL;
     linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "");
@@ -83,9 +87,13 @@ void buildLinksTracker() {
     // Free the memory used by the linked list
     freePageList(&linkTrackerPage);// Free the memory used by the linked list
     freePageList(&listOfAllPages);// Free the memory used by the linked list
+
+    log_message(LOG_DEBUG, "Exiting the buildLinksTracker function");
 }
 
-void updateLinksTracker() {   
+void updateLinksTracker() {  
+    log_message(LOG_DEBUG, "Entering function updateLinksTracker");
+    
     pageList* linkTrackerPage = (pageList*) malloc(sizeof(pageList)); // Allocate memory for linkTrackerPage
     if (linkTrackerPage == NULL) {
         fprintf(stderr, "Memory allocation failed for linkTrackerPage\n");
@@ -152,9 +160,13 @@ void updateLinksTracker() {
     // Free the memory used by the linked list
     freePageList(&linkTrackerPage);// Free the memory used by the linked list
     //freePageList(&listOfAllPages);// Free the memory used by the linked list
+    
+    log_message(LOG_DEBUG, "Exiting function updateLinksTracker");
 }
 
 char* buildLocalGraph(command cmd) {
+    log_message(LOG_DEBUG, "Entering function buildLocalGraph");
+    
     // Allocate memory for linkTrackerPage
     pageList* linkTrackerPage = NULL;
     linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "");
@@ -174,6 +186,8 @@ char* buildLocalGraph(command cmd) {
     char *tempGraph = createLocalGraphMindMap(&subjectPage, &IncomingLinks, &OutgoingLinks);
 
     return tempGraph;
+    
+    log_message(LOG_DEBUG, "Exiting function buildLocalGraph");
 }
 
 /*
@@ -204,6 +218,8 @@ void buildImageTracker(command cmd) {
 */
 
 void buildAcronymsList(command cmd) {
+    log_message(LOG_DEBUG, "Entering function buildAcronymsList");
+    
     pageList* listOfAllPages;
     if (cmd.argument_1 == NULL){
         listOfAllPages = populatePageList(&listOfAllPages, "path", "none");
@@ -221,32 +237,41 @@ void buildAcronymsList(command cmd) {
     freePageList(&listOfAllPages);
     freePageList(&current);
     removeDuplicatesAndSort(ACCRONYM_LIST_PATH);
+    
+    log_message(LOG_DEBUG, "Exiting function buildAcronymsList");
 }
 
 void getPages(command cmd) {
+    log_message(LOG_DEBUG, "Entering function getPages");
+    
     pageList* head = NULL;
-    printf("about to call populatePageList\n");
     head = populatePageList(&head, "path", cmd.argument_1); // Parse JSON and populate linked list
-    printf("about to printPages\n");
     printPages(&head);
     sendMessageToSlack("All Pages Printed\n");
     // Free the memory used by the linked list
     freePageList(&head);
 
+    log_message(LOG_DEBUG, "Entering function getPages");
+    
     return; 
 }
 
 // Mass replace all strings
 void replaceText(command cmd) {
+    log_message(LOG_DEBUG, "Entering function replaceText");
+    
     pageList* head;
     head = populatePageList(&head, "path", cmd.argument_1); // Parse JSON and populate linked list
     replaceStringInWiki(&head, cmd.argument_2,cmd.argument_3);
     // Free the memory used by the linked list
     freePageList(&head);
+    
+    log_message(LOG_DEBUG, "Exiting function replaceText");
 }
 
 void movePage(command cmd){
-
+    log_message(LOG_DEBUG, "Entering function movePage");
+    
     cmd.argument_1 = replaceWord(cmd.argument_1, "\\", "");
     cmd.argument_2 = replaceWord(cmd.argument_2, "\\", "");
 
@@ -303,11 +328,14 @@ void movePage(command cmd){
     freePageList(&subjectPage);
     freePageList(&linkTrackerPage);
 
+    
+    log_message(LOG_DEBUG, "Exiting function movePage");
     return;
 }
 
 void syncSheetToDrl(command cmd){
-
+    log_message(LOG_DEBUG, "Entering function syncSheetToDRL");
+    
     pageList* drlPage = (pageList*) malloc(sizeof(pageList)); // Allocate memory for linkTrackerPage
     if (drlPage == NULL) {
         fprintf(stderr, "Memory allocation failed for drlPage\n");
@@ -349,12 +377,14 @@ void syncSheetToDrl(command cmd){
     fprintf(stderr, "deallocating memory\n");
     cJSON_Delete(requirementList);
     free(output);
-
+    
+    log_message(LOG_DEBUG, "Exiting function syncSheetToDRL");
     return;
 }
 
 void syncDrlToSheet(command cmd){
-
+    log_message(LOG_DEBUG, "Entering function syncDrlToSheet");
+    
     batchGetSheet("14vOyP1Oc5O_7JY1vnY7pQPTJoOB8oi4nNRMEsodIvtU", "NewVersion!A4:AI67");
     fprintf(stderr, "chunk.response: %s\n", chunk.response);
 
@@ -374,11 +404,13 @@ void syncDrlToSheet(command cmd){
     freePageList(&drlPage);
     cJSON_Delete(requirementList);
     free(DRL);
-
+    
+    log_message(LOG_DEBUG, "Exiting function syncDrlToSheet");
     return;
 }
 
 void createRequirementPage(command cmd){
+    log_message(LOG_DEBUG, "Entering function createRequirementPages");
 
     batchGetSheet("14vOyP1Oc5O_7JY1vnY7pQPTJoOB8oi4nNRMEsodIvtU", "NewVersion!A4:AI67");
     fprintf(stderr, "chunk.response: %s\n", chunk.response);
@@ -390,11 +422,14 @@ void createRequirementPage(command cmd){
     renderMutation(&reqPage);
     cJSON_Delete(requirementList);
     freePageList(&reqPage);
+    
+    log_message(LOG_DEBUG, "Exiting function createRequirementPage");
     return;
 }
 
 void createVcdPage(command cmd){
-
+    log_message(LOG_DEBUG, "Entering function createVcdPage");
+    
     batchGetSheet("14vOyP1Oc5O_7JY1vnY7pQPTJoOB8oi4nNRMEsodIvtU", "NewVersion!A4:AI67");
     fprintf(stderr, "chunk.response: %s\n", chunk.response);
     cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
@@ -423,4 +458,6 @@ void createVcdPage(command cmd){
     cJSON_Delete(requirementList);
     freePageList(&C_ST_VCD_DRAFT);
     return;
+    
+    log_message(LOG_DEBUG, "Exiting function createVcdPage");
 }

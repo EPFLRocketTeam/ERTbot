@@ -44,6 +44,8 @@ char *template_move_page_mutation = "{\"query\":\"mutation { pages { move(id: De
  *       API response.
  */
 void wikiApi(char *query){
+    log_message(LOG_DEBUG, "Entering function wikiApi");
+    
   CURL *curl;
   CURLcode res;
   struct curl_slist *headers = NULL;
@@ -90,6 +92,8 @@ void wikiApi(char *query){
         curl_slist_free_all(headers);
     }
     curl_global_cleanup();
+    
+    log_message(LOG_DEBUG, "Exiting function wikiApi");
 }
 
 /**
@@ -105,11 +109,15 @@ void wikiApi(char *query){
  *       function is properly set up to handle the API request.
  */
 void getPageContentQuery(char* id){
+    log_message(LOG_DEBUG, "Entering function getPageContentQuery");
+    
     char *temp_query = strdup(template_pages_singles_query); // Make a copy to modify
     char *modified_query = replaceWord(temp_query, default_page.id, id);
     wikiApi(modified_query);
     free(temp_query);
     free(modified_query);
+    
+    log_message(LOG_DEBUG, "Exiting function getPageContentQuery");
 }
 
 /**
@@ -129,6 +137,8 @@ void getPageContentQuery(char* id){
  *          defined, and that the `wikiApi` function is properly set up to handle the API request.
  */
 void getListQuery(char *sort){
+    log_message(LOG_DEBUG, "Entering function getListQuery");
+    
     if(strcmp(sort, "path") == 0 || strcmp(sort, "exact path") == 0){
         char *temp_query = strdup(template_list_pages_sortByPath_query); // Make a copy to modify
         wikiApi(temp_query);
@@ -140,11 +150,15 @@ void getListQuery(char *sort){
         free(temp_query);
     }
     else{
-        printf("Error: inappropriate sort type in getListQuery function call");
+        log_message(LOG_ERROR, "Error: inappropriate sort type in getListQuery function call");
     }
+    
+    log_message(LOG_DEBUG, "Exiting function getListQuery");
 }
 
 pageList* getPage(pageList** head){
+    log_message(LOG_DEBUG, "Entering function getPage");
+    
     pageList* current = *head;
     getPageContentQuery(current->id);
     sscanf(chunk.response, "{ \"id\": %s", current->id);
@@ -156,12 +170,15 @@ pageList* getPage(pageList** head){
     current->createdAt = jsonParserGetStringValue(chunk.response, "\"createdAt\"");
     //fprintf(stderr, "title: %s\n, path: %s\n, description: %s\n, content: %s\n, updatedAt: %s\n", current->title, current->path, current->description, current->content, current->updatedAt);
     free(chunk.response);
+    
+    log_message(LOG_DEBUG, "Exiting function getPage");
     return current;
 }
 
 // Function to filter and parse the JSON string into a Node linked list
 pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* filterCondition) {
-
+    log_message(LOG_DEBUG, "Entering function parseJSON");
+    
     
     if (strstr(filterCondition, "\\") != NULL) {
         filterCondition = replaceWord(filterCondition, "\\", "");
@@ -254,21 +271,21 @@ pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* f
 
         // Add page to list based on the filter condition
         if (strcmp(filterType, "path") == 0 && (strstr(path, filterCondition) != NULL || strcmp(filterCondition, "none") == 0)) {
-            printf("Page found after filtering by path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
+            log_message(LOG_DEBUG, "Page found after filtering by path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
             *head = addPageToList(head, id, title, path, "", "", updatedAt, "");
-            printf("Page added to list\n");
+            log_message(LOG_DEBUG, "Page added to list");
         }
 
         if (strcmp(filterType, "time") == 0 && (strcmp(filterCondition, "none") == 0 || compareTimes(filterCondition, updatedAt) != 1)) {
-            printf("Page found after filtering by time:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
+            log_message(LOG_DEBUG, "Page found after filtering by time:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
             *head = addPageToList(head, id, title, path, "", "", updatedAt, "");
-            printf("Page added to list\n");
+            log_message(LOG_DEBUG, "Page added to list");
         }
 
         if (strcmp(filterType, "exact path") == 0 && strcmp(path, filterCondition) == 0) {
-            printf("Page found after filtering by exact path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
+            log_message(LOG_DEBUG, "Page found after filtering by exact path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
             *head = addPageToList(head, id, title, path, "", "", updatedAt, "");
-            printf("Page added to list\n");
+            log_message(LOG_DEBUG, "Page added to list");
             free(path);
             free(title);
             free(id);
@@ -296,21 +313,27 @@ pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* f
     }
 
     fprintf(stderr, "Finished searching for pages\n");
+    
+    log_message(LOG_DEBUG, "Exiting function parseJSON");
     return *head;
 }
 
 void updatePageContentMutation(pageList* head){
+    log_message(LOG_DEBUG, "Entering function updatePageContentMutation");
+    
     char *temp_query = template_update_page_mutation;
     //fprintf(stderr,"About to update page (id: %s) to content: %s", head->id, head->content);
     temp_query = replaceWord(temp_query, default_page.id, head->id);
     temp_query = replaceWord(temp_query, default_page.content, head->content);
 
     //fprintf(stderr,"About to update send query: %s\n", temp_query);
-
     wikiApi(temp_query);
+    log_message(LOG_DEBUG, "Exiting function updatePageContentMutation");
 }
 
 void renderMutation(pageList** head){
+    log_message(LOG_DEBUG, "Entering function renderMutation");
+    
     pageList* current = *head;
     while (current)  {
         char *temp_query = template_render_page_mutation;
@@ -318,9 +341,13 @@ void renderMutation(pageList** head){
         wikiApi(temp_query);
         current = current->next;
     }
+    
+    log_message(LOG_DEBUG, "Exiting function renderMutation");
 }
 
 void movePageContentMutation(pageList** head){
+    log_message(LOG_DEBUG, "Entering function movePageContentMutation");
+    
     pageList* current = *head;
     while (current)  {
         char *temp_query = template_move_page_mutation;
@@ -329,11 +356,17 @@ void movePageContentMutation(pageList** head){
         wikiApi(temp_query);
         current = current->next;
     }
+    
+    log_message(LOG_DEBUG, "Exiting function movePageContentMutation");
 }
 
 pageList* populatePageList(pageList** head, char *filterType, char *filterCondition){
+    log_message(LOG_DEBUG, "Entering function populatePageList");
+    
     pageList* temp = *head;
     getListQuery(filterType);
     temp = parseJSON(&temp, chunk.response, filterType, filterCondition);
+    
+    log_message(LOG_DEBUG, "Exiting function populatePageList");
     return temp;
 }

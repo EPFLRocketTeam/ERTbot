@@ -27,6 +27,8 @@ char *template_batch_update_query = "{\"valueInputOption\": \"USER_ENTERED\",\"d
 //char *query = "{\"valueInputOption\": \"USER_ENTERED\",\"data\": [{\"range\": \"Sheet1!A1:C4\",\"majorDimension\": \"ROWS\",\"values\": [[\"Item\", \"Cost\", \"Review\"],[\"Coffee\", 2.50, 5]]}],\"includeValuesInResponse\": true,\"responseValueRenderOption\": \"FORMATTED_VALUE\",\"responseDateTimeRenderOption\": \"SERIAL_NUMBER\"}";
 
 void sheetAPI(char *query, char *url, char *requestType) {
+    log_message(LOG_DEBUG, "Entering function sheetAPI");
+    
     CURL *curl;
     CURLcode res;
     struct curl_slist *headers = NULL;
@@ -67,9 +69,13 @@ void sheetAPI(char *query, char *url, char *requestType) {
     }
 
     curl_global_cleanup();
+    
+    log_message(LOG_DEBUG, "Exiting function sheetAPI");
 }
 
 void batchUpdateSheet(char *sheetId, char *range, char *values){
+    log_message(LOG_DEBUG, "Entering function batchUpdateSheet");
+    
     char *requestType = "POST";
     char *temp_url = strdup(template_batch_update_url); // Make a copy to modify
     char *modified_url = replaceWord(temp_url, "DefaultSheetID", sheetId);
@@ -85,9 +91,13 @@ void batchUpdateSheet(char *sheetId, char *range, char *values){
 
     free(modified_query);
     free(modified_url);
+    
+    log_message(LOG_DEBUG, "Exiting function batchUpdateSheet");
 }
 
 void batchGetSheet(char *sheetId, char *range){
+    log_message(LOG_DEBUG, "Entering function batchGetSheet");
+    
     char *requestType = "GET";
     char *query = "";
     char *temp_url = strdup(template_batch_get_url); // Make a copy to modify
@@ -99,9 +109,13 @@ void batchGetSheet(char *sheetId, char *range){
 
     free(temp_url);
     free(modified_url);
+    
+    log_message(LOG_DEBUG, "Exiting function batchGetSheet");
 }
 
 void refreshOAuthToken() {
+    log_message(LOG_DEBUG, "Entering function refreshOAuthToken");
+    
     CURL *curl;
     CURLcode res;
 
@@ -165,5 +179,6 @@ void refreshOAuthToken() {
 
     curl_global_cleanup();
 
+    log_message(LOG_DEBUG, "Exiting function refreshOAuthToken");
     return;
 }
