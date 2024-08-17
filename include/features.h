@@ -202,4 +202,6 @@ void createRequirementPage(command cmd);
  * @warning NOT FINISHED
  */
 void createVcdPage(command cmd);
+
+void onPageUpdate(command cmd);
 #endif

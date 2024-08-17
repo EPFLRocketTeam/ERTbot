@@ -206,7 +206,7 @@ char* updateList(char *list, pageList *sectionTitle, pageList* links);
  *          from the end of the comment, while even-numbered flags are associated with pointers starting from the beginning of the comment. 
  *          The function handles multiple pairs of markers and continues parsing until the end of the text is reached.
  */
-wikiFlag *parseFlags(char* text, wikiFlag flag);
+wikiFlag *parseFlags(char* text);
 
 /**
  * @brief Parses a command sentence into a `command` structure.
@@ -653,4 +653,7 @@ char *createVcdPieChart(char *unverifiedPopulation, char *partiallyVerifiedPopul
  * - If any error occurs during parsing or updating, the function returns `NULL`.
  */
 char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue);
+
+void freeWikiFlagList(wikiFlag** head);
+
 #endif

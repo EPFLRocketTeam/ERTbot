@@ -140,7 +140,7 @@ void getListQuery(char *sort){
     log_message(LOG_DEBUG, "Entering function getListQuery");
     
     if(strcmp(sort, "path") == 0 || strcmp(sort, "exact path") == 0){
-        char *temp_query = strdup(template_list_pages_sortByPath_query); // Make a copy to modify
+        char* temp_query = strdup(template_list_pages_sortByPath_query); // Make a copy to modify
         wikiApi(temp_query);
         free(temp_query); 
     }

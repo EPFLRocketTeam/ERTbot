@@ -104,31 +104,56 @@ char* remove_char_at_index(char *str, int index) {
     return str;
 }
 
-char* replaceParagraph(char *original, char *newSubstring, char *startPtr, char *endPtr) {
+char* replaceParagraph(char* original, char* newSubstring, char* startPtr, char* endPtr) {
     log_message(LOG_DEBUG, "Entering function replaceParagraph");
     
+    // Check for null pointers
+    if (original == NULL || newSubstring == NULL || startPtr == NULL || endPtr == NULL) {
+        log_message(LOG_ERROR, "Null pointer input original:%ld, %ld, %ld, %ld", (long)original, (long)newSubstring, (long)startPtr, (long)endPtr);
+        return NULL;
+    }
+
+    // Check that startPtr and endPtr are within bounds
+    if (startPtr < original || endPtr >= original + strlen(original)) {
+        log_message(LOG_ERROR, "startPtr or endPtr out of bounds. startPtr: %ld, endPtr: %ld, original end: %ld", (long)startPtr, (long)endPtr, (long)(original + strlen(original)));
+        log_message(LOG_DEBUG, " startPtr is at: \"%ld\"", (long)startPtr);
+        log_message(LOG_DEBUG, " endPtr is at: \"%ld\"", (long)endPtr);
+        return NULL;
+    }
+
     // Calculate the lengths
     int originalLen = strlen(original);
     int newSubLen = strlen(newSubstring);
     int replaceLen = endPtr - startPtr + 1;
     int finalLen = originalLen - replaceLen + newSubLen;
 
+    log_message(LOG_DEBUG, "lengths set");
+
     // Create a temporary buffer to hold the modified string
     char *temp = malloc(finalLen + 1 * sizeof(char));
+    if (temp == NULL) {
+        log_message(LOG_ERROR, "Memory allocation failed");
+        return NULL;
+    }
     memset(temp, 0, finalLen + 1);
+    log_message(LOG_DEBUG, "buffer set");
 
     // Copy the part before the replaced section
     strncpy(temp, original, startPtr - original);
+    log_message(LOG_DEBUG, "copied first part");
 
     // Copy the new substring
     strcat(temp, newSubstring);
+    log_message(LOG_DEBUG, "copied new part");
 
     // Copy the part after the replaced section
     strcat(temp, endPtr + 1);
+    log_message(LOG_DEBUG, "copied end");
 
     // Copy the modified string back to the original
     
     log_message(LOG_DEBUG, "Exiting function replaceParagraph");
+    fprintf(stderr, "exiting replaceParagraph\n");
     return temp;
 }
 

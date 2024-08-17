@@ -21,7 +21,7 @@
 #include "../include/log.h"
 
 char* buildMap(command cmd) {
-    log_message(LOG_DEBUG, "Starting the buildMap function");
+    log_message(LOG_DEBUG, "Entering function buildMap");
 
     pageList* listOfDaughterPages = NULL;
     listOfDaughterPages = populatePageList(&listOfDaughterPages, "path",  cmd.argument_1); // Parse JSON and populate linked list
@@ -69,8 +69,6 @@ void buildLinksTracker() {
             listOfAllPages = listOfAllPages->next;
             freePageList(&links);
 
-            //Used for debugging
-            //updatePageContentMutation(linkTrackerPage);
         }
     }
     
@@ -460,4 +458,53 @@ void createVcdPage(command cmd){
     return;
     
     log_message(LOG_DEBUG, "Exiting function createVcdPage");
+}
+
+void onPageUpdate(command cmd){
+    log_message(LOG_DEBUG, "Entering function onPageUpdate");
+
+    log_message(LOG_DEBUG, "initalising page");
+    pageList* targetPage = (pageList*)malloc(sizeof(pageList));
+
+    log_message(LOG_DEBUG, "setting page ID");
+    targetPage->id = cmd.argument_1;
+
+    log_message(LOG_DEBUG, "getting Page");
+    targetPage = getPage(&targetPage);
+
+    //Page is retrieved as expected fprintf(stderr, "%s\n", targetPage->content);
+
+    log_message(LOG_DEBUG, "initalising wikiFlage pointer");
+    wikiFlag* wikiCommand = (wikiFlag*)malloc(sizeof(wikiFlag));
+
+    log_message(LOG_DEBUG, "calling parseFlags");
+    wikiCommand = parseFlags(targetPage->content);
+
+    
+    while(wikiCommand){
+        
+        if(wikiCommand->cmd.function && strcmp(wikiCommand->cmd.function, "buildMap") == 0){
+            char* map = buildMap(wikiCommand->cmd);
+            map = appendStrings("\n", map);
+            targetPage->content = replaceParagraph(targetPage->content, map, wikiCommand->pointerToEndOfFirstMarker, wikiCommand->pointerToBeginningOfSecondMarker);
+        }
+
+        log_message(LOG_DEBUG, "going to send message to slack");
+        
+
+        wikiCommand = wikiCommand->next;
+    }
+
+    targetPage->content = replaceWord(targetPage->content, "\n", "\\n");
+    targetPage->content = replaceWord(targetPage->content, "\\", "\\\\");
+    targetPage->content = replaceWord(targetPage->content, "\"", "\\\"");
+    
+
+
+
+    fprintf(stderr, "\n\nPAGE AFTER MODIFICATION%s\n\n", targetPage->content);
+
+    updatePageContentMutation(targetPage);
+    renderMutation(&targetPage);
+    log_message(LOG_DEBUG, "Exiting function onPageUpdate");
 }

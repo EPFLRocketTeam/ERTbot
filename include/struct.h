@@ -146,9 +146,7 @@ extern pageList default_page;
  * - `argument_1` to `argument_9`: Strings representing the arguments that are passed to the function. 
  *   These fields are optional and may be left NULL if not used.
  * 
- * @todo - change command struct to linked list to allow multithreading/queing commands and allow queing commands for page containing multiple commands
- *       - Add return medium variable
- *       - update documentation
+ * @todo - update documentation
  */
 typedef struct command {
     char *function;
@@ -183,9 +181,9 @@ extern command** headOfCommandQueue;
  */
 typedef struct wikiFlag {
     command cmd;
-    char* pointer_1;
-    char* pointer_2;
-    struct wikiFlag *next;
+    char* pointerToEndOfFirstMarker;
+    char* pointerToBeginningOfSecondMarker;
+    struct wikiFlag* next;
 }wikiFlag;
 
 

@@ -170,54 +170,42 @@ void removeFirstCommand(command **head) {
     
     if (temp->function && temp->function != NULL){
         free(temp->function);
-        fprintf(stderr, "Freeing function: %p\n", (void*)temp->function);
     }
 
     if (temp->argument_1 && temp->argument_1 != NULL){
         free(temp->argument_1);
-        fprintf(stderr, "Freeing argument_1: %p\n", (void*)temp->argument_1);
     }
 
-    fprintf(stderr, "About to free argument_2\n");
     if (temp->argument_2 && temp->argument_2 != NULL){
         free(temp->argument_2);
-        fprintf(stderr, "Freeing argument_2: %p\n", (void*)temp->argument_2);
     }
-    fprintf(stderr, "Freed argument_2\n");
 
     if (temp->argument_3 && temp->argument_3 != NULL){
         free(temp->argument_3);
-        fprintf(stderr, "Freeing argument_3: %p\n", (void*)temp->argument_3);
     }
 
     if (temp->argument_4 && temp->argument_4 != NULL){
         free(temp->argument_4);
-        fprintf(stderr, "Freeing argument_4: %p\n", (void*)temp->argument_4);
     }
 
     if (temp->argument_5 && temp->argument_5 != NULL){
         free(temp->argument_5);
-        fprintf(stderr, "Freeing argument_5: %p\n", (void*)temp->argument_5);
     }
 
     if (temp->argument_6 && temp->argument_6 != NULL){
         free(temp->argument_6);
-        fprintf(stderr, "Freeing argument_6: %p\n", (void*)temp->argument_6);
     }
 
     if (temp->argument_7 && temp->argument_7 != NULL){
         free(temp->argument_7);
-        fprintf(stderr, "Freeing argument_7: %p\n", (void*)temp->argument_7);
     }
 
     if (temp->argument_8 && temp->argument_8 != NULL){
         free(temp->argument_8);
-        fprintf(stderr, "Freeing argument_8: %p\n", (void*)temp->argument_8);
     }
 
     if (temp->argument_9 && temp->argument_9 != NULL){
         free(temp->argument_9);
-        fprintf(stderr, "Freeing argument_9: %p\n", (void*)temp->argument_9);
     }
 
     fprintf(stderr, "freed all variables\n");
@@ -313,12 +301,9 @@ static command** lookForNewlyUpdatedPages(command** commandQueue){
 command** checkForCommand(command** headOfCommandQueue, PeriodicCommand** headOfPeriodicCommands){
     log_message(LOG_DEBUG, "Entering function checkForCommand");
     
-    headOfCommandQueue = lookForCommandOnSlack(headOfCommandQueue);//done
-    fprintf(stderr, "Checked Slack\n");
-    //headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);//done
-    fprintf(stderr, "Checked wiki\n");
-    headOfCommandQueue = checkAndEnqueuePeriodicCommands(headOfCommandQueue, headOfPeriodicCommands);//done
-    fprintf(stderr, "Checked periodic commands\n");
+    headOfCommandQueue = lookForCommandOnSlack(headOfCommandQueue);
+    //headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);
+    //headOfCommandQueue = checkAndEnqueuePeriodicCommands(headOfCommandQueue, headOfPeriodicCommands);
     
     log_message(LOG_DEBUG, "Exiting function checkForCommand");
     return headOfCommandQueue;
@@ -402,7 +387,7 @@ command** executeCommand(command** commandQueue){
     }
     
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "onPageUpdate") == 0){
-        //onPageUpdate(**commandQueue);
+        onPageUpdate(**commandQueue);
         sendMessageToSlack("onPageUpdate called on page id:");
         sendMessageToSlack((*commandQueue)->argument_1);
     }

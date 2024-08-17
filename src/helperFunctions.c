@@ -302,7 +302,7 @@ char* createMapWBS(pageList** paths) {
     int numberOfParentFolders = 0;
     int baseDepth, currentDepth, numberOfStars;
     
-    char *map = "```plantuml\n@startwbs\n<style>\nwbsDiagram {\n  Linecolor black\n	BackGroundColor white\n  hyperlinkColor black\n}\n</style>";
+    char *map = "```plantuml\n@startwbs\n<style>\nwbsDiagram {\n  Linecolor black\nBackGroundColor white\n  hyperlinkColor black\n}\n</style>";
     baseDepth = countSlashes(current->path);
     while (current != NULL) {
         currentDepth = countSlashes(current->path);
@@ -440,18 +440,22 @@ char* updateList(char *list, pageList *sectionTitle, pageList *links) {
     return list;
 }
 
-wikiFlag *parseFlags(char* text, wikiFlag flag) {
+wikiFlag* parseFlags(char* text) {
     log_message(LOG_DEBUG, "Entering function parseFlags");
     
-    wikiFlag *head = NULL;
-    wikiFlag *current = NULL;
+    wikiFlag* head = NULL;
+    wikiFlag* current = NULL;
     char* start = text;
     char* end = text;
     int flagCount = 0;
     command cmd;
+    wikiFlag *newFlag = (wikiFlag*)malloc(sizeof(wikiFlag));
     
     while (*end != '\0') {
-        if (*end == '<' && *(end + 1) == '-' && *(end + 2) == '-') {
+        //log_message(LOG_DEBUG, "Current chars: %c%c%c%c", *end, *(end+1), *(end+2), *(end+3));
+        if (*end == '<' && *(end + 1) == '!' && *(end + 2) == '-' && *(end + 3) == '-') {
+            log_message(LOG_DEBUG, "Found a comment");
+
             flagCount ++;
             start = end;
             end += 4; // Move to the first character after '<!--'
@@ -463,32 +467,39 @@ wikiFlag *parseFlags(char* text, wikiFlag flag) {
             
             if (*end == '\0') break; // Reached the end of the text
             
-            breakdownCommand(extractParagraphWithPointerDelimiters(text, start+4 , end), &cmd);
+            breakdownCommand(extractParagraphWithPointerDelimiters(text, start+4 , end-1), &cmd);
+
+            log_message(LOG_DEBUG, "Wiki command found in when parsing the flags Function:\"%s\", Command\"%s\"", cmd.function, cmd.argument_1);
             
-            wikiFlag *newFlag = (wikiFlag*)malloc(sizeof(flag));
+            
             newFlag->cmd = cmd;
 
             if (flagCount % 2 != 0){ //odd
-                newFlag->pointer_1 = (char*)(end + 3);
+                newFlag->pointerToEndOfFirstMarker = (char*)(end + 3);
+                log_message(LOG_DEBUG, "Set pointerToEndOfFirstMarker to: \"%ld\"", (long)newFlag->pointerToEndOfFirstMarker);
             }
 
-            else if (flagCount % 2 == 0){ //even
-                newFlag->pointer_2 = (char*)(start);
+            if (flagCount % 2 == 0){ //even
+                newFlag->pointerToBeginningOfSecondMarker = (char*)(start - 1);
+                log_message(LOG_DEBUG, "Set pointerToBeginningOfSecondMarker to: \"%ld\"", (long)newFlag->pointerToBeginningOfSecondMarker);
+                log_message(LOG_DEBUG, "pointerToEndOfFirstMarker is: \"%ld\"", (long)newFlag->pointerToEndOfFirstMarker);
+
+                // Adding to the linked list
+                newFlag->next = NULL;
+                if (head == NULL) {
+                    head = newFlag;
+                    current = newFlag;
+                    wikiFlag *newFlag = (wikiFlag*)malloc(sizeof(wikiFlag));
+                } else {
+                    current->next = newFlag;
+                    current = newFlag;
+                    wikiFlag *newFlag = (wikiFlag*)malloc(sizeof(wikiFlag));
+                }
             }
-            newFlag->next = NULL;
             
-            // Adding to the linked list
-            if (head == NULL) {
-                head = newFlag;
-                current = newFlag;
-            } else {
-                current->next = newFlag;
-                current = newFlag;
-            }
         }
         end++;
     }
-
     
     log_message(LOG_DEBUG, "Exiting function parseFlags");
     return head;
@@ -655,7 +666,7 @@ void freePageList(pageList** head) {
             free(temp->updatedAt);
         }
         if (temp->createdAt){ 
-            fprintf("Freeing createdAt: %p\n", (void*)temp->createdAt);
+            printf("Freeing createdAt: %p\n", (void*)temp->createdAt);
             free(temp->createdAt);
         }
         
@@ -1793,3 +1804,27 @@ char *extractVerificationStatsForAReview(cJSON *requirementList){
 
 }
 */
+
+void freeWikiFlagList(wikiFlag** head) {
+    log_message(LOG_DEBUG, "Entering function freeWikiFlagList");
+    
+    while (*head) {
+        wikiFlag* temp = *head;
+        *head = (*head)->next;
+        
+        // Debugging prints
+        if (temp->pointerToBeginningOfSecondMarker){
+            free(temp->pointerToBeginningOfSecondMarker);
+        }
+        if (temp->pointerToBeginningOfSecondMarker){
+            free(temp->pointerToBeginningOfSecondMarker);
+        }
+        
+        fprintf(stderr, "about to free temp\n");
+        free(temp);
+        fprintf(stderr, "freed temp\n");
+    }
+
+    
+    log_message(LOG_DEBUG, "Exiting function freeWikiFlagList");
+}

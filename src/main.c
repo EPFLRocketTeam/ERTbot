@@ -39,7 +39,7 @@ command** headOfCommandQueue;
 
 
 int main(){
-    log_message(LOG_DEBUG, "Entering function main");
+    log_message(LOG_DEBUG, "Starting program\n\n");
     
     initializeApiTokenVariables();
     headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
@@ -49,24 +49,19 @@ int main(){
     *headOfCommandQueue = NULL;
 
     sendMessageToSlack("Wiki-Toolbox is Online");
-
-    log_message(LOG_INFO, "This is an information log test");
-    log_message(LOG_ERROR, "This is an error log test");
-    log_message(LOG_DEBUG, "This is an debug log test");
     
     while(1){
-        fprintf(stderr, "Going to check for commands\n");
+        
         headOfCommandQueue = checkForCommand(headOfCommandQueue, headOfPeriodicCommands);
-        fprintf(stderr, "Going to execute command\n");
-
+        
         if(*headOfCommandQueue){
-            fprintf(stderr, "command received\n");
+            log_message(LOG_DEBUG, "command received");
             headOfCommandQueue = executeCommand(headOfCommandQueue);
         }
 
-        else{fprintf(stderr, "No command received.\n");}
+        else{log_message(LOG_DEBUG, "No command received.");}
 
-        sleep(5);
+        sleep(2);
     }
 
     sendMessageToSlack("Shutting Down");

@@ -69,7 +69,7 @@ slackMessage* getSlackMessage(slackMessage* slackMsg);
  * 
  * @warning This function has not been tested yet and is not integrated into the program yet
  * 
- * @todo Test the assSlackMember function and integrate with the rest of the program
+ * @todo Test the addSlackMember function and integrate with the rest of the program
  */
 int addSlackMember(char *channels, char *email);
 #endif
