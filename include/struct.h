@@ -116,6 +116,7 @@ typedef struct pageList {
     char *content;
     char *updatedAt;
     char *createdAt;
+    char *authorId;
     struct pageList *next;
 }pageList;
 

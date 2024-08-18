@@ -27,7 +27,7 @@ char *template_DRL = "# General Design Requirements List\n\n\n# table {.tabset}\
 char *template_REQ = "";
 
 
-pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt) {
+pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt, char *authorId) {
     log_message(LOG_DEBUG, "Entering function addPageToList");
     
     pageList* newNode = (pageList *)malloc(sizeof(pageList));
@@ -57,6 +57,9 @@ pageList* addPageToList(pageList** head,  char *id, char *title, char *path, cha
 
     newNode->createdAt = malloc(strlen(createdAt) + 1);
     strcpy(newNode->createdAt, createdAt);
+
+    newNode->authorId = malloc(strlen(authorId) + 1);
+    strcpy(newNode->authorId, authorId);
 
     newNode->next = NULL;  // New node will be the last node
 
@@ -214,6 +217,10 @@ char* getCurrentEDTTimeString() {
     // Allocate static memory for the ISO 8601 string
     static char iso8601[26];  // Size 26 for "YYYY-MM-DDTHH:MM:SS-04:00\0"
     
+    // Set the timezone to Eastern Time
+    setenv("TZ", "GMT", 1);
+    tzset();
+
     // Get the current time
     time_t now = time(NULL);
 
@@ -329,6 +336,7 @@ char* createMapWBS(pageList** paths) {
                     for(numberOfStars; numberOfStars > 0; --numberOfStars){
                         map = appendStrings(map, "*");
                     }
+                    map = appendStrings(map, "_ ");
                     map = appendStrings(map, " ");
                     map = appendStrings(map, getDocId(dirPath));
                     map = appendStrings(map, "\n");
@@ -669,6 +677,10 @@ void freePageList(pageList** head) {
             printf("Freeing createdAt: %p\n", (void*)temp->createdAt);
             free(temp->createdAt);
         }
+        if (temp->authorId){ 
+            printf("Freeing authorId: %p\n", (void*)temp->authorId);
+            free(temp->authorId);
+        }
         
         fprintf(stderr, "about to free temp\n");
         free(temp);
@@ -834,7 +846,7 @@ pageList* findPageLinks(char *content, pageList **links) {
 
         // Check if link is valid (you might need to refine this check)
         if (strstr(link, ".") == NULL) {
-            *links = addPageToList(links, "", title, link, "", "", "", "");
+            *links = addPageToList(links, "", title, link, "", "", "", "", "");
             fprintf(stderr, "found link %s %s\n", link, title);
         }
 
@@ -889,7 +901,7 @@ pageList* findImageLinks(char *input, pageList** head) {
 
         strncpy(link, linkStart, linkLen);
         link[linkLen] = '\0';
-        imageLinks = addPageToList(&imageLinks, link, "", "", "", "", "", "");
+        imageLinks = addPageToList(&imageLinks, link, "", "", "", "", "", "", "");
 
         count++ ;
 
@@ -973,7 +985,7 @@ pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *sub
                 *titleEnd = '\0';
                 *pathEnd = '\0';
                 fprintf(stderr, "Found a reference in title: %s, path:%s\n", titleStart, pathStart);
-                incomingLinks = addPageToList(&incomingLinks, "", titleStart, pathStart, "", "", "", "");
+                incomingLinks = addPageToList(&incomingLinks, "", titleStart, pathStart, "", "", "", "", "");
                 break;
             }
             link = strstr(linkEnd + 1, "\\n/");
@@ -1041,7 +1053,7 @@ pageList* findOutgoingLinks(pageList** head, char *linkTrackerContent, char *sub
                 if (linkEnd == NULL) {
                     linkEnd = contentCopy + strlen(contentCopy);
                 }
-                outgoingLinks = addPageToList(&outgoingLinks, "", "", link, "", "", "", "");
+                outgoingLinks = addPageToList(&outgoingLinks, "", "", link, "", "", "", "", "");
                 link = strstr(linkEnd + 1, "n/");
 
             }
@@ -1612,7 +1624,7 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
         }
 
         
-        reqPage = addPageToList(&reqPage, TEST_REQ_PAGE_ID, id->valuestring, "", "", pageContent, "", "");
+        reqPage = addPageToList(&reqPage, TEST_REQ_PAGE_ID, id->valuestring, "", "", pageContent, "", "", "");
 
         fprintf(stderr, "\n\n\n%s\n\n\n", pageContent);
 
@@ -1633,7 +1645,7 @@ void appendMentionedIn(pageList** head){
     pageList* subjectPage = *head;
 
     pageList* linkTrackerPage = NULL;
-    linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "");
+    linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "", "");
     fprintf(stderr,"linkTrackerPage id set\n");
     linkTrackerPage = getPage(&linkTrackerPage);
 

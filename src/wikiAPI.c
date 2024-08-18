@@ -21,7 +21,7 @@
 #include "../include/log.h"
 
 
-char *template_pages_singles_query = "{\"query\":\"{pages {single(id: DefaultID){id, path, title, content, description, updatedAt, createdAt}}}\"}";
+char *template_pages_singles_query = "{\"query\":\"{pages {single(id: DefaultID){id, path, title, content, description, updatedAt, createdAt, authorId}}}\"}";
 char *template_list_pages_sortByPath_query = "{\"query\":\"{pages {list(orderBy: PATH){path, title, id, updatedAt}}}\"}";
 char *template_list_pages_sortByTime_query = "{\"query\":\"{pages {list(orderBy: UPDATED, orderByDirection: DESC){path, title, id, updatedAt}}}\"}";
 char *template_update_page_mutation = "{\"query\":\"mutation { pages { update(id: DefaultID, content: \\\"DefaultContent\\\", isPublished: true) { responseResult { succeeded, message } } } }\"}";
@@ -161,6 +161,7 @@ pageList* getPage(pageList** head){
     
     pageList* current = *head;
     getPageContentQuery(current->id);
+    fprintf(stderr, "%s\n" ,chunk.response);
     sscanf(chunk.response, "{ \"id\": %s", current->id);
     current->title = jsonParserGetStringValue(chunk.response, "\"title\"");
     current->path = jsonParserGetStringValue(chunk.response, "\"path\"");
@@ -168,6 +169,7 @@ pageList* getPage(pageList** head){
     current->content = jsonParserGetStringValue(chunk.response, "\"content\"");
     current->updatedAt = jsonParserGetStringValue(chunk.response, "\"updatedAt\"");
     current->createdAt = jsonParserGetStringValue(chunk.response, "\"createdAt\"");
+    current->authorId = jsonParserGetIntValue(chunk.response, "\"authorId\"");
     //fprintf(stderr, "title: %s\n, path: %s\n, description: %s\n, content: %s\n, updatedAt: %s\n", current->title, current->path, current->description, current->content, current->updatedAt);
     free(chunk.response);
     
@@ -272,19 +274,19 @@ pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* f
         // Add page to list based on the filter condition
         if (strcmp(filterType, "path") == 0 && (strstr(path, filterCondition) != NULL || strcmp(filterCondition, "none") == 0)) {
             log_message(LOG_DEBUG, "Page found after filtering by path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
-            *head = addPageToList(head, id, title, path, "", "", updatedAt, "");
+            *head = addPageToList(head, id, title, path, "", "", updatedAt, "", "");
             log_message(LOG_DEBUG, "Page added to list");
         }
 
-        if (strcmp(filterType, "time") == 0 && (strcmp(filterCondition, "none") == 0 || compareTimes(filterCondition, updatedAt) != 1)) {
+        if (strcmp(filterType, "time") == 0 && (strcmp(filterCondition, "none") == 0 || compareTimes(filterCondition, updatedAt) == -1)) {
             log_message(LOG_DEBUG, "Page found after filtering by time:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
-            *head = addPageToList(head, id, title, path, "", "", updatedAt, "");
+            *head = addPageToList(head, id, title, path, "", "", updatedAt, "", "");
             log_message(LOG_DEBUG, "Page added to list");
         }
 
         if (strcmp(filterType, "exact path") == 0 && strcmp(path, filterCondition) == 0) {
             log_message(LOG_DEBUG, "Page found after filtering by exact path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
-            *head = addPageToList(head, id, title, path, "", "", updatedAt, "");
+            *head = addPageToList(head, id, title, path, "", "", updatedAt, "", "");
             log_message(LOG_DEBUG, "Page added to list");
             free(path);
             free(title);

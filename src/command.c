@@ -45,7 +45,7 @@ static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicComma
     return *headOfPeriodicCommands;
 }
 
-static command* addCommmandToQueue(command** head,  char *function, char *argument_1, char *argument_2, char *argument_3, char *argument_4, char *argument_5, char *argument_6, char *argument_7, char *argument_8, char *argument_9) {
+static command* addCommandToQueue(command** head,  char *function, char *argument_1, char *argument_2, char *argument_3, char *argument_4, char *argument_5, char *argument_6, char *argument_7, char *argument_8, char *argument_9) {
     log_message(LOG_DEBUG, "Entering function addCommandToQueue");
         
     command* newNode = (command *)malloc(sizeof(command));
@@ -227,7 +227,7 @@ static command** checkAndEnqueuePeriodicCommands(command** commandQueue, Periodi
         if (periodicCommand->next_time <= currentTime) {
             // Enqueue the command into the commandQueue
             command cmd = *periodicCommand->command;
-            *commandQueue = addCommmandToQueue(commandQueue, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
+            *commandQueue = addCommandToQueue(commandQueue, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
 
             // Update the next execution time
             periodicCommand->next_time = currentTime + periodicCommand->period;
@@ -258,7 +258,7 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
         fprintf(stderr, "Received a command on slack\n");
         breakdownCommand(slackMsg->message, &cmd);
         fprintf(stderr, "Command broke down\n");
-        *headOfCommandQueue = addCommmandToQueue(headOfCommandQueue, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
+        *headOfCommandQueue = addCommandToQueue(headOfCommandQueue, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
         fprintf(stderr, "Command added to queue\n");
     }
     
@@ -283,11 +283,13 @@ static command** lookForNewlyUpdatedPages(command** commandQueue){
     log_message(LOG_DEBUG, "Entering function lookForNewlyUpdatedPages");
     
     pageList* updatedPages = NULL;
+    fprintf(stderr, "%s\n", lastPageRefreshCheck);
     updatedPages = populatePageList(&updatedPages, "time", lastPageRefreshCheck);
     pageList* updatedPagesHead = updatedPages;
 
     while(updatedPages){
-        *commandQueue = addCommmandToQueue(commandQueue, "onPageUpdate", updatedPages->id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+        *commandQueue = addCommandToQueue(commandQueue, "onPageUpdate", updatedPages->id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
         updatedPages = updatedPages->next;
     }
 
@@ -302,7 +304,7 @@ command** checkForCommand(command** headOfCommandQueue, PeriodicCommand** headOf
     log_message(LOG_DEBUG, "Entering function checkForCommand");
     
     headOfCommandQueue = lookForCommandOnSlack(headOfCommandQueue);
-    //headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);
+    headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);
     //headOfCommandQueue = checkAndEnqueuePeriodicCommands(headOfCommandQueue, headOfPeriodicCommands);
     
     log_message(LOG_DEBUG, "Exiting function checkForCommand");
@@ -388,8 +390,6 @@ command** executeCommand(command** commandQueue){
     
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "onPageUpdate") == 0){
         onPageUpdate(**commandQueue);
-        sendMessageToSlack("onPageUpdate called on page id:");
-        sendMessageToSlack((*commandQueue)->argument_1);
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildMap") == 0){ //works

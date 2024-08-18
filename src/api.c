@@ -100,3 +100,40 @@ char *jsonParserGetStringValue(char *json, char *key) {
     log_message(LOG_DEBUG, "Exiting function jsonParserGetStringValue");
     return value;
 }
+
+char *jsonParserGetIntValue(char *json, char *key) {
+    log_message(LOG_DEBUG, "Entering function jsonParserGetIntValue");
+    
+    // Find the key in the JSON string
+    char *start = strstr(json, key);
+    if (start == NULL) {
+        fprintf(stderr, "Error: Key '%s' not found in JSON\n", key);
+        return;  // Return error code
+    }
+
+    // Move to the value part of the key-value pair
+    start += strlen(key) + 1;  // Skip key and the colon (assumes no spaces, formatted JSON might require handling)
+
+    // Find the end of the integer value (assume it ends at a comma or closing brace)
+    char *end = strpbrk(start, ",}");
+    if (end == NULL) {
+        fprintf(stderr, "Error: Malformed JSON\n");
+        return;  // Return error code
+    }
+
+    // Extract the integer value as a string
+    size_t length = end - start;
+    char *valueStr = malloc(length + 1);
+    if (valueStr == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed\n");
+        return;  // Return error code
+    }
+
+    strncpy(valueStr, start, length);
+    valueStr[length] = '\0';
+
+    // Convert the extracted string to an integer
+
+    log_message(LOG_DEBUG, "Exiting function jsonParserGetIntValue");
+    return valueStr;  // Return success
+}

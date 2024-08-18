@@ -43,7 +43,7 @@ int main(){
     
     initializeApiTokenVariables();
     headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
-    lastPageRefreshCheck = "none";
+    lastPageRefreshCheck = getCurrentEDTTimeString();
 
     headOfCommandQueue = (command**)malloc(sizeof(command*));
     *headOfCommandQueue = NULL;

@@ -37,7 +37,7 @@ void buildLinksTracker() {
     log_message(LOG_DEBUG, "Starting the buildLinksTracker function");
     
     pageList* linkTrackerPage = NULL;
-    linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "");
+    linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "", "");
     fprintf(stderr,"linkTrackerPage id set\n");
     linkTrackerPage = getPage(&linkTrackerPage);
 
@@ -167,7 +167,7 @@ char* buildLocalGraph(command cmd) {
     
     // Allocate memory for linkTrackerPage
     pageList* linkTrackerPage = NULL;
-    linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "");
+    linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "", "");
     fprintf(stderr,"linkTrackerPage id set\n");
     linkTrackerPage = getPage(&linkTrackerPage);
 
@@ -279,7 +279,7 @@ void movePage(command cmd){
     movePageContentMutation(&subjectPage);
 
     pageList* linkTrackerPage = NULL;
-    linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "");
+    linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "", "");
     fprintf(stderr,"linkTrackerPage id set\n");
     linkTrackerPage = getPage(&linkTrackerPage);
 
@@ -390,7 +390,7 @@ void syncDrlToSheet(command cmd){
     char *DRL = buildDrlFromJSONRequirementList(requirementList);
 
     pageList* drlPage = NULL;
-    drlPage = addPageToList(&drlPage, TEST_DRL_PAGE_ID, "", "", "", "", "", "");
+    drlPage = addPageToList(&drlPage, TEST_DRL_PAGE_ID, "", "", "", "", "", "", "");
     drlPage->content = DRL;
 
     drlPage->content = replaceWord(drlPage->content, "\n", "\\\\n");
@@ -435,7 +435,7 @@ void createVcdPage(command cmd){
     char *pieChart = createVcdPieChart("20", "30", "40");
     
     pageList* C_ST_VCD_DRAFT = NULL;
-    C_ST_VCD_DRAFT = addPageToList(&C_ST_VCD_DRAFT, "1130", "", "", "", "", "", "");
+    C_ST_VCD_DRAFT = addPageToList(&C_ST_VCD_DRAFT, "1130", "", "", "", "", "", "", "");
     getPage(&C_ST_VCD_DRAFT);
 
     char *extractedText = extractText(C_ST_VCD_DRAFT->content, "<!-- Status history -->\\n```kroki\\nvegalite\\n", "\\n```\\n", false, false);
@@ -464,15 +464,19 @@ void onPageUpdate(command cmd){
     log_message(LOG_DEBUG, "Entering function onPageUpdate");
 
     log_message(LOG_DEBUG, "initalising page");
-    pageList* targetPage = (pageList*)malloc(sizeof(pageList));
+    int wasPageModified = 0;
 
-    log_message(LOG_DEBUG, "setting page ID");
-    targetPage->id = cmd.argument_1;
-
-    log_message(LOG_DEBUG, "getting Page");
+    pageList* targetPage = NULL;
+    targetPage = addPageToList(&targetPage, cmd.argument_1, "", "", "", "", "", "", "");
+    fprintf(stderr,"targetPage id set\n");
     targetPage = getPage(&targetPage);
 
-    //Page is retrieved as expected fprintf(stderr, "%s\n", targetPage->content);
+    if(strcmp(targetPage->authorId, "1") == 0){
+        freePageList(&targetPage);
+        return;
+    }
+
+    fprintf(stderr, "authorID: %s\n", targetPage->authorId);
 
     log_message(LOG_DEBUG, "initalising wikiFlage pointer");
     wikiFlag* wikiCommand = (wikiFlag*)malloc(sizeof(wikiFlag));
@@ -487,6 +491,8 @@ void onPageUpdate(command cmd){
             char* map = buildMap(wikiCommand->cmd);
             map = appendStrings("\n", map);
             targetPage->content = replaceParagraph(targetPage->content, map, wikiCommand->pointerToEndOfFirstMarker, wikiCommand->pointerToBeginningOfSecondMarker);
+
+            wasPageModified = 1;
         }
 
         log_message(LOG_DEBUG, "going to send message to slack");
@@ -495,16 +501,16 @@ void onPageUpdate(command cmd){
         wikiCommand = wikiCommand->next;
     }
 
-    targetPage->content = replaceWord(targetPage->content, "\n", "\\n");
-    targetPage->content = replaceWord(targetPage->content, "\\", "\\\\");
-    targetPage->content = replaceWord(targetPage->content, "\"", "\\\"");
+    if(wasPageModified){
+        targetPage->content = replaceWord(targetPage->content, "\n", "\\n");
+        targetPage->content = replaceWord(targetPage->content, "\\", "\\\\");
+        targetPage->content = replaceWord(targetPage->content, "\"", "\\\"");
+        updatePageContentMutation(targetPage);
+        renderMutation(&targetPage);
+        freePageList(&targetPage);
+        sendMessageToSlack("onPageUpdate called on page id:");
+        sendMessageToSlack(cmd.argument_1);
+    }
     
-
-
-
-    fprintf(stderr, "\n\nPAGE AFTER MODIFICATION%s\n\n", targetPage->content);
-
-    updatePageContentMutation(targetPage);
-    renderMutation(&targetPage);
     log_message(LOG_DEBUG, "Exiting function onPageUpdate");
 }

@@ -25,7 +25,7 @@
  *       valid and properly formatted. Memory allocated for the new node's strings should be freed when the node is no 
  *       longer needed to prevent memory leaks.
  */
-pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt);
+pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt, char *authorId);
 
 /**
  * @brief Counts the number of '/' characters in a given string.
