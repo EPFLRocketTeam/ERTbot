@@ -17,6 +17,8 @@
 #include "../include/stringTools.h"
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
+#include "../include/command.h"
+#include "../include/log.h"
 
 char *GITHUB_API_TOKEN;
 char *WIKI_API_TOKEN;
@@ -27,6 +29,8 @@ char *GOOGLE_CLIENT_SECRET;
 char *GOOGLE_REFRESH_TOKEN;
 
 void initializeApiTokenVariables() {
+    log_message(LOG_DEBUG, "Entering function initializeApiTokenVariables");
+    
     GITHUB_API_TOKEN = getenv("GITHUB_API_TOKEN");
     WIKI_API_TOKEN = getenv("WIKI_API_TOKEN");
     SLACK_API_TOKEN = getenv("SLACK_API_TOKEN");
@@ -35,10 +39,13 @@ void initializeApiTokenVariables() {
     GOOGLE_CLIENT_SECRET = getenv("GOOGLE_CLIENT_SECRET");
     GOOGLE_REFRESH_TOKEN = getenv("GOOGLE_REFRESH_TOKEN");
 
+    
+    log_message(LOG_DEBUG, "Exiting function initializeApiTokenVAriables");
     return;
 }
 
 size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp) {
+    log_message(LOG_DEBUG, "Entering function writeCallback");
     
     size_t realsize = size * nmemb; // set the size of the chunk of memory
     struct memory *mem = (struct memory *)clientp; //points to a struct which is the buffer to store data in
@@ -53,13 +60,17 @@ size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp) {
     mem->size += realsize;
     mem->response[mem->size] = 0;
 
+    
+    log_message(LOG_DEBUG, "Exiting function writeCallback");
     return realsize;
 }
 
 char *jsonParserGetStringValue(char *json, char *key) {
+    log_message(LOG_DEBUG, "Entering function jsonParserGetStringValue");
+    
     char *start = strstr(json, key);
     if (start == NULL) {
-        fprintf(stderr, "Error: Key '%s' not found in JSON\n", key);
+        log_message(LOG_ERROR, "Error: Key '%s' not found in JSON\n", key);
         return NULL;
     }
 
@@ -75,7 +86,7 @@ char *jsonParserGetStringValue(char *json, char *key) {
         end = strchr(start, '"');
     }
     if (end == NULL) {
-        fprintf(stderr, "Error: Malformed JSON\n");
+        log_message(LOG_ERROR, "Error: Malformed JSON");
         return NULL;
     }
 
@@ -85,5 +96,44 @@ char *jsonParserGetStringValue(char *json, char *key) {
     strncpy(value, start, length);
     value[length] = '\0';
 
+    
+    log_message(LOG_DEBUG, "Exiting function jsonParserGetStringValue");
     return value;
+}
+
+char *jsonParserGetIntValue(char *json, char *key) {
+    log_message(LOG_DEBUG, "Entering function jsonParserGetIntValue");
+    
+    // Find the key in the JSON string
+    char *start = strstr(json, key);
+    if (start == NULL) {
+        log_message(LOG_ERROR, "Error: Key '%s' not found in JSON\n", key);
+        return;  // Return error code
+    }
+
+    // Move to the value part of the key-value pair
+    start += strlen(key) + 1;  // Skip key and the colon (assumes no spaces, formatted JSON might require handling)
+
+    // Find the end of the integer value (assume it ends at a comma or closing brace)
+    char *end = strpbrk(start, ",}");
+    if (end == NULL) {
+        log_message(LOG_ERROR, "Error: Malformed JSON");
+        return;  // Return error code
+    }
+
+    // Extract the integer value as a string
+    size_t length = end - start;
+    char *valueStr = malloc(length + 1);
+    if (valueStr == NULL) {
+        log_message(LOG_ERROR, "Error: Memory allocation failed");
+        return;  // Return error code
+    }
+
+    strncpy(valueStr, start, length);
+    valueStr[length] = '\0';
+
+    // Convert the extracted string to an integer
+
+    log_message(LOG_DEBUG, "Exiting function jsonParserGetIntValue");
+    return valueStr;  // Return success
 }

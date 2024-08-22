@@ -17,10 +17,14 @@
 #include "../include/stringTools.h"
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
+#include "../include/command.h"
+#include "../include/log.h"
 
 #define MAX_MESSAGE_LENGTH 100000
 
 int sendMessageToSlack( char *message) {
+    log_message(LOG_DEBUG, "Entering function sendMessageToSlack");
+    
     CURL *curl;
     CURLcode res;
     struct curl_slist *headerlist = NULL;
@@ -59,20 +63,24 @@ int sendMessageToSlack( char *message) {
         curl_slist_free_all(headerlist);
 
         if(res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             return 1;
         }
     }
     else {
-        fprintf(stderr, "Failed to initialize libcurl\n");
+        log_message(LOG_ERROR, "Failed to initialize libcurl");
         return 1;
     }
 
     curl_global_cleanup();
+    
+    log_message(LOG_DEBUG, "Exiting function sendMessageToSlack");
     return 0;
 }
 
 void checkLastSlackMessage() {
+    log_message(LOG_DEBUG, "Entering function checkLastSlackMessage");
+    
     CURL *curl;
     CURLcode res;
     struct curl_slist *headers = NULL;
@@ -111,14 +119,14 @@ void checkLastSlackMessage() {
 
         // Check for errors
         if (res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         }
 
         // Check the HTTP status code
         long http_code = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         if (http_code != 200) {
-            fprintf(stderr, "checkLastSlackMessage: HTTP request failed with status code %ld\n", http_code);
+            log_message(LOG_ERROR, "checkLastSlackMessage: HTTP request failed with status code %ld\n", http_code);
         }
 
         // Clean up
@@ -127,21 +135,30 @@ void checkLastSlackMessage() {
     }
 
     curl_global_cleanup();
+    
+    log_message(LOG_DEBUG, "Exiting function checkLastSlackMessage");
 }
 
-slackMessage getSlackMessage(slackMessage slackMsg) {
+slackMessage* getSlackMessage(slackMessage* slackMsg) {
+    log_message(LOG_DEBUG, "Entering function getSlackMessage");
+    
     checkLastSlackMessage();
 
-    slackMsg.message = jsonParserGetStringValue(chunk.response, "\"text\"");
-    slackMsg.sender = jsonParserGetStringValue(chunk.response, "\"user\"");
-    slackMsg.timestamp = jsonParserGetStringValue(chunk.response, "\"ts\"");
+    slackMsg->message = jsonParserGetStringValue(chunk.response, "\"text\"");
+    slackMsg->sender = jsonParserGetStringValue(chunk.response, "\"user\"");
+    slackMsg->timestamp = jsonParserGetStringValue(chunk.response, "\"ts\"");
 
     free(chunk.response);
+
+    
+    log_message(LOG_DEBUG, "Exiting function getSlackMessage");
 
     return slackMsg;
 }
 
 int addSlackMember(char *channels, char *email) {
+    log_message(LOG_DEBUG, "Entering function addSlackMember");
+    
     CURL *curl;
     CURLcode res;
     struct curl_slist *headerlist = NULL;
@@ -170,14 +187,17 @@ int addSlackMember(char *channels, char *email) {
         curl_easy_cleanup(curl);
         curl_slist_free_all(headerlist);
         if(res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             return 1;
         }
     }
     else {
-        fprintf(stderr, "Failed to initialize libcurl\n");
+        log_message(LOG_ERROR, "Failed to initialize libcurl");
         return 1;
     }
     curl_global_cleanup();
+
+    
+    log_message(LOG_DEBUG, "Exiting function addSlackMember");
     return 0;
 }

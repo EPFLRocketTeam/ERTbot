@@ -5,6 +5,16 @@
         "wikiapi.h": "c",
         "api.h": "c",
         "features.h": "c",
-        "struct.h": "c"
-    }
+        "struct.h": "c",
+        "stringtools.h": "c",
+        "markdowntopdf.h": "c",
+        "command.h": "c",
+        "helperfunctions.h": "c",
+        "config.h": "c",
+        "log.h": "c"
+    },
+    "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
+        "clang-analyzer-security.insecureAPI.strcpy",
+        "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling",
+    ]
 }

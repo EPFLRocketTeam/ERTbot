@@ -11,6 +11,9 @@
 #include <ctype.h>
 #include <time.h>
 #include <cjson/cJSON.h>
+#include <stdarg.h>
+
+extern char *lastPageRefreshCheck;
 
 /**
  * @struct memory
@@ -113,6 +116,7 @@ typedef struct pageList {
     char *content;
     char *updatedAt;
     char *createdAt;
+    char *authorId;
     struct pageList *next;
 }pageList;
 
@@ -142,6 +146,8 @@ extern pageList default_page;
  * - `function`: A string representing the name of the function to be executed.
  * - `argument_1` to `argument_9`: Strings representing the arguments that are passed to the function. 
  *   These fields are optional and may be left NULL if not used.
+ * 
+ * @todo - update documentation
  */
 typedef struct command {
     char *function;
@@ -154,7 +160,10 @@ typedef struct command {
     char *argument_7;
     char *argument_8;
     char *argument_9;
+    struct command *next;
 }command;
+
+extern command** headOfCommandQueue;
 
 /**
  * @struct wikiFlag
@@ -168,12 +177,25 @@ typedef struct command {
  * - `pointer_1`: A pointer to additional data or information related to the flag.
  * - `pointer_2`: Another pointer to additional data or information related to the flag.
  * - `next`: A pointer to the next `wikiFlag` in the list, enabling the creation of a linked list of flags.
+ * 
+ * @todo remove, no longer needed, everything can passs through command structure.
  */
 typedef struct wikiFlag {
     command cmd;
-    char* pointer_1;
-    char* pointer_2;
-    struct wikiFlag *next;
+    char* pointerToEndOfFirstMarker;
+    char* pointerToBeginningOfSecondMarker;
+    struct wikiFlag* next;
 }wikiFlag;
+
+
+typedef struct PeriodicCommand {
+    struct command* command;      // Command to be executed
+    int period;         // Period in seconds
+    time_t next_time;   // Next time to execute the command
+    struct PeriodicCommand* next;  // Next periodic command in the list
+} PeriodicCommand;
+
+extern PeriodicCommand** headOfPeriodicCommands;
+
 
 #endif

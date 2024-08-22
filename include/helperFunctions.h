@@ -25,7 +25,7 @@
  *       valid and properly formatted. Memory allocated for the new node's strings should be freed when the node is no 
  *       longer needed to prevent memory leaks.
  */
-pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt);
+pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt, char *authorId);
 
 /**
  * @brief Counts the number of '/' characters in a given string.
@@ -101,7 +101,7 @@ void createMissingFolders(char *path);
  *          to the standard output. The function uses `strftime` to format the time according to the ISO 8601 standard, and it returns a
  *          static buffer containing the formatted time.
  */
-char *currentTime();
+char *getCurrentEDTTimeString();
 
 /**
  * @brief Compares two ISO 8601 formatted timestamps.
@@ -206,7 +206,7 @@ char* updateList(char *list, pageList *sectionTitle, pageList* links);
  *          from the end of the comment, while even-numbered flags are associated with pointers starting from the beginning of the comment. 
  *          The function handles multiple pairs of markers and continues parsing until the end of the text is reached.
  */
-wikiFlag *parseFlags(char* text, wikiFlag flag);
+wikiFlag *parseFlags(char* text);
 
 /**
  * @brief Parses a command sentence into a `command` structure.
@@ -653,4 +653,7 @@ char *createVcdPieChart(char *unverifiedPopulation, char *partiallyVerifiedPopul
  * - If any error occurs during parsing or updating, the function returns `NULL`.
  */
 char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue);
+
+void freeWikiFlagList(wikiFlag** head);
+
 #endif

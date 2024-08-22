@@ -17,6 +17,8 @@
 #include "../include/stringTools.h"
 #include "../include/wikiAPI.h"
 #include "../include/sheetAPI.h"
+#include "../include/command.h"
+#include "../include/log.h"
 
 #define MAX_ARGUMENTS 10
 #define MAX_ARGUMENT_LENGTH 100
@@ -25,10 +27,12 @@ char *template_DRL = "# General Design Requirements List\n\n\n# table {.tabset}\
 char *template_REQ = "";
 
 
-pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt) {
+pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt, char *authorId) {
+    log_message(LOG_DEBUG, "Entering function addPageToList");
+    
     pageList* newNode = (pageList *)malloc(sizeof(pageList));
     if (!newNode) {
-        fprintf(stderr, "Memory allocation error\n");
+        log_message(LOG_ERROR, "Memory allocation error");
         exit(1);
     }
 
@@ -54,6 +58,9 @@ pageList* addPageToList(pageList** head,  char *id, char *title, char *path, cha
     newNode->createdAt = malloc(strlen(createdAt) + 1);
     strcpy(newNode->createdAt, createdAt);
 
+    newNode->authorId = malloc(strlen(authorId) + 1);
+    strcpy(newNode->authorId, authorId);
+
     newNode->next = NULL;  // New node will be the last node
 
     // If the list is empty, make the new node the first node
@@ -70,10 +77,15 @@ pageList* addPageToList(pageList** head,  char *id, char *title, char *path, cha
 
     // Link the new node after the last node
     lastNode->next = newNode;
+
+    
+    log_message(LOG_DEBUG, "Exiting function addPageToList");
     return *head;
 }
 
 int countSlashes(char *str) {
+    log_message(LOG_DEBUG, "Entering function countSlashes");
+    
     int count = 0;
     
     while (*str != '\0') {
@@ -82,22 +94,26 @@ int countSlashes(char *str) {
         }
         str++;
     }
+
     
+    log_message(LOG_DEBUG, "Exiting function countSlashes");
     return count;
 }
 
 void prepend_file(char *source_filename, char *destination_filename) {
+    log_message(LOG_DEBUG, "Entering function prepend_file");
+    
     // Open source file for reading
     FILE *source_file = fopen(source_filename, "r");
     if (source_file == NULL) {
-        printf("Error opening source file.\n");
+        log_message(LOG_ERROR, "Error opening source file.");
         return;
     }
 
     // Open destination file for reading and writing
     FILE *destination_file = fopen(destination_filename, "r+");
     if (destination_file == NULL) {
-        printf("Error opening destination file.\n");
+        log_message(LOG_ERROR, "Error opening destination file.");
         fclose(source_file);
         return;
     }
@@ -111,7 +127,7 @@ void prepend_file(char *source_filename, char *destination_filename) {
     // Allocate buffer to store destination file contents
     char *buffer = (char *)malloc(size);
     if (buffer == NULL) {
-        printf("Memory allocation failed.\n");
+        log_message(LOG_ERROR, "Memory allocation failed.");
         fclose(source_file);
         fclose(destination_file);
         return;
@@ -138,26 +154,32 @@ void prepend_file(char *source_filename, char *destination_filename) {
     free(buffer);
     fclose(source_file);
     fclose(destination_file);
-
-    printf("Contents prepended successfully.\n");
+    
+    log_message(LOG_DEBUG, "Exiting function prepend_file");
 }
 
 int zipFolder(char *folderPath) {
+    log_message(LOG_DEBUG, "Entering function zipFolder");
+    
     char zipCommand[1024];
     snprintf(zipCommand, sizeof(zipCommand), "cd \"%s\" && zip -r \"%s.zip\" .", folderPath, folderPath);
 
     // Execute the zip command
     int result = system(zipCommand);
     if (result != 0) {
-        printf("Failed to create zip file for '%s'\n", folderPath);
+        log_message(LOG_ERROR, "Failed to create zip file for '%s'", folderPath);
         return 1;
     }
 
-    printf("Folder '%s' successfully zipped\n", folderPath);
+    log_message(LOG_ERROR, "Folder '%s' successfully zipped\n", folderPath);
+    
+    log_message(LOG_DEBUG, "Exiting function zipFolder");
     return 0;
 }
 
 void createMissingFolders(char *path) {
+    log_message(LOG_DEBUG, "Entering function createMissingFolders");
+    
     char *dup_path = strdup(path);  // Duplicate the path to modify
     dup_path = removeLastFolder(dup_path);
     char *token = strtok(dup_path, "/"); // Tokenize by "/"
@@ -173,37 +195,55 @@ void createMissingFolders(char *path) {
         struct stat st = {0};
         if (stat(curr_path, &st) == -1) {
             if (mkdir(curr_path, 0755) != 0) {
-                fprintf(stderr, "Failed to create directory: %s\n", curr_path);
+                log_message(LOG_ERROR, "Failed to create directory: %s\n", curr_path);
                 free(dup_path);
                 return;
             } else {
-                printf("Created directory: %s\n", curr_path);
+                log_message(LOG_DEBUG, "Created directory: %s\n", curr_path);
             }
         }
 
         token = strtok(NULL, "/");  // Get the next token
     }
 
+    
+    log_message(LOG_DEBUG, "Exiting function createMissingFolders");
     free(dup_path);
 }
 
-char *currentTime() {
-    char iso8601[25]; // To store the formatted time
+char* getCurrentEDTTimeString() {
+    log_message(LOG_DEBUG, "Entering function getCurrentEDTTimeString");
+    
+    // Allocate static memory for the ISO 8601 string
+    static char iso8601[26];  // Size 26 for "YYYY-MM-DDTHH:MM:SS-04:00\0"
+    
+    // Set the timezone to Eastern Time
+    setenv("TZ", "GMT", 1);
+    tzset();
 
     // Get the current time
-    time_t currentTime = time(NULL);
-    struct tm *utcTime = gmtime(&currentTime);
+    time_t now = time(NULL);
 
-    // Format the time in ISO 8601 format
-    strftime(iso8601, sizeof(iso8601), "%Y-%m-%dT%H:%M:%S.000Z", utcTime);
+    // Convert to local time (in EDT)
+    struct tm *edtTime = localtime(&now);
 
-    // Print the ISO 8601 formatted time
-    printf("Current time in ISO 8601 format: %s\n", iso8601);
+    // Check if we are in Daylight Saving Time (EDT)
+    if (edtTime->tm_isdst > 0) {
+        // EDT timezone is UTC-4
+        strftime(iso8601, sizeof(iso8601), "%Y-%m-%dT%H:%M:%S-04:00", edtTime);
+    } else {
+        // If not DST, fallback to EST (UTC-5)
+        strftime(iso8601, sizeof(iso8601), "%Y-%m-%dT%H:%M:%S-05:00", edtTime);
+    }
 
+    
+    log_message(LOG_DEBUG, "Exiting function getCurrentEDTTimeString");
     return iso8601;
 }
 
 int compareTimes(char* time1, char* time2) {
+    log_message(LOG_DEBUG, "Entering function compareTimes");
+    
     struct tm tm1, tm2;
     memset(&tm1, 0, sizeof(struct tm));
     memset(&tm2, 0, sizeof(struct tm));
@@ -225,15 +265,25 @@ int compareTimes(char* time1, char* time2) {
     time_t time2_t = mktime(&tm2);
 
     // Compare time_t values
-    if (time1_t < time2_t)
+    if (time1_t < time2_t){
+        log_message(LOG_DEBUG, "Exiting function compareTimes");
         return -1;
-    else if (time1_t > time2_t)
+    }
+    else if (time1_t > time2_t){
+        
+        log_message(LOG_DEBUG, "Exiting function compareTimes");
         return 1;
-    else
+    }
+    else{
+        
+        log_message(LOG_DEBUG, "Exiting function compareTimes");
         return 0;
+    }
 }
 
 void replaceStringInWiki(pageList** head, char* oldString, char* newString) {
+    log_message(LOG_DEBUG, "Entering function replaceStringInWiki");
+    
     pageList* current = *head;
     while (current != NULL) {
         current = getPage(&current);
@@ -246,28 +296,29 @@ void replaceStringInWiki(pageList** head, char* oldString, char* newString) {
     }
 
     freePageList(head);
+    
+    log_message(LOG_DEBUG, "Exiting function replaceStringInWiki");
 }
 
 char* createMapWBS(pageList** paths) {
+    log_message(LOG_DEBUG, "Entering function createMapWBS");
+    
     pageList* current = *paths;
     pageList* previous = *paths;
     int isFirstLoop = 1;
     int numberOfParentFolders = 0;
     int baseDepth, currentDepth, numberOfStars;
     
-    char *map = "```plantuml\n@startwbs\n<style>\nwbsDiagram {\n  Linecolor black\n	BackGroundColor white\n  hyperlinkColor black\n}\n</style>";
+    char *map = "```plantuml\n@startwbs\n<style>\nwbsDiagram {\n  Linecolor black\nBackGroundColor white\n  hyperlinkColor black\n}\n</style>";
     baseDepth = countSlashes(current->path);
     while (current != NULL) {
         currentDepth = countSlashes(current->path);
 
         if(isFirstLoop == 0){
-            //fprintf(stderr, "Going to check paths\n");
             //if the current path is not a daughter page of the previous path and the current path is not a sister page of the previous path
             if(strstr(current->path, previous->path) == NULL && strcmp(getDirPath(current->path), getDirPath(previous->path))!=0){
-                //fprintf(stderr, "%s is not contained in %s\n", current->path, previous->path);
                 char *dummyPath = current->path;
                 while(strstr(previous->path, dummyPath) == NULL && baseDepth != countSlashes(dummyPath)){
-                    //fprintf(stderr, "%s is not contained in %s\n", dummyPath, previous->path);
                     numberOfParentFolders++;
                     dummyPath = getDirPath(dummyPath);
                 }
@@ -282,6 +333,7 @@ char* createMapWBS(pageList** paths) {
                     for(numberOfStars; numberOfStars > 0; --numberOfStars){
                         map = appendStrings(map, "*");
                     }
+                    map = appendStrings(map, "_ ");
                     map = appendStrings(map, " ");
                     map = appendStrings(map, getDocId(dirPath));
                     map = appendStrings(map, "\n");
@@ -312,10 +364,14 @@ char* createMapWBS(pageList** paths) {
         previous = previous->next;
     }
     map = appendStrings(map, "\n\n\n@endwbs\n```\n\n\n");
+    
+    log_message(LOG_DEBUG, "Exiting function createMapWBS");
     return map;
 }
 
 char* createList(char *list, pageList** sectionTitle, pageList* links){
+    log_message(LOG_DEBUG, "Entering function createList");
+    
     char *tempList = list;
     tempList = appendStrings(tempList, "\\\\n\\\\n");
     tempList = appendStrings(tempList, "## [");
@@ -332,14 +388,19 @@ char* createList(char *list, pageList** sectionTitle, pageList* links){
 
     freePageList(&links);
 
+    
+    log_message(LOG_DEBUG, "Exiting function createList");
+
     return tempList;
 }
 
 char* updateList(char *list, pageList *sectionTitle, pageList *links) {
+    log_message(LOG_DEBUG, "Entering function updateList");
+    
     // Ensure proper memory allocation for the tempList
     pageList *link = links;
     char *tempList = sectionTitle->path;
-    fprintf(stderr, "path:%s\n", sectionTitle->path);
+    log_message(LOG_DEBUG, "path:%s\n", sectionTitle->path);
 
     tempList = appendStrings(tempList, ")\\n" );
 
@@ -358,7 +419,7 @@ char* updateList(char *list, pageList *sectionTitle, pageList *links) {
     char *startPtr = strstr(list, temp);
     //startPtr += 1;
     if (startPtr == NULL) {
-        fprintf(stderr, "Section title: %s not found\n", sectionTitle->title);
+        log_message(LOG_DEBUG, "Section title: %s not found\n", sectionTitle->title);
         free(tempList);
         return list;
     }
@@ -366,32 +427,37 @@ char* updateList(char *list, pageList *sectionTitle, pageList *links) {
     char *endPtr = strstr(startPtr, "\\n\\n");
     endPtr +=1;
     if (endPtr == NULL) {
-        fprintf(stderr, "End of section not found\n");
+        log_message(LOG_ERROR, "End of section not found");
         free(tempList);
         return list;
     }
 
-    fprintf(stderr, "About to update %s to:\n %s\n", sectionTitle->title, tempList);
-
+    log_message(LOG_DEBUG, "About to update %s to:\n %s\n", sectionTitle->title, tempList);
     list = replaceParagraph(list, tempList, startPtr, endPtr);
-
-    //fprintf(stderr, "New list is %s", list);
 
     freePageList(&links);
     free(tempList);
+    
+    log_message(LOG_DEBUG, "Exiting function updateList");
     return list;
 }
 
-wikiFlag *parseFlags(char* text, wikiFlag flag) {
-    wikiFlag *head = NULL;
-    wikiFlag *current = NULL;
+wikiFlag* parseFlags(char* text) {
+    log_message(LOG_DEBUG, "Entering function parseFlags");
+    
+    wikiFlag* head = NULL;
+    wikiFlag* current = NULL;
     char* start = text;
     char* end = text;
     int flagCount = 0;
     command cmd;
+    wikiFlag *newFlag = (wikiFlag*)malloc(sizeof(wikiFlag));
     
     while (*end != '\0') {
-        if (*end == '<' && *(end + 1) == '-' && *(end + 2) == '-') {
+        //log_message(LOG_DEBUG, "Current chars: %c%c%c%c", *end, *(end+1), *(end+2), *(end+3));
+        if (*end == '<' && *(end + 1) == '!' && *(end + 2) == '-' && *(end + 3) == '-') {
+            log_message(LOG_DEBUG, "Found a comment");
+
             flagCount ++;
             start = end;
             end += 4; // Move to the first character after '<!--'
@@ -403,36 +469,47 @@ wikiFlag *parseFlags(char* text, wikiFlag flag) {
             
             if (*end == '\0') break; // Reached the end of the text
             
-            breakdownCommand(extractParagraphWithPointerDelimiters(text, start+4 , end), &cmd);
+            breakdownCommand(extractParagraphWithPointerDelimiters(text, start+4 , end-1), &cmd);
+
+            log_message(LOG_DEBUG, "Wiki command found in when parsing the flags Function:\"%s\", Command\"%s\"", cmd.function, cmd.argument_1);
             
-            wikiFlag *newFlag = (wikiFlag*)malloc(sizeof(flag));
+            
             newFlag->cmd = cmd;
 
             if (flagCount % 2 != 0){ //odd
-                newFlag->pointer_1 = (char*)(end + 3);
+                newFlag->pointerToEndOfFirstMarker = (char*)(end + 3);
+                log_message(LOG_DEBUG, "Set pointerToEndOfFirstMarker to: \"%ld\"", (long)newFlag->pointerToEndOfFirstMarker);
             }
 
-            else if (flagCount % 2 == 0){ //even
-                newFlag->pointer_2 = (char*)(start);
+            if (flagCount % 2 == 0){ //even
+                newFlag->pointerToBeginningOfSecondMarker = (char*)(start - 1);
+                log_message(LOG_DEBUG, "Set pointerToBeginningOfSecondMarker to: \"%ld\"", (long)newFlag->pointerToBeginningOfSecondMarker);
+                log_message(LOG_DEBUG, "pointerToEndOfFirstMarker is: \"%ld\"", (long)newFlag->pointerToEndOfFirstMarker);
+
+                // Adding to the linked list
+                newFlag->next = NULL;
+                if (head == NULL) {
+                    head = newFlag;
+                    current = newFlag;
+                    wikiFlag *newFlag = (wikiFlag*)malloc(sizeof(wikiFlag));
+                } else {
+                    current->next = newFlag;
+                    current = newFlag;
+                    wikiFlag *newFlag = (wikiFlag*)malloc(sizeof(wikiFlag));
+                }
             }
-            newFlag->next = NULL;
             
-            // Adding to the linked list
-            if (head == NULL) {
-                head = newFlag;
-                current = newFlag;
-            } else {
-                current->next = newFlag;
-                current = newFlag;
-            }
         }
         end++;
     }
-
+    
+    log_message(LOG_DEBUG, "Exiting function parseFlags");
     return head;
 }
 
 void breakdownCommand(char* sentence, command* cmd) {
+    log_message(LOG_DEBUG, "Entering function breakdownCommand");
+    
     char* words[MAX_ARGUMENTS];
     char* token;
     int word_count = 0;
@@ -449,7 +526,7 @@ void breakdownCommand(char* sentence, command* cmd) {
 
     // Check if the sentence has more than ten words
     if (word_count > MAX_ARGUMENTS) {
-        printf("Error: Sentence contains more than ten words.\n");
+        log_message(LOG_ERROR, "Error: Sentence contains more than ten words.");
         free(sentence_copy);
         return;
     }
@@ -505,9 +582,13 @@ void breakdownCommand(char* sentence, command* cmd) {
     }
 
     free(sentence_copy);
+    
+    log_message(LOG_DEBUG, "Exiting function breakdownCommand");
 }
 
 char* createLocalGraphMindMap(pageList** tempPage, pageList** incomingPaths, pageList** outgoingPaths){
+    log_message(LOG_DEBUG, "Entering function createLocalGraphMindMap");
+    
     pageList *currentIncomingLink = *incomingPaths;
     pageList *currentOutgoingLink = *outgoingPaths;
     char *localGraph;
@@ -529,7 +610,6 @@ char* createLocalGraphMindMap(pageList** tempPage, pageList** incomingPaths, pag
         currentIncomingLink = currentIncomingLink->next;
 
     }
-    //fprintf(stderr, "local graph: %s\n", localGraph);
 
     currentOutgoingLink = currentOutgoingLink->next;
 
@@ -547,53 +627,64 @@ char* createLocalGraphMindMap(pageList** tempPage, pageList** incomingPaths, pag
 
     freePageList(&currentIncomingLink);
     freePageList(&currentOutgoingLink);
-
-    //fprintf(stderr, "local graph: %s\n", localGraph);
+    
+    log_message(LOG_DEBUG, "Exiting function createLocalGraphMindMap");
     return localGraph;
 }
 
 void freePageList(pageList** head) {
+    log_message(LOG_DEBUG, "Entering function freePageList");
+    
     while (*head) {
         pageList* temp = *head;
         *head = (*head)->next;
         
         // Debugging prints
         if (temp->id){
-            fprintf(stderr, "Freeing id: %p\n", (void*)temp->id);
+            log_message(LOG_DEBUG, "Freeing page struct variable id: %p\n", (void*)temp->id);
             free(temp->id);
         }
         if (temp->title){
-            fprintf(stderr, "Freeing title: %p\n", (void*)temp->title);
+            log_message(LOG_DEBUG, "Freeing page struct variable title: %p\n", (void*)temp->title);
             free(temp->title);
         }
         if (temp->path){
-            fprintf(stderr, "Freeing path: %p\n", (void*)temp->path);
+            log_message(LOG_DEBUG, "Freeing page struct variable path: %p\n", (void*)temp->path);
             free(temp->path);
         }
         if (temp->description){
-            fprintf(stderr, "Freeing description: %p\n", (void*)temp->description);
+            log_message(LOG_DEBUG, "Freeing page struct variable description: %p\n", (void*)temp->description);
             free(temp->description);
         }
         if (temp->content){
-            fprintf(stderr, "Freeing content: %p\n", (void*)temp->content);
+            log_message(LOG_DEBUG, "Freeing page struct variable content: %p\n", (void*)temp->content);
             free(temp->content);
         }
         if (temp->updatedAt){
-            fprintf(stderr, "Freeing updatedAt: %p\n", (void*)temp->updatedAt);
+            log_message(LOG_DEBUG, "Freeing page struct variable updatedAt: %p\n", (void*)temp->updatedAt);
             free(temp->updatedAt);
         }
         if (temp->createdAt){ 
-            printf("Freeing createdAt: %p\n", (void*)temp->createdAt);
+            log_message(LOG_DEBUG, "Freeing page struct variable createdAt: %p\n", (void*)temp->createdAt);
             free(temp->createdAt);
         }
+        if (temp->authorId){ 
+            log_message(LOG_DEBUG, "Freeing page struct variable authorId: %p\n", (void*)temp->authorId);
+            free(temp->authorId);
+        }
         
-        fprintf(stderr, "about to free temp\n");
+        log_message(LOG_DEBUG, "about to free page struct");
         free(temp);
-        fprintf(stderr, "freed temp\n");
+        log_message(LOG_DEBUG, "freed page struct");
     }
+
+    
+    log_message(LOG_DEBUG, "Exiting function freePageList");
 }
 
 void printAcronymsToFile(char* pathToAccronymList, char *str) {
+    log_message(LOG_DEBUG, "Entering function printAcronymsToFile");
+    
     int len = strlen(str);
     int i;
     int j = 1;
@@ -627,9 +718,13 @@ void printAcronymsToFile(char* pathToAccronymList, char *str) {
             j = 1;
         }
     }
+    
+    log_message(LOG_DEBUG, "Exiting function printAcronymsToFile");
 }
 
 void sortWords(char words[MAX_WORDS][MAX_WORD_LENGTH], int numWords) {
+    log_message(LOG_DEBUG, "Entering function sortWords");
+    
     // Bubble sort algorithm
     for (int i = 0; i < numWords - 1; i++) {
         for (int j = 0; j < numWords - i - 1; j++) {
@@ -641,12 +736,16 @@ void sortWords(char words[MAX_WORDS][MAX_WORD_LENGTH], int numWords) {
             }
         }
     }
+    
+    log_message(LOG_DEBUG, "Exiting function sortWords");
 }
 
 void removeDuplicatesAndSort(char *filename) {
+    log_message(LOG_DEBUG, "Entering function removeDuplicatesAndSort");
+    
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
-        printf("Error opening file.\n");
+        log_message(LOG_ERROR, "Error opening file.");
         return;
     }
 
@@ -668,7 +767,7 @@ void removeDuplicatesAndSort(char *filename) {
     // Open file for writing
     file = fopen(filename, "w");
     if (file == NULL) {
-        printf("Error opening file.\n");
+        log_message(LOG_ERROR, "Error opening file.");
         return;
     }
 
@@ -680,9 +779,13 @@ void removeDuplicatesAndSort(char *filename) {
     }
 
     fclose(file);
+    
+    log_message(LOG_DEBUG, "Exiting function removeDuplicatesAndSort");
 }
 
 pageList* findPageLinks(char *content, pageList **links) {
+    log_message(LOG_DEBUG, "Entering function findPageLinks");
+    
     char *startFlag1 = "[";
     char *startFlag2 = "](";
     char *endFlag = ")";
@@ -719,7 +822,7 @@ pageList* findPageLinks(char *content, pageList **links) {
         char *title = (char *)malloc((titleLength + 1) * sizeof(char));
         char *link = (char *)malloc((linkLength + 1) * sizeof(char));
         if (!title || !link) {
-            fprintf(stderr, "Memory allocation error\n");
+            log_message(LOG_ERROR, "Memory allocation error");
             if (title) free(title);
             if (link) free(link);
             freePageList(links);
@@ -734,8 +837,8 @@ pageList* findPageLinks(char *content, pageList **links) {
 
         // Check if link is valid (you might need to refine this check)
         if (strstr(link, ".") == NULL) {
-            *links = addPageToList(links, "", title, link, "", "", "", "");
-            fprintf(stderr, "found link %s %s\n", link, title);
+            *links = addPageToList(links, "", title, link, "", "", "", "", "");
+            log_message(LOG_DEBUG, "found link %s %s", link, title);
         }
 
         free(title);
@@ -743,10 +846,14 @@ pageList* findPageLinks(char *content, pageList **links) {
         ptr = linkEnd + strlen(endFlag);
     }
 
+    
+    log_message(LOG_DEBUG, "Exiting function findPageLinks");
     return *links;
 }
 
 pageList* findImageLinks(char *input, pageList** head) {
+    log_message(LOG_DEBUG, "Entering function findImageLinks");
+    
     pageList* imageLinks = *head;
     int count = 0;
     char *startFlag1 = "![";
@@ -761,7 +868,7 @@ pageList* findImageLinks(char *input, pageList** head) {
         ptr += strlen(startFlag1);
         char *linkStart = strstr(ptr, startFlag2);
         if (!linkStart) {
-            fprintf(stderr, "Error: Missing startFlag2 after startFlag1\n");
+            log_message(LOG_ERROR, "Error: Missing startFlag2 after startFlag1");
             freePageList(&imageLinks);
             return imageLinks;
         }
@@ -769,7 +876,7 @@ pageList* findImageLinks(char *input, pageList** head) {
         linkStart += strlen(startFlag2);
         char *linkEnd = strstr(linkStart, endFlag);
         if (!linkEnd) {
-            fprintf(stderr, "Error: Missing endFlag after linkStart\n");
+            log_message(LOG_ERROR, "Error: Missing endFlag after linkStart");
             freePageList(&imageLinks);
             return imageLinks;
         }
@@ -778,34 +885,43 @@ pageList* findImageLinks(char *input, pageList** head) {
         int linkLen = linkEnd - linkStart;
         char *link = (char *)malloc((linkLen + 1) * sizeof(char));
         if (!link) {
-            fprintf(stderr, "Memory allocation error\n");
+            log_message(LOG_ERROR, "Memory allocation error");
             freePageList(&imageLinks);
             return imageLinks;
         }
 
         strncpy(link, linkStart, linkLen);
         link[linkLen] = '\0';
-        imageLinks = addPageToList(&imageLinks, link, "", "", "", "", "", "");
+        imageLinks = addPageToList(&imageLinks, link, "", "", "", "", "", "", "");
 
         count++ ;
 
         ptr = linkEnd + strlen(endFlag);
     }
-
+    
+    log_message(LOG_DEBUG, "Exiting function findImageLinks");
     return imageLinks;
 }
 
 void filterLinks(pageList** head) {
+    log_message(LOG_DEBUG, "Entering function filterLinks");
+    
     pageList* current = *head;
     while (current != NULL) {
         current->path = removeAfterSpace(current->path);
         current = current->next;
     }
+
+    
+    log_message(LOG_DEBUG, "Exiting function filterLinks");
 }
 
 void printPages(pageList** head) {
+    log_message(LOG_DEBUG, "Entering function printPages");
+    
     pageList* current = *head;
     while (current != NULL) {
+        sleep(2);
         current = getPage(&current);
         sendMessageToSlack("Page Title: \n");
         sendMessageToSlack(current->title);
@@ -815,13 +931,17 @@ void printPages(pageList** head) {
         
         current = current->next;
     }
+    
+    log_message(LOG_DEBUG, "Exiting function printPages");
 }
 
 pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *subjectPagePath) {
+    log_message(LOG_DEBUG, "Entering function findIncomingLinks");
+    
     pageList *incomingLinks = *head;
     char *contentCopy = strdup(linkTrackerContent);
     if (contentCopy == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
+        log_message(LOG_ERROR, "Memory allocation failed");
         exit(1);
     }
 
@@ -855,8 +975,8 @@ pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *sub
             if (strcmp(link, subjectPagePath) == 0) {
                 *titleEnd = '\0';
                 *pathEnd = '\0';
-                fprintf(stderr, "Found a reference in title: %s, path:%s\n", titleStart, pathStart);
-                incomingLinks = addPageToList(&incomingLinks, "", titleStart, pathStart, "", "", "", "");
+                log_message(LOG_DEBUG, "Found a reference in title: %s, path:%s\n", titleStart, pathStart);
+                incomingLinks = addPageToList(&incomingLinks, "", titleStart, pathStart, "", "", "", "", "");
                 break;
             }
             link = strstr(linkEnd + 1, "\\n/");
@@ -878,14 +998,18 @@ pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *sub
     }
 
     free(contentCopy);
+    
+    log_message(LOG_DEBUG, "Exiting function findIncomingLinks");
     return incomingLinks;
 }
 
 pageList* findOutgoingLinks(pageList** head, char *linkTrackerContent, char *subjectPagePath) {
+    log_message(LOG_DEBUG, "Entering function findOutgoingLinks");
+    
     pageList *outgoingLinks = *head;
     char *contentCopy = strdup(linkTrackerContent);
     if (contentCopy == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
+        log_message(LOG_ERROR, "Memory allocation failed");
         exit(1);
     }
 
@@ -920,7 +1044,7 @@ pageList* findOutgoingLinks(pageList** head, char *linkTrackerContent, char *sub
                 if (linkEnd == NULL) {
                     linkEnd = contentCopy + strlen(contentCopy);
                 }
-                outgoingLinks = addPageToList(&outgoingLinks, "", "", link, "", "", "", "");
+                outgoingLinks = addPageToList(&outgoingLinks, "", "", link, "", "", "", "", "");
                 link = strstr(linkEnd + 1, "n/");
 
             }
@@ -938,10 +1062,14 @@ pageList* findOutgoingLinks(pageList** head, char *linkTrackerContent, char *sub
         }
     }
     free(contentCopy);
+    
+    log_message(LOG_DEBUG, "Exiting function findOutgoingLinks");
     return outgoingLinks;
 }
 
 void addRequirementToCjsonObject(cJSON *requirements, char *idStr, char *pathStr, char *nameStr, char *descriptionStr){
+    log_message(LOG_DEBUG, "Entering function addRequirementToCjsonObject");
+    
     cJSON *id = NULL;
     cJSON *path = NULL;
     cJSON *name = NULL;
@@ -962,9 +1090,14 @@ void addRequirementToCjsonObject(cJSON *requirements, char *idStr, char *pathStr
     cJSON_AddItemToObject(requirement, "name", name);
     cJSON_AddItemToObject(requirement, "description", description);
 
+    
+    log_message(LOG_DEBUG, "Exiting function addRequirementToCjsonObject");
+
 }
 
 void parseRequirementsList(cJSON* requirements, char *content) {
+    log_message(LOG_DEBUG, "Entering function parseRequirementsList");
+    
     char *idStartFlag = "\\n- [";
     char *pathStartFlag = "](/";
     char *nameStartFlag = ") **";
@@ -972,36 +1105,34 @@ void parseRequirementsList(cJSON* requirements, char *content) {
     char *descriptionEndFlag = "\\n";
     char *ptr = content;
 
-    //fprintf(stderr, "Content received:\n\n%s\n\n", content);
-
     while (*ptr) {
         char *idStart = strstr(ptr, idStartFlag);
         if (idStart == NULL){
-            fprintf(stderr, "did not find idStart, Breaking\n");
+            log_message(LOG_DEBUG, "did not find idStart, Breaking");
             break; // No more links
         }
 
         char *pathStart = strstr(idStart, pathStartFlag);
         if (pathStart == NULL){
-            fprintf(stderr, "did not find pathStart, Breaking\n");
+            log_message(LOG_DEBUG, "did not find pathStart, Breaking");
             break; // No more links
         }
 
         char *nameStart = strstr(pathStart, nameStartFlag);
         if (nameStart == NULL){
-            fprintf(stderr, "did not find nameStart, Breaking\n");
+            log_message(LOG_DEBUG, "did not find nameStart, Breaking");
             break; // No more links
         }
 
         char *descriptionStart = strstr(nameStart, descriptionStartFlag);
         if (descriptionStart == NULL){
-            fprintf(stderr, "did not find descriptionStart, Breaking\n");
+            log_message(LOG_DEBUG, "did not find descriptionStart, Breaking");
             break; // No more links
         }
 
         char *descriptionEnd = strstr(descriptionStart + strlen(descriptionStartFlag), descriptionEndFlag);
         if (descriptionEnd == NULL){
-            fprintf(stderr, "did not find descriptionEnd, Breaking\n");
+            log_message(LOG_DEBUG, "did not find descriptionEnd, Breaking");
             break; // No more links
         }
 
@@ -1022,7 +1153,7 @@ void parseRequirementsList(cJSON* requirements, char *content) {
         char *name = (char *)malloc((nameLength + 1) * sizeof(char));
         char *description = (char *)malloc((descriptionLength + 1) * sizeof(char));
         if (!id || !path || !name || !description) {
-            fprintf(stderr, "Memory allocation error\n");
+            log_message(LOG_ERROR, "Memory allocation error");
             if (id) free(id);
             if (path) free(path);
             if (name) free(name);
@@ -1039,8 +1170,6 @@ void parseRequirementsList(cJSON* requirements, char *content) {
         strncpy(description, descriptionStart + strlen(descriptionStartFlag), descriptionLength);
         description[descriptionLength] = '\0';
 
-        
-        //fprintf(stderr, "found requirement \nid: %s\npath: %s\nname: %s\ndescription: %s\n", id, path, name, description);
         addRequirementToCjsonObject(requirements, id, path, name, description);
         
 
@@ -1050,10 +1179,14 @@ void parseRequirementsList(cJSON* requirements, char *content) {
         free(description);
         ptr = descriptionEnd;
     }
+    
+    log_message(LOG_DEBUG, "Exiting function parseRequirementsList");
     return;
 }
 
 char* parseJSONRequirementListInToArray(cJSON* requirements){
+    log_message(LOG_DEBUG, "Entering function parseJSONRequirementListInToArray");
+    
 
     // Get the number of requirements
     int req_count = cJSON_GetArraySize(requirements);
@@ -1072,7 +1205,7 @@ char* parseJSONRequirementListInToArray(cJSON* requirements){
     // Allocate memory for the output string
     char *output_str = (char *)malloc(buffer_size * sizeof(char));
     if (!output_str) {
-        printf("Memory allocation failed\n");
+        log_message(LOG_ERROR, "Memory allocation failed");
         return NULL;
     }
     output_str[0] = '\0'; // Initialize the string
@@ -1098,27 +1231,28 @@ char* parseJSONRequirementListInToArray(cJSON* requirements){
 
     // Clean up the JSON object
 
-    //fprintf(stderr, "%s\n\n\n\n", output_str);
-
+    log_message(LOG_DEBUG, "Exiting function parseJSONRequirementListInToArray");
     return output_str;
 
 }
 
 cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
+    log_message(LOG_DEBUG, "Entering function parseArrayIntoJSONRequirementList");
+    
 
-    fprintf(stderr, "input_str: %s\n", input_str);
+    log_message(LOG_DEBUG, "input_str: %s\n", input_str);
 
     // Parse the input string as JSON
     cJSON *input_json = cJSON_Parse(input_str);
     if (!input_json) {
-        printf("Error parsing input string as JSON object\n");
+        log_message(LOG_ERROR, "Error parsing input string as JSON object");
         return NULL;
     }
 
     // Extract the "values" array from the JSON object
     cJSON *values_array = cJSON_GetObjectItemCaseSensitive(input_json, "values");
     if (!cJSON_IsArray(values_array)) {
-        printf("Error: values is not a JSON array\n");
+        log_message(LOG_ERROR, "Error: values is not a JSON array");
         cJSON_Delete(input_json);
         return NULL;
     }
@@ -1126,7 +1260,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
     // Create a JSON object to hold the requirements
     cJSON *json = cJSON_CreateObject();
     if (!json) {
-        printf("Error creating JSON object\n");
+        log_message(LOG_ERROR, "Error creating JSON object");
         cJSON_Delete(input_json);
         return NULL;
     }
@@ -1134,7 +1268,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
     // Create a JSON array to hold the requirement objects
     cJSON *requirements = cJSON_CreateArray();
     if (!requirements) {
-        printf("Error creating JSON array\n");
+        log_message(LOG_ERROR, "Error creating JSON array");
         cJSON_Delete(json);
         cJSON_Delete(input_json);
         return NULL;
@@ -1148,7 +1282,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
     for (int i = 0; i < num_reqs; i++) {
         cJSON *req_array = cJSON_GetArrayItem(values_array, i);
         if (!cJSON_IsArray(req_array) || cJSON_GetArraySize(req_array) != 35) {
-            printf("Error: Each requirement should be an array of 35 strings, but the array size is: %d\n", cJSON_GetArraySize(req_array));
+            log_message(LOG_ERROR, "Error: Each requirement should be an array of 35 strings, but the array size is: %d\n", cJSON_GetArraySize(req_array));
             cJSON_Delete(json);
             cJSON_Delete(input_json);
             return NULL;
@@ -1157,7 +1291,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
         // Create a JSON object for the current requirement
         cJSON *req = cJSON_CreateObject();
         if (!req) {
-            printf("Error creating JSON object for requirement\n");
+            log_message(LOG_ERROR, "Error creating JSON object for requirement");
             cJSON_Delete(json);
             cJSON_Delete(input_json);
             return NULL;
@@ -1209,14 +1343,19 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
         cJSON_AddItemToArray(requirements, req);
     }
 
+    
+    log_message(LOG_DEBUG, "Exiting function parseArrayIntoJSONRequirementList");
+
     return json;
 }
 
 char *buildDrlFromJSONRequirementList(cJSON *requirementList){
+    log_message(LOG_DEBUG, "Entering function buildDrlFromJSONRequirementList");
+    
     // Get the requirements array from the requirementList object
     cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
-        printf("Error: requirements is not a JSON array\n");
+        log_message(LOG_ERROR, "Error: requirements is not a JSON array");
     }
 
     char *DRL = strdup(template_DRL);
@@ -1226,7 +1365,7 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList){
     for (int i = 0; i < num_reqs; i++) {
         cJSON *requirement = cJSON_GetArrayItem(requirements, i);
         if (!cJSON_IsObject(requirement)) {
-            printf("Error: requirement is not a JSON object\n");
+            log_message(LOG_ERROR, "Error: requirement is not a JSON object");
             continue;
         }
 
@@ -1237,23 +1376,23 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList){
         cJSON *description = cJSON_GetObjectItemCaseSensitive(requirement, "Description");
 
         if (cJSON_IsString(id) && id->valuestring) {
-            //printf("ID: %s\n", id->valuestring);
+            log_message(LOG_DEBUG, "ID: %s", id->valuestring);
             DRL = appendStrings(DRL, "- [");
             DRL = appendStrings(DRL, id->valuestring);
             DRL = appendStrings(DRL, "](/");
         }
         if (cJSON_IsString(path) && path->valuestring) {
-            //printf("Path: %s\n", path->valuestring);
+            log_message(LOG_DEBUG, "Path: %s", path->valuestring);
             DRL = appendStrings(DRL, path->valuestring);
             DRL = appendStrings(DRL, ") **");
         }
         if (cJSON_IsString(title) && title->valuestring) {
-            //printf("title: %s\n", title->valuestring);
+            log_message(LOG_DEBUG, "title: %s", title->valuestring);
             DRL = appendStrings(DRL, title->valuestring);
             DRL = appendStrings(DRL, "**\n");
         }
         if (cJSON_IsString(description) && description->valuestring) {
-            //printf("Description: %s\n", description->valuestring);
+            log_message(LOG_DEBUG, "Description: %s", description->valuestring);
             DRL = appendStrings(DRL, description->valuestring);
             DRL = appendStrings(DRL, "\n");
         }
@@ -1261,16 +1400,20 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList){
     }
 
     DRL = appendStrings(DRL, "{.links-list}");
+    
+    log_message(LOG_DEBUG, "Exiting function buildDrlFromJSONRequirementList");
 
     return DRL;
 
 }
 
 pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, char *requirementId){
+    log_message(LOG_DEBUG, "Entering function buildRequirementPageFromJSONRequirementList");
+    
     // Get the requirements array from the requirementList object
     cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
-        printf("Error: requirements is not a JSON array\n");
+        log_message(LOG_ERROR, "Error: requirements is not a JSON array");
     }
 
     pageList* reqPage = NULL;
@@ -1282,7 +1425,7 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
     for (int i = 0; i < num_reqs; i++) {
         cJSON *requirement = cJSON_GetArrayItem(requirements, i);
         if (!cJSON_IsObject(requirement)) {
-            printf("Error: requirement is not a JSON object\n");
+            log_message(LOG_ERROR, "Error: requirement is not a JSON object");
             continue;
         }
 
@@ -1310,13 +1453,11 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
         //TITLE
         if (cJSON_IsString(id) && id->valuestring) {
-            //printf("ID: %s\n", id->valuestring);
             pageContent = appendStrings(pageContent, "# ");
             pageContent = appendStrings(pageContent, id->valuestring);
             pageContent = appendStrings(pageContent, ": ");
         }
         if (cJSON_IsString(title) && title->valuestring) {
-            //printf("title: %s\n", title->valuestring);
             pageContent = appendStrings(pageContent, title->valuestring);
             pageContent = appendStrings(pageContent, "\n");
         }
@@ -1324,7 +1465,6 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
         //DESCRIPTION
         if (cJSON_IsString(description) && description->valuestring) {
-            //printf("Description: %s\n", description->valuestring);
             pageContent = appendStrings(pageContent, ">**Description**: ");
             pageContent = appendStrings(pageContent, description->valuestring);
             pageContent = appendStrings(pageContent, "\n");
@@ -1333,32 +1473,27 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
         //INFORMATION BOX: SOURCES AND ASSIGNEE
         if (cJSON_IsString(source) && source->valuestring && strcmp(source->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             pageContent = appendStrings(pageContent, "\n>**Source**: ");
             pageContent = appendStrings(pageContent, source->valuestring);
             pageContent = appendStrings(pageContent, "\n");
         }
         if (cJSON_IsString(author) && author->valuestring && strcmp(author->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             pageContent = appendStrings(pageContent, ">**Author**: ");
             pageContent = appendStrings(pageContent, author->valuestring);
             pageContent = appendStrings(pageContent, "\n");
         }
         if (cJSON_IsString(assignee) && assignee->valuestring && strcmp(assignee->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             pageContent = appendStrings(pageContent, ">**Assignee**: ");
             pageContent = appendStrings(pageContent, assignee->valuestring);
             pageContent = appendStrings(pageContent, "\n");
         }
         if (strcmp(source->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 || strcmp(author->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 || strcmp(assignee->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             pageContent = appendStrings(pageContent, "{.is-info}\n");
         }
 
 
         //JUSTIFICATION
         if (cJSON_IsString(justification) && justification->valuestring && strcmp(justification->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             pageContent = appendStrings(pageContent, "\n## Justification\n");
             pageContent = appendStrings(pageContent, justification->valuestring);
             pageContent = appendStrings(pageContent, "\n");
@@ -1367,7 +1502,6 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
         //COMPLIANCE
         if (cJSON_IsString(compliance) && compliance->valuestring && strcmp(compliance->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             
             if(strcmp(compliance->valuestring, "Compliant") == 0){
                 pageContent = appendStrings(pageContent, "\n# Compliance\n");
@@ -1386,7 +1520,6 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
         //CRITICALITY
         if (cJSON_IsString(criticality) && criticality->valuestring && strcmp(criticality->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             
             if(strcmp(criticality->valuestring, "Low") == 0){
                 pageContent = appendStrings(pageContent, "\n# Criticality\n");
@@ -1465,24 +1598,27 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
         }
 
         
-        reqPage = addPageToList(&reqPage, TEST_REQ_PAGE_ID, id->valuestring, "", "", pageContent, "", "");
-
-        fprintf(stderr, "\n\n\n%s\n\n\n", pageContent);
+        reqPage = addPageToList(&reqPage, TEST_REQ_PAGE_ID, id->valuestring, "", "", pageContent, "", "", "");
 
         break;
     }
+
+    
+    log_message(LOG_DEBUG, "Exiting function buildRequirementPageFromJSONRequirementList");
 
     return reqPage;
 
 }
 
 void appendMentionedIn(pageList** head){
+    log_message(LOG_DEBUG, "Entering function appendMentionedIn");
+    
 
     pageList* subjectPage = *head;
 
     pageList* linkTrackerPage = NULL;
-    linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "");
-    fprintf(stderr,"linkTrackerPage id set\n");
+    linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "", "");
+    log_message(LOG_DEBUG, "linkTrackerPage id set");
     linkTrackerPage = getPage(&linkTrackerPage);
 
     pageList* IncomingLinks = findIncomingLinks(&IncomingLinks, linkTrackerPage->content, subjectPage->path);
@@ -1503,11 +1639,16 @@ void appendMentionedIn(pageList** head){
     subjectPage->content = replaceWord(subjectPage->content, "\"", "\\\"");
     updatePageContentMutation(subjectPage);
     renderMutation(&subjectPage);
+
+    
+    log_message(LOG_DEBUG, "Exiting function appendMentionedIn");
     
     return;
 }
 
 char *createVcdPieChart(char *unverifiedPopulation, char *partiallyVerifiedPopulation, char *verifiedPopulation){
+    log_message(LOG_DEBUG, "Entering function createVcdPieChart");
+    
 
     char *pieChart = "```kroki\nvega\n\n{\n  \"$schema\": \"https://vega.github.io/schema/vega/v5.0.json\",\n  \"width\": 350,\n  \"height\": 350,\n  \"autosize\": \"pad\",\n  \"signals\": [\n    {\"name\": \"startAngle\", \"value\": 0},\n    {\"name\": \"endAngle\", \"value\": 6.29},\n    {\"name\": \"padAngle\", \"value\": 0},\n    {\"name\": \"sort\", \"value\": true},\n    {\"name\": \"strokeWidth\", \"value\": 2},\n    {\n      \"name\": \"selected\",\n      \"value\": \"\",\n      \"on\": [{\"events\": \"mouseover\", \"update\": \"datum\"}]\n    }\n  ],\n  \"data\": [\n    {\n      \"name\": \"table\",\n      \"values\": [\n        {\"continent\": \"Unverified\", \"population\": DefaultUnverifiedPopulation},\n        {\"continent\": \"Partially Verified\", \"population\": DefaultPartiallyVerifiedPopulation},\n        {\"continent\": \"Verified\", \"population\": DefaultVerifiedPopulation}\n      ],\n      \"transform\": [\n        {\n          \"type\": \"pie\",\n          \"field\": \"population\",\n          \"startAngle\": {\"signal\": \"startAngle\"},\n          \"endAngle\": {\"signal\": \"endAngle\"},\n          \"sort\": {\"signal\": \"sort\"}\n        }\n      ]\n    },\n    {\n      \"name\": \"fieldSum\",\n      \"source\": \"table\",\n      \"transform\": [\n        {\n          \"type\": \"aggregate\",\n          \"fields\": [\"population\"],\n          \"ops\": [\"sum\"],\n          \"as\": [\"sum\"]\n        }\n      ]\n    }\n  ],\n  \"legends\": [\n    {\n      \"fill\": \"color\",\n      \"title\": \"Legends\",\n      \"orient\": \"none\",\n      \"padding\": {\"value\": 10},\n      \"encode\": {\n        \"symbols\": {\"enter\": {\"fillOpacity\": {\"value\": 1}}},\n        \"legend\": {\n          \"update\": {\n            \"x\": {\n              \"signal\": \"(width / 2) + if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.1 * 0.8, if(width >= height, height, width) / 2 * 0.8)\",\n              \"offset\": 20\n            },\n            \"y\": {\"signal\": \"(height / 2)\", \"offset\": -50}\n          }\n        }\n      }\n    }\n  ],\n  \"scales\": [\n    {\"name\": \"color\", \"type\": \"ordinal\", \"range\": [\"#cf2608\", \"#ff9900\", \"#67b505\"]}\n  ],\n  \"marks\": [\n    {\n      \"type\": \"arc\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"fill\": {\"scale\": \"color\", \"field\": \"continent\"},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"}\n        },\n        \"update\": {\n          \"startAngle\": {\"field\": \"startAngle\"},\n          \"endAngle\": {\"field\": \"endAngle\"},\n          \"cornerRadius\": {\"value\": 15},\n          \"padAngle\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.015, 0.015)\"\n          },\n          \"innerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 0.45, if(width >= height, height, width) / 2 * 0.5)\"\n          },\n          \"outerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.8, if(width >= height, height, width) / 2 * 0.8)\"\n          },\n          \"opacity\": {\n            \"signal\": \"if(selected && selected.continent !== datum.continent, 1, 1)\"\n          },\n          \"stroke\": {\"signal\": \"scale('color', datum.continent)\"},\n          \"strokeWidth\": {\"signal\": \"strokeWidth\"},\n          \"fillOpacity\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.8, 0.8)\"\n          }\n        }\n      }\n    },\n    {\n      \"type\": \"text\",\n      \"encode\": {\n        \"enter\": {\"fill\": {\"value\": \"#525252\"}, \"text\": {\"value\": \"\"}},\n        \"update\": {\n          \"opacity\": {\"value\": 1},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"},\n          \"fontSize\": {\"signal\": \"if(width >= height, height, width) * 0.05\"},\n          \"text\": {\"value\": \"Verification Status\"}\n        }\n      }\n    },\n    {\n      \"name\": \"mark_population\",\n      \"type\": \"text\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"text\": {\n            \"signal\": \"if(datum['endAngle'] - datum['startAngle'] < 0.3, '', format(datum['population'] / 1, '.0f'))\"\n          },\n          \"x\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"y\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"radius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.65, if(width >= height, height, width) / 2 * 0.65)\"\n          },\n          \"theta\": {\"signal\": \"(datum['startAngle'] + datum['endAngle'])/2\"},\n          \"fill\": {\"value\": \"#FFFFFF\"},\n          \"fontSize\": {\"value\": 12},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"}\n        }\n      }\n    }\n  ]\n}\n\n```";
 
@@ -1515,12 +1656,18 @@ char *createVcdPieChart(char *unverifiedPopulation, char *partiallyVerifiedPopul
     pieChart = replaceWord(pieChart, "DefaultPartiallyVerifiedPopulation", partiallyVerifiedPopulation);
     pieChart = replaceWord(pieChart, "DefaultVerifiedPopulation", verifiedPopulation);
 
+    
+    log_message(LOG_DEBUG, "Exiting function createVcdPieChart");
+
     return pieChart;
 
 }
 
 char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue) {
-    fprintf(stderr, "JSON string: %s\n", json_str);
+    log_message(LOG_DEBUG, "Entering function updateVcdStackedAreaChart");
+    
+
+    log_message(LOG_DEBUG, "JSON string: %s", json_str);
     
     // Parse the input JSON string
     cJSON *root = cJSON_Parse(json_str);
@@ -1563,7 +1710,7 @@ char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, i
     cJSON_AddItemToArray(values, item2);
     cJSON_AddItemToArray(values, item3);
 
-    fprintf(stderr, "about to call cJSON_Print\n");
+    log_message(LOG_DEBUG, "about to call cJSON_Print");
 
     // Convert the updated JSON structure back to a string
     char *updated_json_str = cJSON_Print(root);
@@ -1571,6 +1718,8 @@ char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, i
     // Clean up
     cJSON_Delete(root);
 
+    
+    log_message(LOG_DEBUG, "Exiting function updateVcdStackedAreaChart");
     return updated_json_str;
 }
 
@@ -1639,3 +1788,27 @@ char *extractVerificationStatsForAReview(cJSON *requirementList){
 
 }
 */
+
+void freeWikiFlagList(wikiFlag** head) {
+    log_message(LOG_DEBUG, "Entering function freeWikiFlagList");
+    
+    while (*head) {
+        wikiFlag* temp = *head;
+        *head = (*head)->next;
+        
+        // Debugging prints
+        if (temp->pointerToBeginningOfSecondMarker){
+            free(temp->pointerToBeginningOfSecondMarker);
+        }
+        if (temp->pointerToBeginningOfSecondMarker){
+            free(temp->pointerToBeginningOfSecondMarker);
+        }
+        
+        log_message(LOG_DEBUG, "about to free temp");
+        free(temp);
+        log_message(LOG_DEBUG, "freed temp");
+    }
+
+    
+    log_message(LOG_DEBUG, "Exiting function freeWikiFlagList");
+}
