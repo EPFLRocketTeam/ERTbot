@@ -70,7 +70,7 @@ char *jsonParserGetStringValue(char *json, char *key) {
     
     char *start = strstr(json, key);
     if (start == NULL) {
-        fprintf(stderr, "Error: Key '%s' not found in JSON\n", key);
+        log_message(LOG_ERROR, "Error: Key '%s' not found in JSON\n", key);
         return NULL;
     }
 
@@ -86,7 +86,7 @@ char *jsonParserGetStringValue(char *json, char *key) {
         end = strchr(start, '"');
     }
     if (end == NULL) {
-        fprintf(stderr, "Error: Malformed JSON\n");
+        log_message(LOG_ERROR, "Error: Malformed JSON");
         return NULL;
     }
 
@@ -107,7 +107,7 @@ char *jsonParserGetIntValue(char *json, char *key) {
     // Find the key in the JSON string
     char *start = strstr(json, key);
     if (start == NULL) {
-        fprintf(stderr, "Error: Key '%s' not found in JSON\n", key);
+        log_message(LOG_ERROR, "Error: Key '%s' not found in JSON\n", key);
         return;  // Return error code
     }
 
@@ -117,7 +117,7 @@ char *jsonParserGetIntValue(char *json, char *key) {
     // Find the end of the integer value (assume it ends at a comma or closing brace)
     char *end = strpbrk(start, ",}");
     if (end == NULL) {
-        fprintf(stderr, "Error: Malformed JSON\n");
+        log_message(LOG_ERROR, "Error: Malformed JSON");
         return;  // Return error code
     }
 
@@ -125,7 +125,7 @@ char *jsonParserGetIntValue(char *json, char *key) {
     size_t length = end - start;
     char *valueStr = malloc(length + 1);
     if (valueStr == NULL) {
-        fprintf(stderr, "Error: Memory allocation failed\n");
+        log_message(LOG_ERROR, "Error: Memory allocation failed");
         return;  // Return error code
     }
 

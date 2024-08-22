@@ -38,21 +38,20 @@ void buildLinksTracker() {
     
     pageList* linkTrackerPage = NULL;
     linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "", "");
-    fprintf(stderr,"linkTrackerPage id set\n");
+    log_message(LOG_DEBUG, "linkTrackerPage id set");
     linkTrackerPage = getPage(&linkTrackerPage);
 
     linkTrackerPage->content = "";
 
-    fprintf(stderr,"fetched linkTrackerPage content\n");
+    log_message(LOG_DEBUG, "fetched linkTrackerPage content");
     pageList* listOfAllPages = NULL;
 
-    fprintf(stderr,"about to fetch list of all pages");
+    log_message(LOG_DEBUG, "about to fetch list of all pages");
     listOfAllPages = populatePageList(&listOfAllPages, "path", "none"); // Parse JSON and populate linked list
-    fprintf(stderr,"populated list of pages\n");
-
+    log_message(LOG_DEBUG, "populated list of pages");
     
     while (listOfAllPages != NULL) {
-        fprintf(stderr,"about to fetch title: %s.\n", listOfAllPages->title);
+        log_message(LOG_DEBUG, "about to fetch title: %s", listOfAllPages->title);
 
         if(strcmp(listOfAllPages->id, LINK_TRACKER_PAGE_ID) == 0  || strcmp(listOfAllPages->id, BROKEN_LINKS_TRACKER_PAGE_ID) == 0){
             listOfAllPages = listOfAllPages->next;
@@ -72,12 +71,9 @@ void buildLinksTracker() {
         }
     }
     
-
-    fprintf(stderr,"Finished searching all of the pages\n");
-
-    fprintf(stderr,"linkTrackerPage content: %s\n", linkTrackerPage->content);
-
-    fprintf(stderr,"about to update linkTrackerPage\n");
+    log_message(LOG_DEBUG, "Finished searching all of the pages");
+    log_message(LOG_DEBUG, "linkTrackerPage content: %s", linkTrackerPage->content);
+    log_message(LOG_DEBUG, "about to update linkTrackerPage");
 
 
     updatePageContentMutation(linkTrackerPage);
@@ -94,7 +90,7 @@ void updateLinksTracker() {
     
     pageList* linkTrackerPage = (pageList*) malloc(sizeof(pageList)); // Allocate memory for linkTrackerPage
     if (linkTrackerPage == NULL) {
-        fprintf(stderr, "Memory allocation failed for linkTrackerPage\n");
+        log_message(LOG_ERROR, "Memory allocation failed for linkTrackerPage");
         return;
     }
 
@@ -130,12 +126,12 @@ void updateLinksTracker() {
             }
             
             while(links != NULL){
-                fprintf(stderr, "links are: %s\n", links->path);
+                log_message(LOG_DEBUG, "links are: %s", links->path);
                 links = links->next;
             }
             
             freePageList(&links); //free the linked list which stores the links
-            fprintf(stderr, "links freed\n");
+            log_message(LOG_DEBUG, "links freed");
 
             if(listOfAllPages->next == NULL){break;}
             else{listOfAllPages = listOfAllPages->next;}//go to next page
@@ -144,12 +140,10 @@ void updateLinksTracker() {
         }
     }
     
-    fprintf(stderr, "Making sure linkTrackerPage has the right amount of backslashes\n");
+    log_message(LOG_DEBUG, "Making sure linkTrackerPage has the right amount of backslashes");
     linkTrackerPage->content = replaceWord(linkTrackerPage->content, "\\n", "\\\\n");
 
-    //fprintf(stderr,"Finished searching all of the pages\n");
-    //fprintf(stderr,"linkTrackerPage content: %s\n", linkTrackerPage->content);
-    fprintf(stderr,"about to update linkTrackerPage\n");
+    log_message(LOG_DEBUG, "about to update linkTrackerPage");
     
 
     updatePageContentMutation(linkTrackerPage);
@@ -168,7 +162,7 @@ char* buildLocalGraph(command cmd) {
     // Allocate memory for linkTrackerPage
     pageList* linkTrackerPage = NULL;
     linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "", "");
-    fprintf(stderr,"linkTrackerPage id set\n");
+    log_message(LOG_DEBUG, "linkTrackerPage id set");
     linkTrackerPage = getPage(&linkTrackerPage);
 
     pageList* subjectPage = NULL;
@@ -280,32 +274,29 @@ void movePage(command cmd){
 
     pageList* linkTrackerPage = NULL;
     linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "", "");
-    fprintf(stderr,"linkTrackerPage id set\n");
+    log_message(LOG_DEBUG, "linkTrackerPage id set");
     linkTrackerPage = getPage(&linkTrackerPage);
 
     pageList* IncomingLinks = NULL;
-    fprintf(stderr, "cmd.argument_1:%s.\n", cmd.argument_1);
+    log_message(LOG_DEBUG, "cmd.argument_1:%s.\n", cmd.argument_1);
     IncomingLinks = findIncomingLinks(&IncomingLinks, linkTrackerPage->content, cmd.argument_1);
 
     char *originalPathWithParentheseAndSlash = appendStrings("(/", cmd.argument_1);
     char *newPathWithParentheseAndSlash = appendStrings("(/", cmd.argument_2);
 
-    fprintf(stderr, "Going to start modifying target pages\n");
+    log_message(LOG_DEBUG, "Going to start modifying target pages");
     while(IncomingLinks != NULL){
         pageList* temporaryPage = NULL;
         temporaryPage = populatePageList(&temporaryPage, "exact path", IncomingLinks->path);
         temporaryPage = getPage(&temporaryPage);
-        fprintf(stderr, "Going to change %s's content \n", temporaryPage->path);
+        log_message(LOG_DEBUG, "Going to change %s's content", temporaryPage->path);
         temporaryPage->content = replaceWord(temporaryPage->content, originalPathWithParentheseAndSlash, newPathWithParentheseAndSlash);
-        //fprintf(stderr, "%s", temporaryPage->content);
-        fprintf(stderr, "\n\nIs it ok?");
-        getchar();
         temporaryPage->content = replaceWord(temporaryPage->content, "\\", "\\\\");
         temporaryPage->content = replaceWord(temporaryPage->content, "\"", "\\\"");
         updatePageContentMutation(temporaryPage);
-        fprintf(stderr, "\nUpdated Page\n");
+        log_message(LOG_DEBUG, "Updated Page");
         renderMutation(&temporaryPage);
-        fprintf(stderr, "\nRendered Page\n");
+        log_message(LOG_DEBUG, "Rendered Page");
         IncomingLinks = IncomingLinks->next;
         freePageList(&temporaryPage);
     }
@@ -319,9 +310,9 @@ void movePage(command cmd){
 
     linkTrackerPage->content = replaceWord(linkTrackerPage->content, "\\n", "\\\\n");
     updatePageContentMutation(linkTrackerPage);
-    fprintf(stderr, "\nUpdated Page\n");
+    log_message(LOG_DEBUG, "Updated Page");
     renderMutation(&linkTrackerPage);
-    fprintf(stderr, "\nRendered Page\n");
+    log_message(LOG_DEBUG, "Rendered Page");
 
     freePageList(&subjectPage);
     freePageList(&linkTrackerPage);
@@ -336,7 +327,7 @@ void syncSheetToDrl(command cmd){
     
     pageList* drlPage = (pageList*) malloc(sizeof(pageList)); // Allocate memory for linkTrackerPage
     if (drlPage == NULL) {
-        fprintf(stderr, "Memory allocation failed for drlPage\n");
+        log_message(LOG_ERROR, "Memory allocation failed for drlPage");
         return;
     }
 
@@ -366,13 +357,11 @@ void syncSheetToDrl(command cmd){
     sendMessageToSlack(stringTest);
     */
 
-    fprintf(stderr, "parseJSONRequirementListInToArray\n");
     char* output = parseJSONRequirementListInToArray(requirements);
 
-    fprintf(stderr, "batchUpdateSheet\n");
     batchUpdateSheet("14vOyP1Oc5O_7JY1vnY7pQPTJoOB8oi4nNRMEsodIvtU", "Sheet1!A1:D36", output);
 
-    fprintf(stderr, "deallocating memory\n");
+    log_message(LOG_DEBUG, "deallocating memory");
     cJSON_Delete(requirementList);
     free(output);
     
@@ -384,7 +373,7 @@ void syncDrlToSheet(command cmd){
     log_message(LOG_DEBUG, "Entering function syncDrlToSheet");
     
     batchGetSheet("14vOyP1Oc5O_7JY1vnY7pQPTJoOB8oi4nNRMEsodIvtU", "NewVersion!A4:AI67");
-    fprintf(stderr, "chunk.response: %s\n", chunk.response);
+    log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
 
     cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response); 
     char *DRL = buildDrlFromJSONRequirementList(requirementList);
@@ -411,7 +400,7 @@ void createRequirementPage(command cmd){
     log_message(LOG_DEBUG, "Entering function createRequirementPages");
 
     batchGetSheet("14vOyP1Oc5O_7JY1vnY7pQPTJoOB8oi4nNRMEsodIvtU", "NewVersion!A4:AI67");
-    fprintf(stderr, "chunk.response: %s\n", chunk.response);
+    log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
     cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
     pageList* reqPage = buildRequirementPageFromJSONRequirementList(requirementList, cmd.argument_1);
     reqPage->content = replaceWord(reqPage->content, "\n", "\\\\n");
@@ -429,7 +418,7 @@ void createVcdPage(command cmd){
     log_message(LOG_DEBUG, "Entering function createVcdPage");
     
     batchGetSheet("14vOyP1Oc5O_7JY1vnY7pQPTJoOB8oi4nNRMEsodIvtU", "NewVersion!A4:AI67");
-    fprintf(stderr, "chunk.response: %s\n", chunk.response);
+    log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
     cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
 
     char *pieChart = createVcdPieChart("20", "30", "40");
@@ -468,7 +457,7 @@ void onPageUpdate(command cmd){
 
     pageList* targetPage = NULL;
     targetPage = addPageToList(&targetPage, cmd.argument_1, "", "", "", "", "", "", "");
-    fprintf(stderr,"targetPage id set\n");
+    log_message(LOG_DEBUG, "targetPage id set");
     targetPage = getPage(&targetPage);
 
     if(strcmp(targetPage->authorId, "1") == 0){
@@ -476,7 +465,7 @@ void onPageUpdate(command cmd){
         return;
     }
 
-    fprintf(stderr, "authorID: %s\n", targetPage->authorId);
+    log_message(LOG_DEBUG, "authorID: %s\n", targetPage->authorId);
 
     log_message(LOG_DEBUG, "initalising wikiFlage pointer");
     wikiFlag* wikiCommand = (wikiFlag*)malloc(sizeof(wikiFlag));

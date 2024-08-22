@@ -32,7 +32,7 @@ pageList* addPageToList(pageList** head,  char *id, char *title, char *path, cha
     
     pageList* newNode = (pageList *)malloc(sizeof(pageList));
     if (!newNode) {
-        fprintf(stderr, "Memory allocation error\n");
+        log_message(LOG_ERROR, "Memory allocation error");
         exit(1);
     }
 
@@ -315,13 +315,10 @@ char* createMapWBS(pageList** paths) {
         currentDepth = countSlashes(current->path);
 
         if(isFirstLoop == 0){
-            //fprintf(stderr, "Going to check paths\n");
             //if the current path is not a daughter page of the previous path and the current path is not a sister page of the previous path
             if(strstr(current->path, previous->path) == NULL && strcmp(getDirPath(current->path), getDirPath(previous->path))!=0){
-                //fprintf(stderr, "%s is not contained in %s\n", current->path, previous->path);
                 char *dummyPath = current->path;
                 while(strstr(previous->path, dummyPath) == NULL && baseDepth != countSlashes(dummyPath)){
-                    //fprintf(stderr, "%s is not contained in %s\n", dummyPath, previous->path);
                     numberOfParentFolders++;
                     dummyPath = getDirPath(dummyPath);
                 }
@@ -403,7 +400,7 @@ char* updateList(char *list, pageList *sectionTitle, pageList *links) {
     // Ensure proper memory allocation for the tempList
     pageList *link = links;
     char *tempList = sectionTitle->path;
-    fprintf(stderr, "path:%s\n", sectionTitle->path);
+    log_message(LOG_DEBUG, "path:%s\n", sectionTitle->path);
 
     tempList = appendStrings(tempList, ")\\n" );
 
@@ -422,7 +419,7 @@ char* updateList(char *list, pageList *sectionTitle, pageList *links) {
     char *startPtr = strstr(list, temp);
     //startPtr += 1;
     if (startPtr == NULL) {
-        fprintf(stderr, "Section title: %s not found\n", sectionTitle->title);
+        log_message(LOG_DEBUG, "Section title: %s not found\n", sectionTitle->title);
         free(tempList);
         return list;
     }
@@ -430,16 +427,13 @@ char* updateList(char *list, pageList *sectionTitle, pageList *links) {
     char *endPtr = strstr(startPtr, "\\n\\n");
     endPtr +=1;
     if (endPtr == NULL) {
-        fprintf(stderr, "End of section not found\n");
+        log_message(LOG_ERROR, "End of section not found");
         free(tempList);
         return list;
     }
 
-    fprintf(stderr, "About to update %s to:\n %s\n", sectionTitle->title, tempList);
-
+    log_message(LOG_DEBUG, "About to update %s to:\n %s\n", sectionTitle->title, tempList);
     list = replaceParagraph(list, tempList, startPtr, endPtr);
-
-    //fprintf(stderr, "New list is %s", list);
 
     freePageList(&links);
     free(tempList);

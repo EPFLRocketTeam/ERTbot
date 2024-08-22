@@ -50,7 +50,7 @@ static command* addCommandToQueue(command** head,  char *function, char *argumen
         
     command* newNode = (command *)malloc(sizeof(command));
     if (!newNode) {
-        fprintf(stderr, "Memory allocation error\n");
+        log_message(LOG_ERROR, "Memory allocation error");
         exit(1);
     }
 
@@ -68,62 +68,67 @@ static command* addCommandToQueue(command** head,  char *function, char *argumen
 
     // Allocate memory and copy the path and id
     if(function && function != NULL){
-    fprintf(stderr, "function added to command\n");
+    log_message(LOG_DEBUG, "function added to command");
     newNode->function = malloc(strlen(function) + 1);
     strcpy(newNode->function, function);
     }
 
     if(argument_1 && argument_1 != NULL){
-        fprintf(stderr, "argument 1 added to command\n");
+        log_message(LOG_DEBUG, "argument 1 added to command");
         newNode->argument_1 = malloc(strlen(argument_1) + 1);
         strcpy(newNode->argument_1, argument_1);
     }
 
     if(argument_2 && argument_2 != NULL){
-        fprintf(stderr, "argument 2 added to command\n");
+        log_message(LOG_DEBUG, "argument 2 added to command");
         newNode->argument_2 = malloc(strlen(argument_2) + 1);
         strcpy(newNode->argument_2, argument_2);
     }
 
     if(argument_3 && argument_3 != NULL){
-        fprintf(stderr, "argument 3 added to command\n");
+        log_message(LOG_DEBUG, "argument 1 added to command");
         newNode->argument_3 = malloc(strlen(argument_3) + 1);
         strcpy(newNode->argument_3, argument_3);
     }
 
     if(argument_4 && argument_4 != NULL){
+        log_message(LOG_DEBUG, "argument 4 added to command");
         newNode->argument_4 = malloc(strlen(argument_4) + 1);
         strcpy(newNode->argument_4, argument_4);
     }
 
     if(argument_5 && argument_5 != NULL){
+        log_message(LOG_DEBUG, "argument 5 added to command");
         newNode->argument_5 = malloc(strlen(argument_5) + 1);
         strcpy(newNode->argument_5, argument_5);
     }
 
     if(argument_6 && argument_6 != NULL){
+        log_message(LOG_DEBUG, "argument 6 added to command");
         newNode->argument_6 = malloc(strlen(argument_6) + 1);
         strcpy(newNode->argument_6, argument_6);
     }
 
     if(argument_7 && argument_7 != NULL){
+        log_message(LOG_DEBUG, "argument 7 added to command");
         newNode->argument_7 = malloc(strlen(argument_7) + 1);
         strcpy(newNode->argument_7, argument_7);
     }
 
     if(argument_8 && argument_8 != NULL){
+        log_message(LOG_DEBUG, "argument 8 added to command");
         newNode->argument_8 = malloc(strlen(argument_8) + 1);
         strcpy(newNode->argument_8, argument_8);
     }
 
     if(argument_9 && argument_9 != NULL){
+        log_message(LOG_DEBUG, "argument 9 added to command");
         newNode->argument_9 = malloc(strlen(argument_9) + 1);
         strcpy(newNode->argument_9, argument_9);
     }
 
 
-    fprintf(stderr, "All arguments added to command Queue\n");
-
+    log_message(LOG_DEBUG, "All arguments added to command struct");
     newNode->next = NULL;  // New node will be the last node
 
     // If the list is empty, make the new node the first node
@@ -141,7 +146,7 @@ static command* addCommandToQueue(command** head,  char *function, char *argumen
     // Link the new node after the last node
     lastNode->next = newNode;
 
-    fprintf(stderr, "Command added to queue\n");
+    log_message(LOG_DEBUG, "Command added to queue");
     
     log_message(LOG_DEBUG, "Exiting function addCommandToQueue");
     return *head;
@@ -150,19 +155,18 @@ static command* addCommandToQueue(command** head,  char *function, char *argumen
 void removeFirstCommand(command **head) {
     log_message(LOG_DEBUG, "Entering function removeFirstCommand");
     
-    fprintf(stderr, "About to remove first command\n");
+    log_message(LOG_DEBUG, "About to remove first command");
 
     if (*head == NULL) {
         // The list is already empty, nothing to remove
         return;
     }
 
-    fprintf(stderr, "Creating a temporary pointer to a command\n");
-
+    log_message(LOG_DEBUG, "Creating a temporary pointer to a command");
     // Save the current head node to free it later
     command* temp = *head;
 
-    fprintf(stderr, "Placing the head on to the next command\n");
+    log_message(LOG_DEBUG, "Placing the head on to the next command");
     // Update the head to point to the next node
     *head = (*head)->next;
 
@@ -208,11 +212,11 @@ void removeFirstCommand(command **head) {
         free(temp->argument_9);
     }
 
-    fprintf(stderr, "freed all variables\n");
+    log_message(LOG_DEBUG, "freed all variables");
     
     free(temp);
 
-    fprintf(stderr, "freed struct\n");
+    log_message(LOG_DEBUG, "freed struct");
     
     log_message(LOG_DEBUG, "Exiting function removeFirstCommand"); 
 }
@@ -247,7 +251,7 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
 
     slackMsg->message = malloc(200);
     if (slackMsg->message == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
+        log_message(LOG_ERROR, "Memory allocation failed");
     }
 
 
@@ -255,15 +259,15 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
     
     //If received a message which was not sent by bot, breakdown message into command structure and return command 
     if(strcmp(slackMsg->sender, "U06RQCAT0H1") != 0){
-        fprintf(stderr, "Received a command on slack\n");
+        log_message(LOG_INFO, "Received a command on slack");
         breakdownCommand(slackMsg->message, &cmd);
-        fprintf(stderr, "Command broke down\n");
+        log_message(LOG_DEBUG, "Command broke down");
         *headOfCommandQueue = addCommandToQueue(headOfCommandQueue, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
-        fprintf(stderr, "Command added to queue\n");
+        log_message(LOG_DEBUG, "Command added to queue");
     }
     
     //If last message was sent by bot, free allocated memory and return emtpy command
-    else{fprintf(stderr, "No commands sent\n"); }//log.info
+    else{log_message(LOG_DEBUG, "No commands sent on slack"); }//log.info
     
     if (chunk.response) {
         chunk.response = NULL;
@@ -283,7 +287,7 @@ static command** lookForNewlyUpdatedPages(command** commandQueue){
     log_message(LOG_DEBUG, "Entering function lookForNewlyUpdatedPages");
     
     pageList* updatedPages = NULL;
-    fprintf(stderr, "%s\n", lastPageRefreshCheck);
+    log_message(LOG_INFO, "Last Page refresh check happened at: %s\n", lastPageRefreshCheck);
     updatedPages = populatePageList(&updatedPages, "time", lastPageRefreshCheck);
     pageList* updatedPagesHead = updatedPages;
 
@@ -462,8 +466,6 @@ command** executeCommand(command** commandQueue){
     else{
         sendMessageToSlack("Uknown Command :rayane_side_eyeing:");
     }
-
-    fprintf(stderr, "about to run removeFirstCommand\n");
 
     removeFirstCommand(commandQueue);
     

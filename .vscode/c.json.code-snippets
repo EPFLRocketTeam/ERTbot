@@ -46,6 +46,14 @@
             "log_message(LOG_DEBUG, \"${1:debug_message}\");"
         ],
         "description": "Insert a debug log message with a placeholder for the debug message"
+    },
+
+    "Log Info": {
+        "prefix": "li",
+        "body": [
+            "log_message(LOG_INFO, \"${1:information_message}\");"
+        ],
+        "description": "Insert a information log message with a placeholder for the debug message"
     }
 
 }
