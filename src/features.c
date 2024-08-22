@@ -19,6 +19,8 @@
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
 #include "../include/log.h"
+#include "../include/requirements.h"
+
 
 char* buildMap(command cmd) {
     log_message(LOG_DEBUG, "Entering function buildMap");
@@ -324,14 +326,53 @@ void movePage(command cmd){
 
 void syncSheetToDrl(command cmd){
     log_message(LOG_DEBUG, "Entering function syncSheetToDRL");
-    
+
+    refreshOAuthToken();
+
     pageList* drlPage = (pageList*) malloc(sizeof(pageList)); // Allocate memory for linkTrackerPage
     if (drlPage == NULL) {
         log_message(LOG_ERROR, "Memory allocation failed for drlPage");
         return;
     }
+    char *sheetId;
 
-    drlPage->id = TEST_DRL_PAGE_ID; //Initialise linkTrackerPage
+    if(strcmp(cmd.argument_1, "ST")==0){
+        drlPage->id = "420";
+        sheetId = "ST!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "PR")==0){
+        drlPage->id = "414";
+        sheetId = "PR!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "FD")==0){
+        drlPage->id = "416";
+        sheetId = "FD!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "RE")==0){
+        drlPage->id = "419";
+        sheetId = "RE!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "GS")==0){
+        drlPage->id = "417";
+        sheetId = "GS!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "AV")==0){
+        drlPage->id = "421";
+        sheetId = "AV!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "TE")==0){
+        drlPage->id = 
+        sheetId = "TE!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "PL")==0){
+        drlPage->id = "418";
+        sheetId = "PL!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "GE")==0){
+        drlPage->id = "415";
+        sheetId = "GE!A3:AI300";
+    }
+
     drlPage = getPage(&drlPage); //get content and updated at values
 
     cJSON *requirementList = cJSON_CreateObject();
@@ -344,22 +385,17 @@ void syncSheetToDrl(command cmd){
     requirements = cJSON_CreateArray();
     cJSON_AddItemToObject(requirementList, "requirements", requirements);
 
-
     parseRequirementsList(requirements, drlPage->content);
-
-    /*
-    char *stringTest = NULL;
-    stringTest = cJSON_Print(requirementList);
-    if (stringTest == NULL){
-        fprintf(stderr, "Failed to print monitor.\n");
-    }
-    stringTest = replaceWord(stringTest, "\"", "\\\"");
-    sendMessageToSlack(stringTest);
-    */
 
     char* output = parseJSONRequirementListInToArray(requirements);
 
-    batchUpdateSheet("14vOyP1Oc5O_7JY1vnY7pQPTJoOB8oi4nNRMEsodIvtU", "Sheet1!A1:D36", output);
+
+    log_message(LOG_DEBUG, "calling batchUpdateSheet with values set to: %s", output);
+
+    
+    batchUpdateSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId, output);
+    
+
 
     log_message(LOG_DEBUG, "deallocating memory");
     cJSON_Delete(requirementList);

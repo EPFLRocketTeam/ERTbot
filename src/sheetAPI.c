@@ -18,6 +18,8 @@
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
 #include "../include/log.h"
+#include "../include/requirements.h"
+
 
 
 char *template_batch_update_url = "https://sheets.googleapis.com/v4/spreadsheets/DefaultSheetID/values:batchUpdate";
@@ -69,6 +71,8 @@ void sheetAPI(char *query, char *url, char *requestType) {
     }
 
     curl_global_cleanup();
+
+    log_message(LOG_DEBUG, "chunk.response after sheet API:%s", chunk.response);
     
     log_message(LOG_DEBUG, "Exiting function sheetAPI");
 }
@@ -155,6 +159,14 @@ void refreshOAuthToken() {
             log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         } else {
 
+            log_message(LOG_DEBUG, "response when calling for token refresh: %s", chunk.response);
+
+            //Yes the key value has an extra : compared to when the same function is called in wikiAPI functions
+            //see the note on the jsonParserGetStringValue function
+            SHEET_API_TOKEN = jsonParserGetStringValue(chunk.response, "\"access_token\":");
+
+            log_message(LOG_DEBUG, "SHEET_API_TOKEN after refresh: %s", SHEET_API_TOKEN);
+            
             // Here you would parse the JSON response to extract the access token.
             // The response would look something like this:
             // {

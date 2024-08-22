@@ -93,6 +93,10 @@ size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp);
  * @details This function searches for the specified key within the JSON string, locates the associated value,
  *          and returns a dynamically allocated copy of that value. Special handling is implemented for the 
  *          key `"content"` to correctly parse the JSON structure.
+ * 
+ * @warning Needs to be used differently depending on the format of the json value's format. if it is formated like this:
+ *  "key": "value" add the colon to the key
+ *  "key":"value" do not add the colon to the key
  */
 char *jsonParserGetStringValue(char *json, char *key);
 
