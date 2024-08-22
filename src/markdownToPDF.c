@@ -38,6 +38,8 @@
  * - Outputs a success message if the conversion is successful, otherwise an error message.
  */
 void markdownToLatex(char* inputMarkdownFile, char* outputLatexFile) {
+    log_message(LOG_DEBUG, "Entering function markdownToLatex");
+    
     char command[MAX_COMMAND_LENGTH]; // Assuming command won't exceed 500 characters
 
     // Construct the Pandoc command
@@ -48,10 +50,13 @@ void markdownToLatex(char* inputMarkdownFile, char* outputLatexFile) {
 
     // Check if Pandoc command executed successfully
     if (status == 0) {
-        printf("Markdown file converted to LaTeX successfully.\n");
+        log_message(LOG_DEBUG, "Markdown file converted to LaTeX successfully.");
     } else {
-        fprintf(stderr, "Error converting Markdown to LaTeX.\n");
+        log_message(LOG_ERROR, "Error converting Markdown to LaTeX.");
     }
+
+    
+    log_message(LOG_DEBUG, "Exiting function markdownToLatex");
 }
 
 /**
@@ -71,6 +76,8 @@ void markdownToLatex(char* inputMarkdownFile, char* outputLatexFile) {
  * - Adjustments are made to realign the headers as necessary by shifting characters and removing extra hashes.
  */
 char* fixTabsets(char *str) {
+    log_message(LOG_DEBUG, "Entering function fixTabsets");
+    
     char* input = str;
     int count1 = 0;
     int count2 = 0;
@@ -131,6 +138,8 @@ char* fixTabsets(char *str) {
         j=0;
     }
 
+    
+    log_message(LOG_DEBUG, "Exiting function fixTabsets");
     return input;
 }
 
@@ -152,6 +161,8 @@ char* fixTabsets(char *str) {
  * - The function handles cases where these characters might not be present by truncating the string after the substring.
  */
 char* removeImagesScale(char *input, char *sub) {
+    log_message(LOG_DEBUG, "Entering function removeImagesScale");
+    
     char *found;
     char* str = input;
     size_t subLen = strlen(sub);
@@ -174,6 +185,9 @@ char* removeImagesScale(char *input, char *sub) {
         str = found + subLen;
     }
 
+    
+    log_message(LOG_DEBUG, "Exiting function removeImagesScale");
+
     return str;
 }
 
@@ -192,6 +206,9 @@ char* removeImagesScale(char *input, char *sub) {
  * - The function uses `strstr` to find occurrences of the image extensions and `memmove` and `memcpy` to insert the closing tags.
  */
 void endCenteringLatex(char *str) {
+    log_message(LOG_DEBUG, "Entering function endCenteringLatex");
+    
+
     char *jpeg = ".jpeg}";
     char *png = ".png}";
     char *PNG = ".PNG}";
@@ -264,6 +281,9 @@ void endCenteringLatex(char *str) {
             pos += strlen(gif);
         }
     }
+
+    
+    log_message(LOG_DEBUG, "Exiting function endCenteringLatex");
 }
 
 /**
@@ -286,6 +306,8 @@ void endCenteringLatex(char *str) {
  * - The function uses `extractParagraphWithPointerDelimiters`, `replaceWord`, and `replaceParagraph` to perform the necessary text replacements.
  */
 void stylizeMainAdvantages(char *str) {
+    log_message(LOG_DEBUG, "Entering function stylizeMainAdvantages");
+    
     char *begin_quote = "\\begin{quote}";
     char *danger = "\\{.is-success\\}";
     char *end_quote = "\\end{quote}";
@@ -325,6 +347,9 @@ void stylizeMainAdvantages(char *str) {
             
         }
     }
+
+    
+    log_message(LOG_DEBUG, "Exiting function stylizeMainAdvantages");
 }
 
 /**
@@ -347,6 +372,8 @@ void stylizeMainAdvantages(char *str) {
  * - The function uses `extractParagraphWithPointerDelimiters`, `replaceWord`, and `replaceParagraph` to perform the necessary text replacements.
  */
 void stylizeMainDisadvantages(char *str) {
+    log_message(LOG_DEBUG, "Entering function stylizeMainDisadvantages");
+    
     char *begin_quote = "\\begin{quote}";
     char *danger = "\\{.is-danger\\}";
     char *end_quote = "\\end{quote}";
@@ -378,7 +405,7 @@ void stylizeMainDisadvantages(char *str) {
 
             str = replaceParagraph(str, paragraph, begin_ptr, end_of_end_ptr);
 
-            printf("found!");
+            log_message(LOG_DEBUG, "found a {.is-danger}");
 
             begin_ptr = strstr(end_ptr, begin_quote);
 
@@ -388,6 +415,8 @@ void stylizeMainDisadvantages(char *str) {
             
         }
     }
+    
+    log_message(LOG_DEBUG, "Exiting function stylizeMainDisadvantages");
 }
 
 /**
@@ -411,7 +440,8 @@ void stylizeMainDisadvantages(char *str) {
  * - `replaceWord` and `replaceParagraph` are used to perform text replacements.
  */
 char* makeDangerLists(char* input) {
-
+    log_message(LOG_DEBUG, "Entering function makeDangerLists");
+    
     char* is_danger = "{.is-danger}";
     char* newline_pattern = "\n\n";
     char* tempParagraph;
@@ -440,7 +470,7 @@ char* makeDangerLists(char* input) {
         }
 
         if (last_newline_before_is_danger == input) {
-            printf("No '/n/n' found before '{.is-danger}'.\n");
+            log_message(LOG_DEBUG, "No '/n/n' found before '{.is-danger}'.");
         }
 
         tempParagraph = extractParagraphWithPointerDelimiters(input, last_newline_before_is_danger, is_danger_ptr);
@@ -452,6 +482,8 @@ char* makeDangerLists(char* input) {
         // Move the current pointer after the last "{.is-danger}" found
         current_ptr = is_danger_ptr + strlen(is_danger);
     }
+    
+    log_message(LOG_DEBUG, "Exiting function makeDangerLists");
 
     return input;
 }
@@ -477,6 +509,8 @@ char* makeDangerLists(char* input) {
  * - `replaceWord` and `replaceParagraph` are used to perform text replacements.
  */
 char* makeSuccessLists(char* input) {
+    log_message(LOG_DEBUG, "Entering function makeSuccessLists");
+    
 
     char* is_danger = "{.is-success}";
     char* newline_pattern = "\n\n";
@@ -517,7 +551,8 @@ char* makeSuccessLists(char* input) {
         // Move the current pointer after the last "{.is-danger}" found
         current_ptr = is_danger_ptr + strlen(is_danger);
     }
-
+    
+    log_message(LOG_DEBUG, "Exiting function makeSuccessLists");
     return input;
 }
 
@@ -546,6 +581,8 @@ char* makeSuccessLists(char* input) {
  * or where memory allocation fails gracefully.
  */
 char* makeDocTitle(char *input) {
+    log_message(LOG_DEBUG, "Entering function makeDocTitle");
+    
     // Remove the first 10 characters
     size_t len = strlen(input);
     if (len <= 10) {
@@ -580,7 +617,8 @@ char* makeDocTitle(char *input) {
 
     result = replaceWord(result, "-", "$\\hspace{0.3cm}$");
     result = replaceWord(result, "_", "$\\hspace{0.3cm}$");
-
+    
+    log_message(LOG_DEBUG, "Exiting function makeDocTitle");
     return result;
 }
 
@@ -606,9 +644,11 @@ char* makeDocTitle(char *input) {
  * sufficient memory is available. Error handling is included for file operations and memory allocation.
  */
 void applyDefaultImageScaleAndPosition(char *filename) {
+    log_message(LOG_DEBUG, "Entering function applyDefaultImageScaleAndPosition");
+    
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
-        printf("Unable to open file %s\n", filename);
+        log_message(LOG_ERROR, "Unable to open file %s", filename);
         return;
     }
 
@@ -620,7 +660,7 @@ void applyDefaultImageScaleAndPosition(char *filename) {
     // Allocate memory for file contents
     char *buffer = (char *)malloc(fileSize + 1000);
     if (buffer == NULL) {
-        printf("Memory allocation failed.\n");
+        log_message(LOG_ERROR, "Memory allocation failed.");
         fclose(file);
         return;
     }
@@ -644,7 +684,7 @@ void applyDefaultImageScaleAndPosition(char *filename) {
     // Write modified buffer back to the file
     FILE *newFile = fopen(filename, "w");
     if (newFile == NULL) {
-        printf("Unable to open file %s for writing\n", filename);
+        log_message(LOG_ERROR, "Unable to open file %s for writing", filename);
         free(buffer);
         return;
     }
@@ -653,12 +693,14 @@ void applyDefaultImageScaleAndPosition(char *filename) {
     fclose(newFile);
 
     if (bytesWritten != bytesRead) {
-        printf("Error writing to file.\n");
+        log_message(LOG_ERROR, "Error writing to file.");
     } else {
-        printf("\n\nFile %s successfully modified and saved.\n\n", filename);
+        log_message(LOG_DEBUG, "File %s successfully modified and saved.", filename);
     }
 
     free(buffer);
+    
+    log_message(LOG_DEBUG, "Exiting function applyDefaultImageScaleAndPosition");
 }
 
 /**
@@ -685,12 +727,14 @@ void applyDefaultImageScaleAndPosition(char *filename) {
  * `replaceWord` for performing text replacements. Error handling is included for file operations and memory allocation.
  */
 void populateTitleAndHeader( char *filename, char *docPath) {
+    log_message(LOG_DEBUG, "Entering function populateTitleAndHeader");
+    
     char *docID;
     char *docType;
     char *docTitle;
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
-        printf("Unable to open file %s\n", filename);
+        log_message(LOG_ERROR, "Unable to open file %s", filename);
         return;
     }
 
@@ -702,7 +746,7 @@ void populateTitleAndHeader( char *filename, char *docPath) {
     // Allocate memory for file contents
     char *buffer = (char *)malloc(fileSize + 2000);
     if (buffer == NULL) {
-        printf("Memory allocation failed.\n");
+        log_message(LOG_ERROR, "Memory allocation failed.");
         fclose(file);
         return;
     }
@@ -738,7 +782,7 @@ void populateTitleAndHeader( char *filename, char *docPath) {
     // Write modified buffer back to the file
     FILE *newFile = fopen(filename, "w");
     if (newFile == NULL) {
-        printf("Unable to open file %s for writing\n", filename);
+        log_message(LOG_ERROR, "Unable to open file %s for writing", filename);
         free(buffer);
         return;
     }
@@ -747,12 +791,14 @@ void populateTitleAndHeader( char *filename, char *docPath) {
     fclose(newFile);
 
     if (bytesWritten != bytesRead) {
-        printf("Error writing to file.\n");
+        log_message(LOG_ERROR, "Error writing to file.");
     } else {
-        printf("\n\nFile %s successfully modified and saved.\n\n", filename);
+        log_message(LOG_DEBUG, "File %s successfully modified and saved.", filename);
     }
 
     free(buffer);
+    
+    log_message(LOG_DEBUG, "Exiting function populateTitleAndHeader");
 }
 
 /**
@@ -778,6 +824,8 @@ void populateTitleAndHeader( char *filename, char *docPath) {
  * Error handling for `replaceParagraph` is not included.
  */
 char* removeDrawio(char *input) {
+    log_message(LOG_DEBUG, "Entering function removeDrawio");
+    
     char *begin_quote = "```diagram\nPHN2ZyB4";
     char *end_quote = "=\n```";
     char *str = input;
@@ -803,6 +851,8 @@ char* removeDrawio(char *input) {
             break;
         }
     }
+    
+    log_message(LOG_DEBUG, "Exiting function removeDrawio");
 
     return str;
 }
@@ -829,6 +879,8 @@ char* removeDrawio(char *input) {
  * parts of the string. Error handling for `replaceParagraph` is not included.
  */
 char* removeImageCaptions(char *input) {
+    log_message(LOG_DEBUG, "Entering function removeImageCaptions");
+    
     char *begin_quote = "![";
     char *danger = ".";
     char *end_quote = "](";
@@ -861,7 +913,8 @@ char* removeImageCaptions(char *input) {
             
         }
     }
-
+    
+    log_message(LOG_DEBUG, "Exiting function removeImageCaptions");
     return str;
 }
 
@@ -886,6 +939,8 @@ char* removeImageCaptions(char *input) {
  * - Error handling is provided for file operations and the `plantuml` command execution.
  */
 void compilePlantUML( char *plantUMLCode,  char *imagePath) {
+    log_message(LOG_DEBUG, "Entering function compilePlantUML");
+    
     // Extract the file name from the provided imagePath
      char *lastSlash = strrchr(imagePath, '/');
      char *fileName = (lastSlash != NULL) ? lastSlash + 1 : imagePath;
@@ -895,7 +950,7 @@ void compilePlantUML( char *plantUMLCode,  char *imagePath) {
     snprintf(tempUML, sizeof(tempUML), "%s.uml", fileName);
     FILE *file = fopen(tempUML, "w");
     if (file == NULL) {
-        printf("Error opening file for writing.\n");
+        log_message(LOG_ERROR, "Error opening file for writing.");
         return;
     }
     fwrite(plantUMLCode, 1, strlen(plantUMLCode), file);
@@ -907,14 +962,16 @@ void compilePlantUML( char *plantUMLCode,  char *imagePath) {
 
     int status = system(command);
     if (status != 0) {
-        printf("Error compiling PlantUML to PNG.\n");
+        log_message(LOG_ERROR, "Error compiling PlantUML to PNG.");
         return;
     }
 
     // Clean up temporary .uml file
     remove(tempUML);
 
-    printf("PlantUML compiled to %s\n", imagePath);
+    log_message(LOG_DEBUG, "PlantUML compiled to %s", imagePath);
+    
+    log_message(LOG_DEBUG, "Exiting function compilePlantUML");
 }
 
 /**
@@ -940,6 +997,8 @@ void compilePlantUML( char *plantUMLCode,  char *imagePath) {
  * - Error handling for the `compilePlantUML` function and file operations is assumed to be handled elsewhere.
  */
 char* extractPlantUML(char *input, char * docID) {
+    log_message(LOG_DEBUG, "Entering function extractPlantUML");
+    
     char *str = input;
     char *begin_quote = "\n```plantuml\n";
     char *danger = "@end";
@@ -987,6 +1046,8 @@ char* extractPlantUML(char *input, char * docID) {
         }
     }
 
+    
+    log_message(LOG_DEBUG, "Exiting function extractPlantUML");
     return str;
 }
 
@@ -1007,16 +1068,20 @@ char* extractPlantUML(char *input, char * docID) {
  * - Error handling for specific issues in `fetchImage` and memory management for the linked list are assumed to be handled elsewhere.
  */
 void getImages(pageList** head, char* pagePath) {
+    log_message(LOG_DEBUG, "Entering function getImages");
+    
     pageList* current = *head;
     int error;
     while (current != NULL) {
         error = fetchImage(current->path, pagePath);
         if(!error){
-            printf("an image did not download properly");
+            log_message(LOG_ERROR, "an image did not download properly");
             fetchImage(current->path, pagePath);
         }
         current = current->next;
     }
+    
+    log_message(LOG_DEBUG, "Exiting function getImages");
 }
 
 /**
@@ -1035,6 +1100,8 @@ void getImages(pageList** head, char* pagePath) {
  * - `freePageList` cleans up and deallocates the memory used by the list of image links.
  */
 void downloadImages(pageList** head){
+    log_message(LOG_DEBUG, "Entering function downloadImages");
+    
     char *docID;
     pageList* imageLinks;
     imageLinks = findImageLinks((*head)->content, &imageLinks);
@@ -1042,6 +1109,8 @@ void downloadImages(pageList** head){
     docID = getDocId((*head)->path);
     getImages(&imageLinks, docID);
     freePageList(&imageLinks);
+    
+    log_message(LOG_DEBUG, "Exiting function downloadImages");
 }
 
 /**
@@ -1067,6 +1136,8 @@ void downloadImages(pageList** head){
  * - `extractPlantUML` extracts and processes PlantUML diagrams from the content.
  */
 char* preProcessing(char* pageContent, char *docID){
+    log_message(LOG_DEBUG, "Entering function preProcessing");
+    
 
     char *tempPageContent = pageContent;
 
@@ -1090,10 +1161,14 @@ char* preProcessing(char* pageContent, char *docID){
     tempPageContent = removeImageCaptions(tempPageContent);
     tempPageContent = extractPlantUML(tempPageContent, docID);
 
+    
+    log_message(LOG_DEBUG, "Exiting function preProcessing");
     return tempPageContent;
 }
 
 void getZip(command cmd){
+    log_message(LOG_DEBUG, "Entering function getZip");
+    
     pageList* tempPage;
     char *docID;
     int error;
@@ -1118,7 +1193,7 @@ void getZip(command cmd){
     contentFile = fopen(pathTXT, "w");
     // Check if file opened successfully
     if (contentFile == NULL) {
-        printf("Error opening file!\n\n");
+        log_message(LOG_ERROR, "Error opening file!");
         exit(1);
     }
 
@@ -1131,16 +1206,16 @@ void getZip(command cmd){
 
     applyDefaultImageScaleAndPosition(pathTEX);
     prepend_file("/Users/ryan/Desktop/Tidy/EPFL/Mirror/EPFL/ERT/ERTWikiToolbox-Test-Branch/test/2024_C_SE_DOCUMENTATION_TEMPLATE.txt", pathTEX);
-    printf("template added");
+    log_message(LOG_DEBUG, "template added");
     populateTitleAndHeader(pathTEX, tempPage->path);
     error = zipFolder(pathFolder);
 
      char *message = "Here is your file:"; // Message you want to send
 
         if (sendMessageToSlack(message) == 0) {
-            printf("Message sent successfully to Slack!\n");
+            log_message(LOG_DEBUG, "Message sent successfully to Slack!");
         } else {
-            printf("Message sending failed.\n");
+            log_message(LOG_ERROR, "Message sending failed.");
         }
 
 
@@ -1149,4 +1224,6 @@ void getZip(command cmd){
         } else {
             printf("File upload failed.\n");
         }*/
+    
+    log_message(LOG_DEBUG, "Exiting function getZip");
 }

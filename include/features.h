@@ -140,7 +140,6 @@ void getPages(command cmd);
  * 
  * @note
  * - The `batchUpdateSheet` function requires a valid Google Sheets API token and sheet ID, which are hardcoded in this function.
- * - Includes debugging `fprintf` statements for tracking the process and error handling.
  * 
  * @todo update so that it can be used with any DRL page (not hardcoded to a single page), needs to be compatible with tabs
  */

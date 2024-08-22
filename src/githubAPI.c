@@ -83,7 +83,7 @@ int fetchImage(char* imagePath, char * pagePath){
                 return 0;
             }
 
-                printf("%s downloaded successfully!\n", imagePath);
+                log_message(LOG_INFO, "%s downloaded successfully!", imagePath);
 
         } else {
             log_message(LOG_ERROR, "Failed to initialize CURL.");

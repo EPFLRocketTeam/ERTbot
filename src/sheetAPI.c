@@ -61,7 +61,7 @@ void sheetAPI(char *query, char *url, char *requestType) {
         res = curl_easy_perform(curl);
         // Check for errors
         if (res != CURLE_OK) {
-            fprintf(stderr, "sheetAPI: curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, "sheetAPI: curl_easy_perform() failed: %s", curl_easy_strerror(res));
         }
         // Clean up
         curl_easy_cleanup(curl);
@@ -83,11 +83,8 @@ void batchUpdateSheet(char *sheetId, char *range, char *values){
     char *modified_query = replaceWord(temp_query, "DefaultRange", range);
     modified_query = replaceWord(modified_query, "DefaultValues", values);
     
-    //fprintf(stderr, "modified_query: %s\n", modified_query);
-    //fprintf(stderr, "sheetAPI\n");
-    sheetAPI(modified_query, modified_url, requestType);
 
-    //fprintf(stderr, "chunk.response: %s\n", chunk.response);
+    sheetAPI(modified_query, modified_url, requestType);
 
     free(modified_query);
     free(modified_url);
@@ -120,7 +117,7 @@ void refreshOAuthToken() {
     CURLcode res;
 
     if (GOOGLE_CLIENT_ID == NULL || GOOGLE_CLIENT_SECRET == NULL || GOOGLE_REFRESH_TOKEN == NULL) {
-        fprintf(stderr, "Environment variables not set.\n");
+        log_message(LOG_ERROR, "Environment variables not set.");
         return;
     }
 
@@ -155,10 +152,8 @@ void refreshOAuthToken() {
 
         // Check for errors
         if(res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         } else {
-            // Output the response
-            fprintf(stderr, "Response: %s\n", chunk.response);
 
             // Here you would parse the JSON response to extract the access token.
             // The response would look something like this:

@@ -199,7 +199,7 @@ void createMissingFolders(char *path) {
                 free(dup_path);
                 return;
             } else {
-                printf("Created directory: %s\n", curr_path);
+                log_message(LOG_DEBUG, "Created directory: %s\n", curr_path);
             }
         }
 
@@ -610,7 +610,6 @@ char* createLocalGraphMindMap(pageList** tempPage, pageList** incomingPaths, pag
         currentIncomingLink = currentIncomingLink->next;
 
     }
-    //fprintf(stderr, "local graph: %s\n", localGraph);
 
     currentOutgoingLink = currentOutgoingLink->next;
 
@@ -628,8 +627,6 @@ char* createLocalGraphMindMap(pageList** tempPage, pageList** incomingPaths, pag
 
     freePageList(&currentIncomingLink);
     freePageList(&currentOutgoingLink);
-
-    //fprintf(stderr, "local graph: %s\n", localGraph);
     
     log_message(LOG_DEBUG, "Exiting function createLocalGraphMindMap");
     return localGraph;
@@ -644,41 +641,41 @@ void freePageList(pageList** head) {
         
         // Debugging prints
         if (temp->id){
-            fprintf(stderr, "Freeing id: %p\n", (void*)temp->id);
+            log_message(LOG_DEBUG, "Freeing page struct variable id: %p\n", (void*)temp->id);
             free(temp->id);
         }
         if (temp->title){
-            fprintf(stderr, "Freeing title: %p\n", (void*)temp->title);
+            log_message(LOG_DEBUG, "Freeing page struct variable title: %p\n", (void*)temp->title);
             free(temp->title);
         }
         if (temp->path){
-            fprintf(stderr, "Freeing path: %p\n", (void*)temp->path);
+            log_message(LOG_DEBUG, "Freeing page struct variable path: %p\n", (void*)temp->path);
             free(temp->path);
         }
         if (temp->description){
-            fprintf(stderr, "Freeing description: %p\n", (void*)temp->description);
+            log_message(LOG_DEBUG, "Freeing page struct variable description: %p\n", (void*)temp->description);
             free(temp->description);
         }
         if (temp->content){
-            fprintf(stderr, "Freeing content: %p\n", (void*)temp->content);
+            log_message(LOG_DEBUG, "Freeing page struct variable content: %p\n", (void*)temp->content);
             free(temp->content);
         }
         if (temp->updatedAt){
-            fprintf(stderr, "Freeing updatedAt: %p\n", (void*)temp->updatedAt);
+            log_message(LOG_DEBUG, "Freeing page struct variable updatedAt: %p\n", (void*)temp->updatedAt);
             free(temp->updatedAt);
         }
         if (temp->createdAt){ 
-            printf("Freeing createdAt: %p\n", (void*)temp->createdAt);
+            log_message(LOG_DEBUG, "Freeing page struct variable createdAt: %p\n", (void*)temp->createdAt);
             free(temp->createdAt);
         }
         if (temp->authorId){ 
-            printf("Freeing authorId: %p\n", (void*)temp->authorId);
+            log_message(LOG_DEBUG, "Freeing page struct variable authorId: %p\n", (void*)temp->authorId);
             free(temp->authorId);
         }
         
-        fprintf(stderr, "about to free temp\n");
+        log_message(LOG_DEBUG, "about to free page struct");
         free(temp);
-        fprintf(stderr, "freed temp\n");
+        log_message(LOG_DEBUG, "freed page struct");
     }
 
     
@@ -825,7 +822,7 @@ pageList* findPageLinks(char *content, pageList **links) {
         char *title = (char *)malloc((titleLength + 1) * sizeof(char));
         char *link = (char *)malloc((linkLength + 1) * sizeof(char));
         if (!title || !link) {
-            fprintf(stderr, "Memory allocation error\n");
+            log_message(LOG_ERROR, "Memory allocation error");
             if (title) free(title);
             if (link) free(link);
             freePageList(links);
@@ -841,7 +838,7 @@ pageList* findPageLinks(char *content, pageList **links) {
         // Check if link is valid (you might need to refine this check)
         if (strstr(link, ".") == NULL) {
             *links = addPageToList(links, "", title, link, "", "", "", "", "");
-            fprintf(stderr, "found link %s %s\n", link, title);
+            log_message(LOG_DEBUG, "found link %s %s", link, title);
         }
 
         free(title);
@@ -871,7 +868,7 @@ pageList* findImageLinks(char *input, pageList** head) {
         ptr += strlen(startFlag1);
         char *linkStart = strstr(ptr, startFlag2);
         if (!linkStart) {
-            fprintf(stderr, "Error: Missing startFlag2 after startFlag1\n");
+            log_message(LOG_ERROR, "Error: Missing startFlag2 after startFlag1");
             freePageList(&imageLinks);
             return imageLinks;
         }
@@ -879,7 +876,7 @@ pageList* findImageLinks(char *input, pageList** head) {
         linkStart += strlen(startFlag2);
         char *linkEnd = strstr(linkStart, endFlag);
         if (!linkEnd) {
-            fprintf(stderr, "Error: Missing endFlag after linkStart\n");
+            log_message(LOG_ERROR, "Error: Missing endFlag after linkStart");
             freePageList(&imageLinks);
             return imageLinks;
         }
@@ -888,7 +885,7 @@ pageList* findImageLinks(char *input, pageList** head) {
         int linkLen = linkEnd - linkStart;
         char *link = (char *)malloc((linkLen + 1) * sizeof(char));
         if (!link) {
-            fprintf(stderr, "Memory allocation error\n");
+            log_message(LOG_ERROR, "Memory allocation error");
             freePageList(&imageLinks);
             return imageLinks;
         }
@@ -944,7 +941,7 @@ pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *sub
     pageList *incomingLinks = *head;
     char *contentCopy = strdup(linkTrackerContent);
     if (contentCopy == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
+        log_message(LOG_ERROR, "Memory allocation failed");
         exit(1);
     }
 
@@ -978,7 +975,7 @@ pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *sub
             if (strcmp(link, subjectPagePath) == 0) {
                 *titleEnd = '\0';
                 *pathEnd = '\0';
-                fprintf(stderr, "Found a reference in title: %s, path:%s\n", titleStart, pathStart);
+                log_message(LOG_DEBUG, "Found a reference in title: %s, path:%s\n", titleStart, pathStart);
                 incomingLinks = addPageToList(&incomingLinks, "", titleStart, pathStart, "", "", "", "", "");
                 break;
             }
@@ -1012,7 +1009,7 @@ pageList* findOutgoingLinks(pageList** head, char *linkTrackerContent, char *sub
     pageList *outgoingLinks = *head;
     char *contentCopy = strdup(linkTrackerContent);
     if (contentCopy == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
+        log_message(LOG_ERROR, "Memory allocation failed");
         exit(1);
     }
 
@@ -1108,36 +1105,34 @@ void parseRequirementsList(cJSON* requirements, char *content) {
     char *descriptionEndFlag = "\\n";
     char *ptr = content;
 
-    //fprintf(stderr, "Content received:\n\n%s\n\n", content);
-
     while (*ptr) {
         char *idStart = strstr(ptr, idStartFlag);
         if (idStart == NULL){
-            fprintf(stderr, "did not find idStart, Breaking\n");
+            log_message(LOG_DEBUG, "did not find idStart, Breaking");
             break; // No more links
         }
 
         char *pathStart = strstr(idStart, pathStartFlag);
         if (pathStart == NULL){
-            fprintf(stderr, "did not find pathStart, Breaking\n");
+            log_message(LOG_DEBUG, "did not find pathStart, Breaking");
             break; // No more links
         }
 
         char *nameStart = strstr(pathStart, nameStartFlag);
         if (nameStart == NULL){
-            fprintf(stderr, "did not find nameStart, Breaking\n");
+            log_message(LOG_DEBUG, "did not find nameStart, Breaking");
             break; // No more links
         }
 
         char *descriptionStart = strstr(nameStart, descriptionStartFlag);
         if (descriptionStart == NULL){
-            fprintf(stderr, "did not find descriptionStart, Breaking\n");
+            log_message(LOG_DEBUG, "did not find descriptionStart, Breaking");
             break; // No more links
         }
 
         char *descriptionEnd = strstr(descriptionStart + strlen(descriptionStartFlag), descriptionEndFlag);
         if (descriptionEnd == NULL){
-            fprintf(stderr, "did not find descriptionEnd, Breaking\n");
+            log_message(LOG_DEBUG, "did not find descriptionEnd, Breaking");
             break; // No more links
         }
 
@@ -1158,7 +1153,7 @@ void parseRequirementsList(cJSON* requirements, char *content) {
         char *name = (char *)malloc((nameLength + 1) * sizeof(char));
         char *description = (char *)malloc((descriptionLength + 1) * sizeof(char));
         if (!id || !path || !name || !description) {
-            fprintf(stderr, "Memory allocation error\n");
+            log_message(LOG_ERROR, "Memory allocation error");
             if (id) free(id);
             if (path) free(path);
             if (name) free(name);
@@ -1175,8 +1170,6 @@ void parseRequirementsList(cJSON* requirements, char *content) {
         strncpy(description, descriptionStart + strlen(descriptionStartFlag), descriptionLength);
         description[descriptionLength] = '\0';
 
-        
-        //fprintf(stderr, "found requirement \nid: %s\npath: %s\nname: %s\ndescription: %s\n", id, path, name, description);
         addRequirementToCjsonObject(requirements, id, path, name, description);
         
 
@@ -1238,9 +1231,6 @@ char* parseJSONRequirementListInToArray(cJSON* requirements){
 
     // Clean up the JSON object
 
-    //fprintf(stderr, "%s\n\n\n\n", output_str);
-
-    
     log_message(LOG_DEBUG, "Exiting function parseJSONRequirementListInToArray");
     return output_str;
 
@@ -1250,7 +1240,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
     log_message(LOG_DEBUG, "Entering function parseArrayIntoJSONRequirementList");
     
 
-    fprintf(stderr, "input_str: %s\n", input_str);
+    log_message(LOG_DEBUG, "input_str: %s\n", input_str);
 
     // Parse the input string as JSON
     cJSON *input_json = cJSON_Parse(input_str);
@@ -1386,23 +1376,23 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList){
         cJSON *description = cJSON_GetObjectItemCaseSensitive(requirement, "Description");
 
         if (cJSON_IsString(id) && id->valuestring) {
-            //printf("ID: %s\n", id->valuestring);
+            log_message(LOG_DEBUG, "ID: %s", id->valuestring);
             DRL = appendStrings(DRL, "- [");
             DRL = appendStrings(DRL, id->valuestring);
             DRL = appendStrings(DRL, "](/");
         }
         if (cJSON_IsString(path) && path->valuestring) {
-            //printf("Path: %s\n", path->valuestring);
+            log_message(LOG_DEBUG, "Path: %s", path->valuestring);
             DRL = appendStrings(DRL, path->valuestring);
             DRL = appendStrings(DRL, ") **");
         }
         if (cJSON_IsString(title) && title->valuestring) {
-            //printf("title: %s\n", title->valuestring);
+            log_message(LOG_DEBUG, "title: %s", title->valuestring);
             DRL = appendStrings(DRL, title->valuestring);
             DRL = appendStrings(DRL, "**\n");
         }
         if (cJSON_IsString(description) && description->valuestring) {
-            //printf("Description: %s\n", description->valuestring);
+            log_message(LOG_DEBUG, "Description: %s", description->valuestring);
             DRL = appendStrings(DRL, description->valuestring);
             DRL = appendStrings(DRL, "\n");
         }
@@ -1463,13 +1453,11 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
         //TITLE
         if (cJSON_IsString(id) && id->valuestring) {
-            //printf("ID: %s\n", id->valuestring);
             pageContent = appendStrings(pageContent, "# ");
             pageContent = appendStrings(pageContent, id->valuestring);
             pageContent = appendStrings(pageContent, ": ");
         }
         if (cJSON_IsString(title) && title->valuestring) {
-            //printf("title: %s\n", title->valuestring);
             pageContent = appendStrings(pageContent, title->valuestring);
             pageContent = appendStrings(pageContent, "\n");
         }
@@ -1477,7 +1465,6 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
         //DESCRIPTION
         if (cJSON_IsString(description) && description->valuestring) {
-            //printf("Description: %s\n", description->valuestring);
             pageContent = appendStrings(pageContent, ">**Description**: ");
             pageContent = appendStrings(pageContent, description->valuestring);
             pageContent = appendStrings(pageContent, "\n");
@@ -1486,32 +1473,27 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
         //INFORMATION BOX: SOURCES AND ASSIGNEE
         if (cJSON_IsString(source) && source->valuestring && strcmp(source->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             pageContent = appendStrings(pageContent, "\n>**Source**: ");
             pageContent = appendStrings(pageContent, source->valuestring);
             pageContent = appendStrings(pageContent, "\n");
         }
         if (cJSON_IsString(author) && author->valuestring && strcmp(author->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             pageContent = appendStrings(pageContent, ">**Author**: ");
             pageContent = appendStrings(pageContent, author->valuestring);
             pageContent = appendStrings(pageContent, "\n");
         }
         if (cJSON_IsString(assignee) && assignee->valuestring && strcmp(assignee->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             pageContent = appendStrings(pageContent, ">**Assignee**: ");
             pageContent = appendStrings(pageContent, assignee->valuestring);
             pageContent = appendStrings(pageContent, "\n");
         }
         if (strcmp(source->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 || strcmp(author->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 || strcmp(assignee->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             pageContent = appendStrings(pageContent, "{.is-info}\n");
         }
 
 
         //JUSTIFICATION
         if (cJSON_IsString(justification) && justification->valuestring && strcmp(justification->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             pageContent = appendStrings(pageContent, "\n## Justification\n");
             pageContent = appendStrings(pageContent, justification->valuestring);
             pageContent = appendStrings(pageContent, "\n");
@@ -1520,7 +1502,6 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
         //COMPLIANCE
         if (cJSON_IsString(compliance) && compliance->valuestring && strcmp(compliance->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             
             if(strcmp(compliance->valuestring, "Compliant") == 0){
                 pageContent = appendStrings(pageContent, "\n# Compliance\n");
@@ -1539,7 +1520,6 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
         //CRITICALITY
         if (cJSON_IsString(criticality) && criticality->valuestring && strcmp(criticality->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            //printf("Path: %s\n", path->valuestring);
             
             if(strcmp(criticality->valuestring, "Low") == 0){
                 pageContent = appendStrings(pageContent, "\n# Criticality\n");
@@ -1620,8 +1600,6 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
         
         reqPage = addPageToList(&reqPage, TEST_REQ_PAGE_ID, id->valuestring, "", "", pageContent, "", "", "");
 
-        fprintf(stderr, "\n\n\n%s\n\n\n", pageContent);
-
         break;
     }
 
@@ -1640,7 +1618,7 @@ void appendMentionedIn(pageList** head){
 
     pageList* linkTrackerPage = NULL;
     linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "", "");
-    fprintf(stderr,"linkTrackerPage id set\n");
+    log_message(LOG_DEBUG, "linkTrackerPage id set");
     linkTrackerPage = getPage(&linkTrackerPage);
 
     pageList* IncomingLinks = findIncomingLinks(&IncomingLinks, linkTrackerPage->content, subjectPage->path);
@@ -1689,7 +1667,7 @@ char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, i
     log_message(LOG_DEBUG, "Entering function updateVcdStackedAreaChart");
     
 
-    fprintf(stderr, "JSON string: %s\n", json_str);
+    log_message(LOG_DEBUG, "JSON string: %s", json_str);
     
     // Parse the input JSON string
     cJSON *root = cJSON_Parse(json_str);
@@ -1732,7 +1710,7 @@ char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, i
     cJSON_AddItemToArray(values, item2);
     cJSON_AddItemToArray(values, item3);
 
-    fprintf(stderr, "about to call cJSON_Print\n");
+    log_message(LOG_DEBUG, "about to call cJSON_Print");
 
     // Convert the updated JSON structure back to a string
     char *updated_json_str = cJSON_Print(root);
@@ -1826,9 +1804,9 @@ void freeWikiFlagList(wikiFlag** head) {
             free(temp->pointerToBeginningOfSecondMarker);
         }
         
-        fprintf(stderr, "about to free temp\n");
+        log_message(LOG_DEBUG, "about to free temp");
         free(temp);
-        fprintf(stderr, "freed temp\n");
+        log_message(LOG_DEBUG, "freed temp");
     }
 
     

@@ -78,13 +78,13 @@ void wikiApi(char *query){
         res = curl_easy_perform(curl);
         // Check for errors
         if (res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         }
         // Check the HTTP status code
         long http_code = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         if (http_code != 200) {
-            fprintf(stderr, "wikiApi: HTTP request failed with status code %ld\n", http_code);
+            log_message(LOG_ERROR, "wikiApi: HTTP request failed with status code %ld\n", http_code);
             exit(-1);;
         }
         // Clean up
@@ -161,7 +161,7 @@ pageList* getPage(pageList** head){
     
     pageList* current = *head;
     getPageContentQuery(current->id);
-    fprintf(stderr, "%s\n" ,chunk.response);
+    log_message(LOG_DEBUG, "%s" ,chunk.response);
     sscanf(chunk.response, "{ \"id\": %s", current->id);
     current->title = jsonParserGetStringValue(chunk.response, "\"title\"");
     current->path = jsonParserGetStringValue(chunk.response, "\"path\"");
@@ -170,7 +170,7 @@ pageList* getPage(pageList** head){
     current->updatedAt = jsonParserGetStringValue(chunk.response, "\"updatedAt\"");
     current->createdAt = jsonParserGetStringValue(chunk.response, "\"createdAt\"");
     current->authorId = jsonParserGetIntValue(chunk.response, "\"authorId\"");
-    //fprintf(stderr, "title: %s\n, path: %s\n, description: %s\n, content: %s\n, updatedAt: %s\n", current->title, current->path, current->description, current->content, current->updatedAt);
+    log_message(LOG_DEBUG, "title: %s\n, path: %s\n, description: %s\n, content: %s\n, updatedAt: %s\n", current->title, current->path, current->description, current->content, current->updatedAt);
     free(chunk.response);
     
     log_message(LOG_DEBUG, "Exiting function getPage");
@@ -188,7 +188,7 @@ pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* f
 
     char* start = strstr(jsonString, "\"list\":");
     if (start == NULL) {
-        fprintf(stderr, "Invalid JSON format.\n");
+        log_message(LOG_ERROR, "Invalid JSON format.");
         return *head;
     }
 
@@ -296,7 +296,7 @@ pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* f
         }
 
         if (strcmp(filterType, "time") == 0 && strcmp(filterCondition, "none") != 0 && compareTimes(filterCondition, updatedAt) == 1) {
-            fprintf(stderr, "Last page found\n");
+            log_message(LOG_DEBUG, "Last page found");
             free(id);
             free(title);
             free(path);
@@ -314,7 +314,7 @@ pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* f
         free(updatedAt);
     }
 
-    fprintf(stderr, "Finished searching for pages\n");
+    log_message(LOG_DEBUG, "Finished searching for pages");
     
     log_message(LOG_DEBUG, "Exiting function parseJSON");
     return *head;
@@ -324,11 +324,11 @@ void updatePageContentMutation(pageList* head){
     log_message(LOG_DEBUG, "Entering function updatePageContentMutation");
     
     char *temp_query = template_update_page_mutation;
-    //fprintf(stderr,"About to update page (id: %s) to content: %s", head->id, head->content);
+    log_message(LOG_DEBUG, "About to update page (id: %s) to content: %s", head->id, head->content);
     temp_query = replaceWord(temp_query, default_page.id, head->id);
     temp_query = replaceWord(temp_query, default_page.content, head->content);
 
-    //fprintf(stderr,"About to update send query: %s\n", temp_query);
+    log_message(LOG_DEBUG, "About to update send query: %s\n", temp_query);
     wikiApi(temp_query);
     log_message(LOG_DEBUG, "Exiting function updatePageContentMutation");
 }

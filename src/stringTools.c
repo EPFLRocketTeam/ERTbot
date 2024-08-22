@@ -153,7 +153,6 @@ char* replaceParagraph(char* original, char* newSubstring, char* startPtr, char*
     // Copy the modified string back to the original
     
     log_message(LOG_DEBUG, "Exiting function replaceParagraph");
-    fprintf(stderr, "exiting replaceParagraph\n");
     return temp;
 }
 
@@ -304,7 +303,7 @@ char* appendStrings(char *str1,  char *str2) {
     char *combined = (char *)malloc(len1 + len2 + 1); // +1 for the null terminator
     
     if (combined == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
+        log_message(LOG_ERROR, "Memory allocation failed");
         exit(1);
     }
     

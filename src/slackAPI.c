@@ -63,12 +63,12 @@ int sendMessageToSlack( char *message) {
         curl_slist_free_all(headerlist);
 
         if(res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             return 1;
         }
     }
     else {
-        fprintf(stderr, "Failed to initialize libcurl\n");
+        log_message(LOG_ERROR, "Failed to initialize libcurl");
         return 1;
     }
 
@@ -119,14 +119,14 @@ void checkLastSlackMessage() {
 
         // Check for errors
         if (res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         }
 
         // Check the HTTP status code
         long http_code = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         if (http_code != 200) {
-            fprintf(stderr, "checkLastSlackMessage: HTTP request failed with status code %ld\n", http_code);
+            log_message(LOG_ERROR, "checkLastSlackMessage: HTTP request failed with status code %ld\n", http_code);
         }
 
         // Clean up
@@ -187,12 +187,12 @@ int addSlackMember(char *channels, char *email) {
         curl_easy_cleanup(curl);
         curl_slist_free_all(headerlist);
         if(res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             return 1;
         }
     }
     else {
-        fprintf(stderr, "Failed to initialize libcurl\n");
+        log_message(LOG_ERROR, "Failed to initialize libcurl");
         return 1;
     }
     curl_global_cleanup();
