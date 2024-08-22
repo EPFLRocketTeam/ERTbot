@@ -261,10 +261,10 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
     
     //If received a message which was not sent by bot, breakdown message into command structure and return command 
     if(strcmp(slackMsg->sender, "U06RQCAT0H1") != 0){
-        log_message(LOG_INFO, "Received a command on slack");
         breakdownCommand(slackMsg->message, &cmd);
         log_message(LOG_DEBUG, "Command broke down");
         *headOfCommandQueue = addCommandToQueue(headOfCommandQueue, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
+        log_message(LOG_INFO, "Received a %s command on slack", cmd.function);
         log_message(LOG_DEBUG, "Command added to queue");
     }
     
@@ -289,13 +289,14 @@ static command** lookForNewlyUpdatedPages(command** commandQueue){
     log_message(LOG_DEBUG, "Entering function lookForNewlyUpdatedPages");
     
     pageList* updatedPages = NULL;
-    log_message(LOG_INFO, "Last Page refresh check happened at: %s\n", lastPageRefreshCheck);
+    log_message(LOG_DEBUG, "Last Page refresh check happened at: %s", lastPageRefreshCheck);
     updatedPages = populatePageList(&updatedPages, "time", lastPageRefreshCheck);
     pageList* updatedPagesHead = updatedPages;
 
     while(updatedPages){
 
         *commandQueue = addCommandToQueue(commandQueue, "onPageUpdate", updatedPages->id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        log_message(LOG_INFO, "onPageUpdate command has been added to queue for page id: %s", updatedPages->id);
         updatedPages = updatedPages->next;
     }
 

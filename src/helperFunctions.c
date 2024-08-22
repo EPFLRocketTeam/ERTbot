@@ -25,9 +25,6 @@
 #define MAX_ARGUMENTS 10
 #define MAX_ARGUMENT_LENGTH 100
 
-char *template_DRL = "# General Design Requirements List\n\n\n# table {.tabset}\n\n## General\n";
-char *template_REQ = "";
-
 
 pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt, char *authorId) {
     log_message(LOG_DEBUG, "Entering function addPageToList");

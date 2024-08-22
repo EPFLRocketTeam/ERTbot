@@ -13,6 +13,8 @@
 #include "../include/log.h"
 #include "../include/requirements.h"
 
+char *template_DRL = "# General Design Requirements List\n\n\n# table {.tabset}\n\n## General\n";
+char *template_REQ = "";
 
 /*
 char *extractVerificationStatsForAReview(cJSON *requirementList){
@@ -566,8 +568,8 @@ char* parseJSONRequirementListInToArray(cJSON* requirements){
         const char *name = cJSON_GetObjectItem(req, "name")->valuestring;
         const char *description = cJSON_GetObjectItem(req, "description")->valuestring;
 
-        char req_str[512]; // Buffer for the current requirement string
-        snprintf(req_str, sizeof(req_str), "[\"%s\", \"%s\", \"%s\", \"%s\"]", id, path, name, description);
+        char req_str[1000]; // Buffer for the current requirement string
+        snprintf(req_str, sizeof(req_str), "[\"%s\", \"%s\", \"%s\"]", id, name, description);
 
         if (i > 0) {
             strcat(output_str, ", ");
@@ -606,7 +608,6 @@ void addRequirementToCjsonObject(cJSON *requirements, char *idStr, char *pathStr
     cJSON_AddItemToObject(requirement, "name", name);
     cJSON_AddItemToObject(requirement, "description", description);
 
-    
     log_message(LOG_DEBUG, "Exiting function addRequirementToCjsonObject");
 
 }
@@ -619,13 +620,36 @@ void parseRequirementsList(cJSON* requirements, char *content) {
     char *nameStartFlag = ") **";
     char *descriptionStartFlag = "**\\n";
     char *descriptionEndFlag = "\\n";
+    char *groupStartFlag ="\\n## ";
+    char *groupEndFlag = idStartFlag;
     char *ptr = content;
+    int isLastGroup = 0;
+
 
     while (*ptr) {
+    
         char *idStart = strstr(ptr, idStartFlag);
         if (idStart == NULL){
             log_message(LOG_DEBUG, "did not find idStart, Breaking");
             break; // No more links
+        }
+
+        
+        char *groupStart = strstr(ptr, groupStartFlag);
+        if (groupStart == NULL){
+            log_message(LOG_DEBUG, "did not find groupStart, setting isLastGroup to 1");
+            isLastGroup = 1;
+        }
+        if (groupStart < idStart && isLastGroup == 0){
+            int groupLength = idStart - groupStart - strlen(groupStartFlag);
+            char *group = (char *)malloc((groupLength + 1) * sizeof(char));
+            strncpy(group, groupStart + strlen(groupStartFlag), groupLength);
+            group[groupLength] = '\0';
+            addRequirementToCjsonObject(requirements, group, "", "", "");
+
+            ptr = idStart;
+
+            continue;
         }
 
         char *pathStart = strstr(idStart, pathStartFlag);
@@ -686,8 +710,9 @@ void parseRequirementsList(cJSON* requirements, char *content) {
         strncpy(description, descriptionStart + strlen(descriptionStartFlag), descriptionLength);
         description[descriptionLength] = '\0';
 
+        log_message(LOG_DEBUG, "adding requirement with id: %s\npath: %s\nname: %s", id, path, name);
         addRequirementToCjsonObject(requirements, id, path, name, description);
-        
+
 
         free(id);
         free(path);

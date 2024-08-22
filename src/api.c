@@ -98,7 +98,7 @@ char *jsonParserGetStringValue(char *json, char *key) {
     strncpy(value, start, length);
     value[length] = '\0';
 
-    
+    log_message(LOG_DEBUG, "Value for key: %s is: %s", key, value);
     log_message(LOG_DEBUG, "Exiting function jsonParserGetStringValue");
     return value;
 }
@@ -110,7 +110,7 @@ char *jsonParserGetIntValue(char *json, char *key) {
     char *start = strstr(json, key);
     if (start == NULL) {
         log_message(LOG_ERROR, "Error: Key '%s' not found in JSON\n", key);
-        return;  // Return error code
+        return NULL;  // Return error code
     }
 
     // Move to the value part of the key-value pair
@@ -120,7 +120,7 @@ char *jsonParserGetIntValue(char *json, char *key) {
     char *end = strpbrk(start, ",}");
     if (end == NULL) {
         log_message(LOG_ERROR, "Error: Malformed JSON");
-        return;  // Return error code
+        return NULL;  // Return error code
     }
 
     // Extract the integer value as a string
@@ -128,7 +128,7 @@ char *jsonParserGetIntValue(char *json, char *key) {
     char *valueStr = malloc(length + 1);
     if (valueStr == NULL) {
         log_message(LOG_ERROR, "Error: Memory allocation failed");
-        return;  // Return error code
+        return NULL;  // Return error code
     }
 
     strncpy(valueStr, start, length);
