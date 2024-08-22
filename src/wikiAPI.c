@@ -19,6 +19,8 @@
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
 #include "../include/log.h"
+#include "../include/requirements.h"
+
 
 
 char *template_pages_singles_query = "{\"query\":\"{pages {single(id: DefaultID){id, path, title, content, description, updatedAt, createdAt, authorId}}}\"}";

@@ -19,6 +19,8 @@
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
 #include "../include/log.h"
+#include "../include/requirements.h"
+
 
 char *GITHUB_API_TOKEN;
 char *WIKI_API_TOKEN;

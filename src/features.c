@@ -19,6 +19,8 @@
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
 #include "../include/log.h"
+#include "../include/requirements.h"
+
 
 char* buildMap(command cmd) {
     log_message(LOG_DEBUG, "Entering function buildMap");

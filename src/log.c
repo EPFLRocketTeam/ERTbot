@@ -11,6 +11,8 @@
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
 #include "../include/log.h"
+#include "../include/requirements.h"
+
 
 void log_message(int level, const char *format, ...) {
     FILE *log_file;

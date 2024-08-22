@@ -18,6 +18,8 @@
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
 #include "../include/log.h"
+#include "../include/requirements.h"
+
 
 
 char *template_batch_update_url = "https://sheets.googleapis.com/v4/spreadsheets/DefaultSheetID/values:batchUpdate";

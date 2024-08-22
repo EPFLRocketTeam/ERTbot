@@ -19,6 +19,8 @@
 #include "../include/sheetAPI.h"
 #include "../include/command.h"
 #include "../include/log.h"
+#include "../include/requirements.h"
+
 
 
 int fetchImage(char* imagePath, char * pagePath){
