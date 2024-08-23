@@ -203,4 +203,6 @@ void createRequirementPage(command cmd);
 void createVcdPage(command cmd);
 
 void onPageUpdate(command cmd);
+
+void updateStatsPage(command cmd);
 #endif

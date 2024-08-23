@@ -456,8 +456,8 @@ pageList* findIncomingLinks(pageList **head, char *linkTrackerContent, char *sub
  */
 pageList* findOutgoingLinks(pageList **head, char *linkTrackerContent, char *subjectPagePath);
 
-
-
 void freeWikiFlagList(wikiFlag** head);
+
+char* convert_timestamp_to_cest(char *timestamp);
 
 #endif

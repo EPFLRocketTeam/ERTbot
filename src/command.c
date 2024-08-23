@@ -322,8 +322,8 @@ PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicComm
     log_message(LOG_DEBUG, "Entering function initializePeriodicCommands");
     
     command* getRyansHomePage = (command*)malloc(sizeof(command));
-    getRyansHomePage->function = "getPages";
-    getRyansHomePage->argument_1 = "competition/firehorn/systems_engineering/other/ryan_homepage/bababoui";
+    getRyansHomePage->function = "updateStatsPage";
+    getRyansHomePage->argument_1 = NULL;
     getRyansHomePage->argument_2 = NULL;
     getRyansHomePage->argument_3 = NULL;
     getRyansHomePage->argument_4 = NULL;
@@ -336,7 +336,7 @@ PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicComm
 
     headOfPeriodicCommands = (PeriodicCommand**)malloc(sizeof(PeriodicCommand*));
     *headOfPeriodicCommands = NULL;
-    *headOfPeriodicCommands = addPeriodicCommand(headOfPeriodicCommands, getRyansHomePage, 10);
+    *headOfPeriodicCommands = addPeriodicCommand(headOfPeriodicCommands, getRyansHomePage, 3600);
     
     log_message(LOG_DEBUG, "Exiting function initializePeriodicCommands");
     return headOfPeriodicCommands;
@@ -406,6 +406,11 @@ command** executeCommand(command** commandQueue){
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildLocalGraph") == 0){ //Works
         buildLocalGraph(**commandQueue);
     }
+
+    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateStatsPage") == 0){
+        updateStatsPage(**commandQueue);
+    }
+
 
 /*
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "getPDF") == 0){
