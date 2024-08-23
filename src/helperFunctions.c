@@ -1127,3 +1127,42 @@ void freeWikiFlagList(wikiFlag** head) {
     
     log_message(LOG_DEBUG, "Exiting function freeWikiFlagList");
 }
+
+char* convert_timestamp_to_cest(char *timestamp) {
+    struct tm tm;
+    time_t raw_time;
+    char *output_buffer = malloc(100); // Allocate memory for the output string
+
+    if (output_buffer == NULL) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        return NULL;
+    }
+
+    // Initialize the struct tm to avoid any potential issues
+    memset(&tm, 0, sizeof(struct tm));
+
+    // Parse the timestamp into a struct tm (UTC time)
+    if (strptime(timestamp, "%Y-%m-%dT%H:%M:%S", &tm) == NULL) {
+        fprintf(stderr, "Failed to parse timestamp.\n");
+        free(output_buffer);
+        return NULL;
+    }
+
+    // Convert the struct tm to time_t (in UTC)
+    raw_time = timegm(&tm);
+
+    // Add 2 hours for CEST (Central European Summer Time)
+    raw_time += 2 * 3600;
+
+    // Convert back to struct tm in local time (CEST)
+    struct tm *cest_time = localtime(&raw_time);
+
+    // Format the CEST time into a readable string
+    if (strftime(output_buffer, 100, "%A, %B %d, %Y %H:%M:%S", cest_time) == 0) {
+        fprintf(stderr, "Failed to format time.\n");
+        free(output_buffer);
+        return NULL;
+    }
+
+    return output_buffer; // Return the formatted string
+}

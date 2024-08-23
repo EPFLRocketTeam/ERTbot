@@ -539,3 +539,39 @@ void onPageUpdate(command cmd){
     
     log_message(LOG_DEBUG, "Exiting function onPageUpdate");
 }
+
+void updateStatsPage(command cmd){
+    log_message(LOG_DEBUG, "Entering function updateStatsPage");
+    
+    pageList* head = NULL;
+    head = populatePageList(&head, "time", "none");
+
+    pageList* current = head;
+
+    char* linksListOfPages = "# Recently Edited Pages\n";
+
+    for(int i = 0; i < 5; i++){
+        linksListOfPages = appendStrings(linksListOfPages, "- [");
+        linksListOfPages = appendStrings(linksListOfPages, current->title);
+        linksListOfPages = appendStrings(linksListOfPages, "](/");
+        linksListOfPages = appendStrings(linksListOfPages, current->path);
+        linksListOfPages = appendStrings(linksListOfPages, ")\n**updated at:** ");
+        linksListOfPages = appendStrings(linksListOfPages, convert_timestamp_to_cest(current->updatedAt));
+        linksListOfPages = appendStrings(linksListOfPages, "\n");
+        current = current->next;
+    }
+
+    freePageList(&head);
+
+    linksListOfPages = appendStrings(linksListOfPages, "{.links-list}");
+    linksListOfPages = replaceWord(linksListOfPages, "\n", "\\\\n");
+
+    pageList* statsPage = NULL;
+    statsPage = addPageToList(&statsPage, "1178", "", "", "", linksListOfPages, "", "", "");
+    log_message(LOG_DEBUG, "statsPage id set");
+    updatePageContentMutation(statsPage);
+    renderMutation(&statsPage);
+    sendMessageToSlack("stats page updated");
+
+    log_message(LOG_DEBUG, "Exiting function updateStatsPage");
+}
