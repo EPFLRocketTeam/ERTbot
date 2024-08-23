@@ -72,7 +72,7 @@ char *jsonParserGetStringValue(char *json, char *key) {
     
     char *start = strstr(json, key);
     if (start == NULL) {
-        log_message(LOG_ERROR, "Error: Key '%s' not found in JSON\n", key);
+        log_message(LOG_ERROR, "Error: Key '%s' not found in JSON", key);
         return NULL;
     }
 
@@ -109,7 +109,7 @@ char *jsonParserGetIntValue(char *json, char *key) {
     // Find the key in the JSON string
     char *start = strstr(json, key);
     if (start == NULL) {
-        log_message(LOG_ERROR, "Error: Key '%s' not found in JSON\n", key);
+        log_message(LOG_ERROR, "Error: Key '%s' not found in JSON", key);
         return NULL;  // Return error code
     }
 

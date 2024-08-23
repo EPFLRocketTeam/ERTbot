@@ -72,7 +72,7 @@ void sheetAPI(char *query, char *url, char *requestType) {
 
     curl_global_cleanup();
 
-    log_message(LOG_DEBUG, "chunk.response after sheet API:%s", chunk.response);
+    //log_message(LOG_DEBUG, "chunk.response after sheet API:%s", chunk.response);
     
     log_message(LOG_DEBUG, "Exiting function sheetAPI");
 }

@@ -13,7 +13,7 @@
 #include "../include/log.h"
 #include "../include/requirements.h"
 
-char *template_DRL = "# General Design Requirements List\n\n\n# table {.tabset}\n\n## General\n";
+char *template_DRL = "# General Design Requirements List\n\n\n# table {.tabset}\n\n";
 char *template_REQ = "";
 
 /*
@@ -373,6 +373,8 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList){
 
     char *DRL = strdup(template_DRL);
 
+    int isFirstGroup = 1;
+
     // Iterate over each requirement object in the requirements array
     int num_reqs = cJSON_GetArraySize(requirements);
     for (int i = 0; i < num_reqs; i++) {
@@ -384,21 +386,41 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList){
 
         // Get and print each item of the requirement object
         cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
-        cJSON *path = cJSON_GetObjectItemCaseSensitive(requirement, "Path");
         cJSON *title = cJSON_GetObjectItemCaseSensitive(requirement, "Title");
         cJSON *description = cJSON_GetObjectItemCaseSensitive(requirement, "Description");
+
+        if(strlen(id->valuestring) < 2){
+            log_message(LOG_DEBUG, "ID is smaller than one, breaking");
+            break;
+        }
+        
+        if(title == NULL){
+            log_message(LOG_DEBUG, "Found a new group");
+
+            if(!isFirstGroup){
+                DRL = appendStrings(DRL, "{.links-list}");
+                isFirstGroup = 0;
+            }
+            else{isFirstGroup = 0;}
+
+            DRL = appendStrings(DRL, "\n\n\n## ");
+            DRL = appendStrings(DRL, id->valuestring);
+            DRL = appendStrings(DRL, "\n");
+            continue;
+        }
 
         if (cJSON_IsString(id) && id->valuestring) {
             log_message(LOG_DEBUG, "ID: %s", id->valuestring);
             DRL = appendStrings(DRL, "- [");
             DRL = appendStrings(DRL, id->valuestring);
             DRL = appendStrings(DRL, "](/");
-        }
-        if (cJSON_IsString(path) && path->valuestring) {
-            log_message(LOG_DEBUG, "Path: %s", path->valuestring);
-            DRL = appendStrings(DRL, path->valuestring);
+            DRL = appendStrings(DRL, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/");
+            DRL = appendStrings(DRL, id->valuestring);
             DRL = appendStrings(DRL, ") **");
         }
+        
+        
+        
         if (cJSON_IsString(title) && title->valuestring) {
             log_message(LOG_DEBUG, "title: %s", title->valuestring);
             DRL = appendStrings(DRL, title->valuestring);
@@ -424,7 +446,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
     log_message(LOG_DEBUG, "Entering function parseArrayIntoJSONRequirementList");
     
 
-    log_message(LOG_DEBUG, "input_str: %s\n", input_str);
+    //log_message(LOG_DEBUG, "input_str: %s\n", input_str);
 
     // Parse the input string as JSON
     cJSON *input_json = cJSON_Parse(input_str);
@@ -461,17 +483,15 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
     // Add the requirements array to the JSON object
     cJSON_AddItemToObject(json, "requirements", requirements);
 
+    log_message(LOG_DEBUG, "about to parse requirements from value array into cJSON object");
+
     // Iterate over the input array of arrays and create JSON objects for each requirement
     int num_reqs = cJSON_GetArraySize(values_array);
     for (int i = 0; i < num_reqs; i++) {
+        
         cJSON *req_array = cJSON_GetArrayItem(values_array, i);
-        if (!cJSON_IsArray(req_array) || cJSON_GetArraySize(req_array) != 35) {
-            log_message(LOG_ERROR, "Error: Each requirement should be an array of 35 strings, but the array size is: %d\n", cJSON_GetArraySize(req_array));
-            cJSON_Delete(json);
-            cJSON_Delete(input_json);
-            return NULL;
-        }
-
+        
+    
         // Create a JSON object for the current requirement
         cJSON *req = cJSON_CreateObject();
         if (!req) {
@@ -481,8 +501,22 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
             return NULL;
         }
 
+        if(cJSON_GetArrayItem(req_array, REQ_ID_COL) == NULL){
+            log_message(LOG_DEBUG, "ID is empty");
+            break;
+        }
+
         // Add the fields to the requirement JSON object
         cJSON_AddStringToObject(req, "ID", cJSON_GetArrayItem(req_array, REQ_ID_COL)->valuestring);
+        log_message(LOG_DEBUG, "About to parse the rest of %s", cJSON_GetArrayItem(req_array, REQ_ID_COL)->valuestring);
+
+        if(cJSON_GetArrayItem(req_array, REQ_TITLE_COL) == NULL){
+            log_message(LOG_DEBUG, "Title is empty");
+            cJSON_AddItemToArray(requirements, req);
+            continue;
+        }
+
+        
         cJSON_AddStringToObject(req, "Title", cJSON_GetArrayItem(req_array, REQ_TITLE_COL)->valuestring);
         cJSON_AddStringToObject(req, "Description", cJSON_GetArrayItem(req_array, REQ_DESCRIPTION_COL)->valuestring);
         cJSON_AddStringToObject(req, "Source", cJSON_GetArrayItem(req_array, REQ_SOURCE_COL)->valuestring);
@@ -521,10 +555,13 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
         cJSON_AddStringToObject(req, "Review 4 Verification 3 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_3_METHOD_COL)->valuestring);
         cJSON_AddStringToObject(req, "Review 4 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_3_STATUS_COL)->valuestring);
 
-        cJSON_AddStringToObject(req, "Path", cJSON_GetArrayItem(req_array, REQ_PATH_COL)->valuestring);
+        //cJSON_AddStringToObject(req, "Path", cJSON_GetArrayItem(req_array, REQ_PATH_COL)->valuestring);
+        
 
         // Add the requirement object to the requirements array
         cJSON_AddItemToArray(requirements, req);
+
+        log_message(LOG_DEBUG, "Finished parsing array");
     }
 
     

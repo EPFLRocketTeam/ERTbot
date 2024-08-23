@@ -86,7 +86,8 @@ void wikiApi(char *query){
         long http_code = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         if (http_code != 200) {
-            log_message(LOG_ERROR, "wikiApi: HTTP request failed with status code %ld\n", http_code);
+            log_message(LOG_ERROR, "wikiApi: HTTP request failed with status code %ld", http_code);
+            log_message(LOG_ERROR, "chunk.resposnse: %s", chunk.response);
             exit(-1);;
         }
         // Clean up

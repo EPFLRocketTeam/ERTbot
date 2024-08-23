@@ -389,14 +389,10 @@ void syncSheetToDrl(command cmd){
 
     char* output = parseJSONRequirementListInToArray(requirements);
 
-
     log_message(LOG_DEBUG, "calling batchUpdateSheet with values set to: %s", output);
 
-    
     batchUpdateSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId, output);
     
-
-
     log_message(LOG_DEBUG, "deallocating memory");
     cJSON_Delete(requirementList);
     free(output);
@@ -407,9 +403,50 @@ void syncSheetToDrl(command cmd){
 
 void syncDrlToSheet(command cmd){
     log_message(LOG_DEBUG, "Entering function syncDrlToSheet");
+
+    refreshOAuthToken();
+
+    char *sheetId;
+    char *drlPageId;
+
+    if(strcmp(cmd.argument_1, "ST")==0){
+        drlPageId = "420";
+        sheetId = "ST!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "PR")==0){
+        drlPageId = "414";
+        sheetId = "PR!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "FD")==0){
+        drlPageId = "416";
+        sheetId = "FD!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "RE")==0){
+        drlPageId = "419";
+        sheetId = "RE!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "GS")==0){
+        drlPageId = "417";
+        sheetId = "GS!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "AV")==0){
+        drlPageId = "421";
+        sheetId = "AV!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "TE")==0){
+        drlPageId = 
+        sheetId = "TE!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "PL")==0){
+        drlPageId = "418";
+        sheetId = "PL!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "GE")==0){
+        drlPageId = "415";
+        sheetId = "GE!A3:AI300";
+    }
     
-    batchGetSheet("14vOyP1Oc5O_7JY1vnY7pQPTJoOB8oi4nNRMEsodIvtU", "NewVersion!A4:AI67");
-    log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
+    batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
 
     cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response); 
     char *DRL = buildDrlFromJSONRequirementList(requirementList);
@@ -418,8 +455,9 @@ void syncDrlToSheet(command cmd){
     drlPage = addPageToList(&drlPage, TEST_DRL_PAGE_ID, "", "", "", "", "", "", "");
     drlPage->content = DRL;
 
+
     drlPage->content = replaceWord(drlPage->content, "\n", "\\\\n");
-    drlPage->content = replaceWord(drlPage->content, "\"", "\\\"");
+    drlPage->content = replaceWord(drlPage->content, "\"", "\\\\\\\"");
 
     updatePageContentMutation(drlPage);
     renderMutation(&drlPage);
