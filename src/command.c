@@ -385,8 +385,8 @@ command** executeCommand(command** commandQueue){
         sendMessageToSlack("Page created.");
     }
 
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "createVCDPage") == 0){
-        createVcdPage(**commandQueue);
+    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateVcdPage") == 0){
+        updateVcdPage(**commandQueue);
         sendMessageToSlack("Page created.");
     }
 

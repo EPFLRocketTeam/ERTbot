@@ -470,6 +470,91 @@ void syncDrlToSheet(command cmd){
     return;
 }
 
+void updateVcdPage(command cmd){
+    log_message(LOG_DEBUG, "Entering function updateVcdPage");
+    
+    refreshOAuthToken();
+
+    char *sheetId;
+    char *vcdPageId;
+
+    if(strcmp(cmd.argument_1, "ST")==0){
+        vcdPageId = "1186";
+        sheetId = "ST!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "PR")==0){
+        vcdPageId = "1187";
+        sheetId = "PR!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "FD")==0){
+        vcdPageId = "1182";
+        sheetId = "FD!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "RE")==0){
+        vcdPageId = "1185";
+        sheetId = "RE!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "GS")==0){
+        vcdPageId = "1183";
+        sheetId = "GS!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "AV")==0){
+        vcdPageId = "1181";
+        sheetId = "AV!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "TE")==0){
+        vcdPageId = 
+        sheetId = "TE!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "PL")==0){
+        vcdPageId = "1184";
+        sheetId = "PL!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "GE")==0){
+        vcdPageId = "1180";
+        sheetId = "GE!A3:AI300";
+    }
+
+    batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
+    log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
+    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
+
+    int verificationStatusCount[3];
+    countVerificationStatus(requirementList, verificationStatusCount);
+    char *pieChart = createVcdPieChart(verificationStatusCount);
+
+    char *VCD = pieChart;
+    char *listOfRequirements = buildVcdList(requirementList);
+    VCD = appendStrings(VCD, listOfRequirements);
+    
+    pageList* vcdPage = NULL;
+    vcdPage = addPageToList(&vcdPage, vcdPageId, "", "", "", VCD, "", "", "");
+
+    vcdPage->content = replaceWord(vcdPage->content, "\n", "\\\\n");
+    vcdPage->content = replaceWord(vcdPage->content, "\"", "\\\\\\\"");
+
+    updatePageContentMutation(vcdPage);
+    renderMutation(&vcdPage);
+
+    /* Stacked Area chart
+    char *extractedText = extractText(vcdPage->content, "<!-- Status history -->\\n```kroki\\nvegalite\\n", "\\n```\\n", false, false);
+    extractedText = replaceWord(extractedText, "\\n", "\n");
+    extractedText = replaceWord(extractedText, "\\\"", "\"");
+    char *stackedAreaChart = updateVcdStackedAreaChart(extractedText, "20/24", 33, 33, 34);    
+    stackedAreaChart = appendStrings("<!-- Status history -->\n```kroki\nvegalite\n", stackedAreaChart);
+    stackedAreaChart = appendStrings(stackedAreaChart, "\n```\n");
+    fprintf(stderr, "\n\n%s\n\n", stackedAreaChart);
+    free(stackedAreaChart);
+    //free(extractedText);
+    */
+    
+    
+    cJSON_Delete(requirementList);
+    freePageList(&vcdPage);
+    log_message(LOG_DEBUG, "Exiting function updateVcdPage");
+    return;
+}
+
 void createRequirementPage(command cmd){
     log_message(LOG_DEBUG, "Entering function createRequirementPages");
 
@@ -486,41 +571,6 @@ void createRequirementPage(command cmd){
     
     log_message(LOG_DEBUG, "Exiting function createRequirementPage");
     return;
-}
-
-void createVcdPage(command cmd){
-    log_message(LOG_DEBUG, "Entering function createVcdPage");
-    
-    batchGetSheet("14vOyP1Oc5O_7JY1vnY7pQPTJoOB8oi4nNRMEsodIvtU", "NewVersion!A4:AI67");
-    log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
-    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
-
-    char *pieChart = createVcdPieChart("20", "30", "40");
-    
-    pageList* C_ST_VCD_DRAFT = NULL;
-    C_ST_VCD_DRAFT = addPageToList(&C_ST_VCD_DRAFT, "1130", "", "", "", "", "", "", "");
-    getPage(&C_ST_VCD_DRAFT);
-
-    char *extractedText = extractText(C_ST_VCD_DRAFT->content, "<!-- Status history -->\\n```kroki\\nvegalite\\n", "\\n```\\n", false, false);
-
-    extractedText = replaceWord(extractedText, "\\n", "\n");
-    extractedText = replaceWord(extractedText, "\\\"", "\"");
-
-
-    char *stackedAreaChart = updateVcdStackedAreaChart(extractedText, "20/24", 33, 33, 34);    
-    stackedAreaChart = appendStrings("<!-- Status history -->\n```kroki\nvegalite\n", stackedAreaChart);
-    stackedAreaChart = appendStrings(stackedAreaChart, "\n```\n");
-    fprintf(stderr, "\n\n%s\n\n", stackedAreaChart);
-    free(stackedAreaChart);
-    
-    
-    //free(extractedText);
-
-    cJSON_Delete(requirementList);
-    freePageList(&C_ST_VCD_DRAFT);
-    return;
-    
-    log_message(LOG_DEBUG, "Exiting function createVcdPage");
 }
 
 void onPageUpdate(command cmd){
