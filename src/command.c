@@ -380,8 +380,8 @@ command** executeCommand(command** commandQueue){
         sendMessageToSlack("Finished parsing.");
     }
 
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "createRequirementPage") == 0){
-        createRequirementPage(**commandQueue);
+    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateRequirementPage") == 0){
+        updateRequirementPage(**commandQueue);
         sendMessageToSlack("Page created.");
     }
 

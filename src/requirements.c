@@ -16,71 +16,6 @@
 char *template_DRL = "# General Design Requirements List\n\n\n# table {.tabset}\n\n";
 char *template_REQ = "";
 
-/*
-char *extractVerificationStatsForAReview(cJSON *requirementList){
-
-    //VERIFICAITON
-    int isVerification = 0;
-    int verificationCount = 0;
-
-    for(int reviewNumber = 1; reviewNumber <= MAXIMUM_NUMBER_OF_REVIEWS; reviewNumber++){
-        for (int verificationNumber = 1; verificationNumber <= MAXIMUM_NUMBER_OF_VERIFICATIONS_PER_REVIEW; verificationNumber++){
-
-            char JsonItemNameMethod[1024];
-            snprintf(JsonItemNameMethod, sizeof(JsonItemNameMethod), "Review %d Verification %d Method", reviewNumber, verificationNumber);
-
-            char JsonItemNameStatus[1024];
-            snprintf(JsonItemNameStatus, sizeof(JsonItemNameStatus), "Review %d Verification %d Status", reviewNumber, verificationNumber);
-
-            cJSON *verificationMethod = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameMethod);
-            cJSON *verificationStatus = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameStatus);
-
-            char *reviewName = REVIEW_1_NAME;
-
-            if(reviewNumber = 1){reviewName = REVIEW_1_NAME;}
-            if(reviewNumber = 2){reviewName = REVIEW_2_NAME;}
-            if(reviewNumber = 3){reviewName = REVIEW_3_NAME;}
-            if(reviewNumber = 4){reviewName = REVIEW_4_NAME;}
-
-            if(strcmp(verificationMethod->valuestring, REQ_SHEET_EMPTY_VALUE) != 0){
-                
-                verificationCount++;
-
-                if(isVerification == 0){
-                    pageContent = appendStrings(pageContent, "\n# Verification");
-                    isVerification = 1;
-                }
-
-                char temp_verificationNumber[100];
-                snprintf(temp_verificationNumber, sizeof(temp_verificationNumber), "\n## Verification %d\n", verificationCount);
-                pageContent = appendStrings(pageContent, temp_verificationNumber);
-
-                pageContent = appendStrings(pageContent, "**Method**: ");
-                pageContent = appendStrings(pageContent, verificationMethod->valuestring);
-                pageContent = appendStrings(pageContent, "\n**Deadline**: ");
-                pageContent = appendStrings(pageContent, reviewName);
-                pageContent = appendStrings(pageContent, "\n");
-
-                if(strcmp(verificationStatus->valuestring, REQ_SHEET_EMPTY_VALUE) != 0){
-                    pageContent = appendStrings(pageContent, "**Status**: ");
-
-                    if(strcmp(verificationStatus->valuestring, "Completed") == 0){pageContent = appendStrings(pageContent, ":green_circle:");}
-                    if(strcmp(verificationStatus->valuestring, "In progress") == 0){pageContent = appendStrings(pageContent, ":orange_circle:");}
-                    if(strcmp(verificationStatus->valuestring, "Uncompleted") == 0){pageContent = appendStrings(pageContent, ":red_circle:");}
-
-                    pageContent = appendStrings(pageContent, verificationStatus->valuestring);
-                    pageContent = appendStrings(pageContent, "\n");
-
-                }
-
-
-            }
-
-        }
-    }
-
-}
-*/
 
 char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue) {
     log_message(LOG_DEBUG, "Entering function updateVcdStackedAreaChart");
@@ -166,207 +101,176 @@ char *createVcdPieChart(int* verificationStatusCount){
     return pieChart;
 }
 
-pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, char *requirementId){
+char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
     log_message(LOG_DEBUG, "Entering function buildRequirementPageFromJSONRequirementList");
     
-    // Get the requirements array from the requirementList object
-    cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
-    if (!cJSON_IsArray(requirements)) {
-        log_message(LOG_ERROR, "Error: requirements is not a JSON array");
-    }
-
-    pageList* reqPage = NULL;
-
     char *pageContent = strdup(template_REQ);
 
-    // Iterate over each requirement object in the requirements array
-    int num_reqs = cJSON_GetArraySize(requirements);
-    for (int i = 0; i < num_reqs; i++) {
-        cJSON *requirement = cJSON_GetArrayItem(requirements, i);
-        if (!cJSON_IsObject(requirement)) {
-            log_message(LOG_ERROR, "Error: requirement is not a JSON object");
-            continue;
-        }
+    // Get and print each item of the requirement object
+    cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
+    cJSON *title = cJSON_GetObjectItemCaseSensitive(requirement, "Title");
+    cJSON *description = cJSON_GetObjectItemCaseSensitive(requirement, "Description");
+    cJSON *source = cJSON_GetObjectItemCaseSensitive(requirement, "Source");
+    cJSON *author = cJSON_GetObjectItemCaseSensitive(requirement, "Author");
+    cJSON *justification = cJSON_GetObjectItemCaseSensitive(requirement, "Justification");
+    cJSON *criticality = cJSON_GetObjectItemCaseSensitive(requirement, "Criticality");
+    cJSON *compliance = cJSON_GetObjectItemCaseSensitive(requirement, "Compliance");
+    cJSON *verification_status = cJSON_GetObjectItemCaseSensitive(requirement, "Verification Status");
+    cJSON *assignee = cJSON_GetObjectItemCaseSensitive(requirement, "Assignee");
 
-        // Get and print each item of the requirement object
-        cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
+    cJSON *path = cJSON_GetObjectItemCaseSensitive(requirement, "Path");
 
-        if (cJSON_IsString(id) && id->valuestring && strcmp(id->valuestring, requirementId) != 0){
-            continue;
-        }
+    
+
+    //TITLE
+    if (cJSON_IsString(id) && id->valuestring) {
+        pageContent = appendStrings(pageContent, "# ");
+        pageContent = appendStrings(pageContent, id->valuestring);
+        pageContent = appendStrings(pageContent, ": ");
+    }
+    if (cJSON_IsString(title) && title->valuestring) {
+        pageContent = appendStrings(pageContent, title->valuestring);
+        pageContent = appendStrings(pageContent, "\n");
+    }
 
 
-        cJSON *title = cJSON_GetObjectItemCaseSensitive(requirement, "Title");
-        cJSON *description = cJSON_GetObjectItemCaseSensitive(requirement, "Description");
-        cJSON *source = cJSON_GetObjectItemCaseSensitive(requirement, "Source");
-        cJSON *author = cJSON_GetObjectItemCaseSensitive(requirement, "Author");
-        cJSON *justification = cJSON_GetObjectItemCaseSensitive(requirement, "Justification");
-        cJSON *criticality = cJSON_GetObjectItemCaseSensitive(requirement, "Criticality");
-        cJSON *compliance = cJSON_GetObjectItemCaseSensitive(requirement, "Compliance");
-        cJSON *verification_status = cJSON_GetObjectItemCaseSensitive(requirement, "Verification Status");
-        cJSON *assignee = cJSON_GetObjectItemCaseSensitive(requirement, "Assignee");
+    //DESCRIPTION
+    if (cJSON_IsString(description) && description->valuestring) {
+        pageContent = appendStrings(pageContent, ">**Description**: ");
+        pageContent = appendStrings(pageContent, description->valuestring);
+        pageContent = appendStrings(pageContent, "\n");
+    }
 
-        cJSON *path = cJSON_GetObjectItemCaseSensitive(requirement, "Path");
 
+    //INFORMATION BOX: SOURCES AND ASSIGNEE
+    if (cJSON_IsString(source) && source->valuestring && strcmp(source->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
+        pageContent = appendStrings(pageContent, "\n>**Source**: ");
+        pageContent = appendStrings(pageContent, source->valuestring);
+        pageContent = appendStrings(pageContent, "\n");
+    }
+    if (cJSON_IsString(author) && author->valuestring && strcmp(author->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
+        pageContent = appendStrings(pageContent, ">**Author**: ");
+        pageContent = appendStrings(pageContent, author->valuestring);
+        pageContent = appendStrings(pageContent, "\n");
+    }
+    if (cJSON_IsString(assignee) && assignee->valuestring && strcmp(assignee->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
+        pageContent = appendStrings(pageContent, ">**Assignee**: ");
+        pageContent = appendStrings(pageContent, assignee->valuestring);
+        pageContent = appendStrings(pageContent, "\n");
+    }
+    if (strcmp(source->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 || strcmp(author->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 || strcmp(assignee->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
+        pageContent = appendStrings(pageContent, "{.is-info}\n");
+    }
+
+
+    //JUSTIFICATION
+    if (cJSON_IsString(justification) && justification->valuestring && strcmp(justification->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
+        pageContent = appendStrings(pageContent, "\n## Justification\n");
+        pageContent = appendStrings(pageContent, justification->valuestring);
+        pageContent = appendStrings(pageContent, "\n");
+    }
+
+
+    //COMPLIANCE
+    if (cJSON_IsString(compliance) && compliance->valuestring && strcmp(compliance->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
         
-
-        //TITLE
-        if (cJSON_IsString(id) && id->valuestring) {
-            pageContent = appendStrings(pageContent, "# ");
-            pageContent = appendStrings(pageContent, id->valuestring);
-            pageContent = appendStrings(pageContent, ": ");
+        if(strcmp(compliance->valuestring, "Compliant") == 0){
+            pageContent = appendStrings(pageContent, "\n# Compliance\n");
+            pageContent = appendStrings(pageContent, ":green_circle: Compliant\n");
         }
-        if (cJSON_IsString(title) && title->valuestring) {
-            pageContent = appendStrings(pageContent, title->valuestring);
-            pageContent = appendStrings(pageContent, "\n");
+        if(strcmp(compliance->valuestring, "Unknown") == 0){
+            pageContent = appendStrings(pageContent, "\n# Compliance\n");
+            pageContent = appendStrings(pageContent, ":orange_circle: Unknown\n");
         }
-
-
-        //DESCRIPTION
-        if (cJSON_IsString(description) && description->valuestring) {
-            pageContent = appendStrings(pageContent, ">**Description**: ");
-            pageContent = appendStrings(pageContent, description->valuestring);
-            pageContent = appendStrings(pageContent, "\n");
+        if(strcmp(compliance->valuestring, "Uncompliant") == 0){
+            pageContent = appendStrings(pageContent, "\n# Compliance\n");
+            pageContent = appendStrings(pageContent, ":red_circle: Uncompliant\n");
         }
+    }
 
 
-        //INFORMATION BOX: SOURCES AND ASSIGNEE
-        if (cJSON_IsString(source) && source->valuestring && strcmp(source->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            pageContent = appendStrings(pageContent, "\n>**Source**: ");
-            pageContent = appendStrings(pageContent, source->valuestring);
-            pageContent = appendStrings(pageContent, "\n");
+    //CRITICALITY
+    if (cJSON_IsString(criticality) && criticality->valuestring && strcmp(criticality->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
+        
+        if(strcmp(criticality->valuestring, "Low") == 0){
+            pageContent = appendStrings(pageContent, "\n# Criticality\n");
+            pageContent = appendStrings(pageContent, ":green_circle: Low\n");
         }
-        if (cJSON_IsString(author) && author->valuestring && strcmp(author->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            pageContent = appendStrings(pageContent, ">**Author**: ");
-            pageContent = appendStrings(pageContent, author->valuestring);
-            pageContent = appendStrings(pageContent, "\n");
+        if(strcmp(criticality->valuestring, "Medium") == 0){
+            pageContent = appendStrings(pageContent, "\n# Criticality\n");
+            pageContent = appendStrings(pageContent, ":orange_circle: Medium\n");
         }
-        if (cJSON_IsString(assignee) && assignee->valuestring && strcmp(assignee->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            pageContent = appendStrings(pageContent, ">**Assignee**: ");
-            pageContent = appendStrings(pageContent, assignee->valuestring);
-            pageContent = appendStrings(pageContent, "\n");
+        if(strcmp(criticality->valuestring, "High") == 0){
+            pageContent = appendStrings(pageContent, "\n# Criticality\n");
+            pageContent = appendStrings(pageContent, ":red_circle: High\n");
         }
-        if (strcmp(source->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 || strcmp(author->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 || strcmp(assignee->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            pageContent = appendStrings(pageContent, "{.is-info}\n");
-        }
-
-
-        //JUSTIFICATION
-        if (cJSON_IsString(justification) && justification->valuestring && strcmp(justification->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            pageContent = appendStrings(pageContent, "\n## Justification\n");
-            pageContent = appendStrings(pageContent, justification->valuestring);
-            pageContent = appendStrings(pageContent, "\n");
-        }
-
-
-        //COMPLIANCE
-        if (cJSON_IsString(compliance) && compliance->valuestring && strcmp(compliance->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            
-            if(strcmp(compliance->valuestring, "Compliant") == 0){
-                pageContent = appendStrings(pageContent, "\n# Compliance\n");
-                pageContent = appendStrings(pageContent, ":green_circle: Compliant\n");
-            }
-            if(strcmp(compliance->valuestring, "Unknown") == 0){
-                pageContent = appendStrings(pageContent, "\n# Compliance\n");
-                pageContent = appendStrings(pageContent, ":orange_circle: Unknown\n");
-            }
-            if(strcmp(compliance->valuestring, "Uncompliant") == 0){
-                pageContent = appendStrings(pageContent, "\n# Compliance\n");
-                pageContent = appendStrings(pageContent, ":red_circle: Uncompliant\n");
-            }
-        }
-
-
-        //CRITICALITY
-        if (cJSON_IsString(criticality) && criticality->valuestring && strcmp(criticality->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-            
-            if(strcmp(criticality->valuestring, "Low") == 0){
-                pageContent = appendStrings(pageContent, "\n# Criticality\n");
-                pageContent = appendStrings(pageContent, ":green_circle: Low\n");
-            }
-            if(strcmp(criticality->valuestring, "Medium") == 0){
-                pageContent = appendStrings(pageContent, "\n# Criticality\n");
-                pageContent = appendStrings(pageContent, ":orange_circle: Medium\n");
-            }
-            if(strcmp(criticality->valuestring, "High") == 0){
-                pageContent = appendStrings(pageContent, "\n# Criticality\n");
-                pageContent = appendStrings(pageContent, ":red_circle: High\n");
-            }
-        }
+    }
 
 
 
-        //VERIFICAITON
-        int isVerification = 0;
-        int verificationCount = 0;
+    //VERIFICAITON
+    int isVerification = 0;
+    int verificationCount = 0;
 
-        for(int reviewNumber = 1; reviewNumber <= MAXIMUM_NUMBER_OF_REVIEWS; reviewNumber++){
-            for (int verificationNumber = 1; verificationNumber <= MAXIMUM_NUMBER_OF_VERIFICATIONS_PER_REVIEW; verificationNumber++){
+    for(int reviewNumber = 1; reviewNumber <= MAXIMUM_NUMBER_OF_REVIEWS; reviewNumber++){
+        for (int verificationNumber = 1; verificationNumber <= MAXIMUM_NUMBER_OF_VERIFICATIONS_PER_REVIEW; verificationNumber++){
 
-                char JsonItemNameMethod[1024];
-                snprintf(JsonItemNameMethod, sizeof(JsonItemNameMethod), "Review %d Verification %d Method", reviewNumber, verificationNumber);
+            char JsonItemNameMethod[1024];
+            snprintf(JsonItemNameMethod, sizeof(JsonItemNameMethod), "Review %d Verification %d Method", reviewNumber, verificationNumber);
 
-                char JsonItemNameStatus[1024];
-                snprintf(JsonItemNameStatus, sizeof(JsonItemNameStatus), "Review %d Verification %d Status", reviewNumber, verificationNumber);
+            char JsonItemNameStatus[1024];
+            snprintf(JsonItemNameStatus, sizeof(JsonItemNameStatus), "Review %d Verification %d Status", reviewNumber, verificationNumber);
 
-                cJSON *verificationMethod = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameMethod);
-                cJSON *verificationStatus = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameStatus);
+            cJSON *verificationMethod = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameMethod);
+            cJSON *verificationStatus = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameStatus);
 
-                char *reviewName = REVIEW_1_NAME;
+            char *reviewName = REVIEW_1_NAME;
 
-                if(reviewNumber = 1){reviewName = REVIEW_1_NAME;}
-                if(reviewNumber = 2){reviewName = REVIEW_2_NAME;}
-                if(reviewNumber = 3){reviewName = REVIEW_3_NAME;}
-                if(reviewNumber = 4){reviewName = REVIEW_4_NAME;}
+            if(reviewNumber = 1){reviewName = REVIEW_1_NAME;}
+            if(reviewNumber = 2){reviewName = REVIEW_2_NAME;}
+            if(reviewNumber = 3){reviewName = REVIEW_3_NAME;}
+            if(reviewNumber = 4){reviewName = REVIEW_4_NAME;}
 
-                if(strcmp(verificationMethod->valuestring, REQ_SHEET_EMPTY_VALUE) != 0){
-                    
-                    verificationCount++;
+            if(strcmp(verificationMethod->valuestring, REQ_SHEET_EMPTY_VALUE) != 0){
+                
+                verificationCount++;
 
-                    if(isVerification == 0){
-                        pageContent = appendStrings(pageContent, "\n# Verification");
-                        isVerification = 1;
-                    }
+                if(isVerification == 0){
+                    pageContent = appendStrings(pageContent, "\n# Verification");
+                    isVerification = 1;
+                }
 
-                    char temp_verificationNumber[100];
-                    snprintf(temp_verificationNumber, sizeof(temp_verificationNumber), "\n## Verification %d\n", verificationCount);
-                    pageContent = appendStrings(pageContent, temp_verificationNumber);
+                char temp_verificationNumber[100];
+                snprintf(temp_verificationNumber, sizeof(temp_verificationNumber), "\n## Verification %d\n", verificationCount);
+                pageContent = appendStrings(pageContent, temp_verificationNumber);
 
-                    pageContent = appendStrings(pageContent, "**Method**: ");
-                    pageContent = appendStrings(pageContent, verificationMethod->valuestring);
-                    pageContent = appendStrings(pageContent, "\n**Deadline**: ");
-                    pageContent = appendStrings(pageContent, reviewName);
+                pageContent = appendStrings(pageContent, "**Method**: ");
+                pageContent = appendStrings(pageContent, verificationMethod->valuestring);
+                pageContent = appendStrings(pageContent, "\n**Deadline**: ");
+                pageContent = appendStrings(pageContent, reviewName);
+                pageContent = appendStrings(pageContent, "\n");
+
+                if(strcmp(verificationStatus->valuestring, REQ_SHEET_EMPTY_VALUE) != 0){
+                    pageContent = appendStrings(pageContent, "**Status**: ");
+
+                    if(strcmp(verificationStatus->valuestring, "Completed") == 0){pageContent = appendStrings(pageContent, ":green_circle:");}
+                    if(strcmp(verificationStatus->valuestring, "In progress") == 0){pageContent = appendStrings(pageContent, ":orange_circle:");}
+                    if(strcmp(verificationStatus->valuestring, "Uncompleted") == 0){pageContent = appendStrings(pageContent, ":red_circle:");}
+
+                    pageContent = appendStrings(pageContent, verificationStatus->valuestring);
                     pageContent = appendStrings(pageContent, "\n");
-
-                    if(strcmp(verificationStatus->valuestring, REQ_SHEET_EMPTY_VALUE) != 0){
-                        pageContent = appendStrings(pageContent, "**Status**: ");
-
-                        if(strcmp(verificationStatus->valuestring, "Completed") == 0){pageContent = appendStrings(pageContent, ":green_circle:");}
-                        if(strcmp(verificationStatus->valuestring, "In progress") == 0){pageContent = appendStrings(pageContent, ":orange_circle:");}
-                        if(strcmp(verificationStatus->valuestring, "Uncompleted") == 0){pageContent = appendStrings(pageContent, ":red_circle:");}
-
-                        pageContent = appendStrings(pageContent, verificationStatus->valuestring);
-                        pageContent = appendStrings(pageContent, "\n");
-
-                    }
-
 
                 }
 
+
             }
+
         }
-
-        
-        reqPage = addPageToList(&reqPage, TEST_REQ_PAGE_ID, id->valuestring, "", "", pageContent, "", "", "");
-
-        break;
     }
-
     
     log_message(LOG_DEBUG, "Exiting function buildRequirementPageFromJSONRequirementList");
 
-    return reqPage;
-
+    return pageContent;
 }
 
 char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem){

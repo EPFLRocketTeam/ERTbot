@@ -59,7 +59,7 @@ void renderMutation(pageList** head);
  * @note Ensure that `replaceWord` and `wikiApi` functions are correctly implemented. The `template_move_page_mutation` should 
  *       be a valid mutation query template. The list of pages should be properly initialized and linked.
  */
-void movePageContentMutation(pageList** head);
+void movePageMutation(pageList** head);
 
 /**
  * @brief Populates a linked list of pages based on a filter type and condition.
@@ -80,4 +80,6 @@ void movePageContentMutation(pageList** head);
  */
 pageList* populatePageList(pageList** head, char *filterType, char *filterCondition);
 
+
+void createPageMutation(char* path, char* content, char* title);
 #endif

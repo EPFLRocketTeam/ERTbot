@@ -1157,7 +1157,7 @@ char* convert_timestamp_to_cest(char *timestamp) {
     struct tm *cest_time = localtime(&raw_time);
 
     // Format the CEST time into a readable string
-    if (strftime(output_buffer, 100, "%A, %B %d, %Y %H:%M:%S", cest_time) == 0) {
+    if (strftime(output_buffer, 100, "%A, %B %d at %H:%M:%S", cest_time) == 0) {
         fprintf(stderr, "Failed to format time.\n");
         free(output_buffer);
         return NULL;

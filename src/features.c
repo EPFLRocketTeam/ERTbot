@@ -3,7 +3,6 @@
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
  * @brief Contains all of the functions which represent a single feature
  * 
- * @todo - Add "onPageUpdateFeature"
  */
 
 #include "../include/struct.h"
@@ -272,7 +271,7 @@ void movePage(command cmd){
     pageList* subjectPage = NULL;
     subjectPage = populatePageList(&subjectPage, "exact path", cmd.argument_1);
     subjectPage->path = cmd.argument_2;
-    movePageContentMutation(&subjectPage);
+    movePageMutation(&subjectPage);
 
     pageList* linkTrackerPage = NULL;
     linkTrackerPage = addPageToList(&linkTrackerPage, LINK_TRACKER_PAGE_ID, "", "", "", "", "", "", "");
@@ -555,21 +554,115 @@ void updateVcdPage(command cmd){
     return;
 }
 
-void createRequirementPage(command cmd){
-    log_message(LOG_DEBUG, "Entering function createRequirementPages");
+void updateRequirementPage(command cmd){
+    log_message(LOG_DEBUG, "Entering function updateRequirementPages");
 
-    batchGetSheet("14vOyP1Oc5O_7JY1vnY7pQPTJoOB8oi4nNRMEsodIvtU", "NewVersion!A4:AI67");
+    refreshOAuthToken();
+    char *sheetId;
+    pageList* requirementPagesHead = NULL;
+    char *path = cmd.argument_1;
+
+    if(strcmp(cmd.argument_1, "ST")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/";
+        sheetId = "ST!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "PR")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PR_DRL/";
+        sheetId = "PR!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "FD")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_FD_DRL/";
+        sheetId = "FD!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "RE")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_RE_DRL/";
+        sheetId = "RE!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "GS")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GS_DRL/";
+        sheetId = "GS!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "AV")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_AV_DRL/";
+        sheetId = "AV!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "TE")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_TE_DRL/";
+        sheetId = "TE!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "PL")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PL_DRL/";
+        sheetId = "PL!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "GE")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GE_DRL/";
+        sheetId = "GE!A3:AI300";
+    }
+
+    requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
+
+
+    batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
     log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
-    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
-    pageList* reqPage = buildRequirementPageFromJSONRequirementList(requirementList, cmd.argument_1);
-    reqPage->content = replaceWord(reqPage->content, "\n", "\\\\n");
-    reqPage->content = replaceWord(reqPage->content, "\"", "\\\"");
-    updatePageContentMutation(reqPage);
-    renderMutation(&reqPage);
-    cJSON_Delete(requirementList);
-    freePageList(&reqPage);
     
-    log_message(LOG_DEBUG, "Exiting function createRequirementPage");
+    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
+
+    // Get the requirements array from the requirementList object
+    cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
+    if (!cJSON_IsArray(requirements)) {
+        log_message(LOG_ERROR, "Error: requirements is not a JSON array");
+    }
+
+    pageList* currentReqPage = requirementPagesHead;
+
+    // Iterate over each requirement object in the requirements array
+    int num_reqs = cJSON_GetArraySize(requirements);
+
+    while (currentReqPage){
+        for (int i = 0; i < num_reqs; i++) {
+            cJSON *requirement = cJSON_GetArrayItem(requirements, i);
+
+            if (!cJSON_IsObject(requirement)) {
+                log_message(LOG_ERROR, "Error: requirement is not a JSON object");
+                continue;
+            }
+
+            // Get and print each item of the requirement object
+            cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
+
+            if (cJSON_IsString(id) && id->valuestring && strcmp(id->valuestring, currentReqPage->title) == 0){
+                char* importedRequirementInformation = buildRequirementPageFromJSONRequirementList(requirement);
+                char* flag = "<!--";
+                flag = appendStrings(flag, id->valuestring);
+                flag = appendStrings(flag, "-->");
+
+                char* start = currentReqPage->content;
+                char* end = currentReqPage->content;
+
+                start = strstr(start, flag);
+                start = start + strlen(flag);
+                end = strstr(end, flag);
+                
+                currentReqPage->content = replaceParagraph(currentReqPage->content, importedRequirementInformation, start, end);
+
+                currentReqPage->content = replaceWord(currentReqPage->content, "\n", "\\\\n");
+                currentReqPage->content = replaceWord(currentReqPage->content, "\"", "\\\"");
+                updatePageContentMutation(currentReqPage);
+                renderMutation(&currentReqPage);
+
+                break;
+            }
+
+        }
+
+
+        currentReqPage = currentReqPage->next;
+    }
+    
+    cJSON_Delete(requirementList);
+    freePageList(&requirementPagesHead);
+    
+    log_message(LOG_DEBUG, "Exiting function updateRequirementPage");
     return;
 }
 
@@ -643,7 +736,7 @@ void updateStatsPage(command cmd){
         linksListOfPages = appendStrings(linksListOfPages, current->title);
         linksListOfPages = appendStrings(linksListOfPages, "](/");
         linksListOfPages = appendStrings(linksListOfPages, current->path);
-        linksListOfPages = appendStrings(linksListOfPages, ")\n**updated at:** ");
+        linksListOfPages = appendStrings(linksListOfPages, ")\n**Updated on:** ");
         linksListOfPages = appendStrings(linksListOfPages, convert_timestamp_to_cest(current->updatedAt));
         linksListOfPages = appendStrings(linksListOfPages, "\n");
         current = current->next;
@@ -662,4 +755,110 @@ void updateStatsPage(command cmd){
     sendMessageToSlack("stats page updated");
 
     log_message(LOG_DEBUG, "Exiting function updateStatsPage");
+}
+
+void createMissingRequirementPages(command cmd){
+    refreshOAuthToken();
+    char *sheetId;
+    pageList* requirementPagesHead = NULL;
+    char *path;
+
+    path = cmd.argument_1;
+
+    if(strcmp(cmd.argument_1, "ST")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/";
+        sheetId = "ST!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "PR")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PR_DRL/";
+        sheetId = "PR!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "FD")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_FD_DRL/";
+        sheetId = "FD!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "RE")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_RE_DRL/";
+        sheetId = "RE!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "GS")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GS_DRL/";
+        sheetId = "GS!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "AV")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_AV_DRL/";
+        sheetId = "AV!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "TE")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_TE_DRL/";
+        sheetId = "TE!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "PL")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PL_DRL/";
+        sheetId = "PL!A3:AI300";
+    }
+    if(strcmp(cmd.argument_1, "GE")==0){
+        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GE_DRL/";
+        sheetId = "GE!A3:AI300";
+    }
+
+    requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
+    batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
+
+    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
+
+    // Get the requirements array from the requirementList object
+    cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
+    if (!cJSON_IsArray(requirements)) {
+        log_message(LOG_ERROR, "Error: requirements is not a JSON array");
+    }
+
+    
+    // Iterate over each requirement object in the requirements array
+    int num_reqs = cJSON_GetArraySize(requirements);
+
+    for (int i = 0; i < num_reqs; i++) {
+        cJSON *requirement = cJSON_GetArrayItem(requirements, i);
+
+        if (!cJSON_IsObject(requirement)) {
+            log_message(LOG_ERROR, "Error: requirement is not a JSON object");
+            continue;
+        }
+
+        // Get and print each item of the requirement object
+        cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
+        pageList* currentReqPage = requirementPagesHead;
+        int foundPage = 0;
+
+        while(currentReqPage){
+            if (cJSON_IsString(id) && id->valuestring && strcmp(id->valuestring, currentReqPage->title) == 0){
+                foundPage = 1;
+                break;
+            }
+
+            else{
+                currentReqPage = currentReqPage->next;
+            }
+
+        }
+
+        if (foundPage == 0){
+            char *reqPath = appendStrings(path, id->valuestring);
+            char *reqContent = "<!--";
+            reqContent = appendStrings(reqContent, id->valuestring);
+            reqContent = appendStrings(reqContent, "-->\\\\n");
+            reqContent = appendStrings(reqContent, reqContent);
+            createPageMutation(reqPath, reqContent, id->valuestring);
+        }
+
+    }
+
+    
+    cJSON_Delete(requirementList);
+    freePageList(&requirementPagesHead);
+    
+    log_message(LOG_DEBUG, "Exiting function updateRequirementPage");
+    return;
+
+
 }

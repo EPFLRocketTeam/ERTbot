@@ -138,7 +138,7 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem);
  * 
  * @todo Function is too long it needs to be broken up into smaller functions.
  */
-pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, char *requirementId);
+char *buildRequirementPageFromJSONRequirementList(cJSON *requirement);
 
 /**
  * @brief Appends a section listing pages that mention the current page.

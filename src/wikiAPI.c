@@ -30,6 +30,8 @@ char *template_update_page_mutation = "{\"query\":\"mutation { pages { update(id
 char *template_render_page_mutation = "{\"query\":\"mutation { pages { render(id: DefaultID) { responseResult { succeeded, message } } } }\"}";
 char *template_create_user_mutation = "{\"query\":\"mutation { users { create(email: \\\"DefaultEmail\\\", name: \\\"DefaultName\\\", prodiverKey: DefaultProviderKey, groups: DefaultGroup, mustChangePassword: true, passwordRaw: \\\"DefaultPassword\\\") { responseResult { succeeded, message } } } }";
 char *template_move_page_mutation = "{\"query\":\"mutation { pages { move(id: DefaultID, destinationPath: \\\"DefaultPath\\\", destinationLocale: \\\"en\\\") { responseResult { succeeded, message } } } }\"}";
+char *template_create_page_mutation = "{\"query\":\"mutation { pages { create(content: \\\"DefaultContent\\\", description: \\\"\\\", editor: \\\"code\\\", isPublished: true, isPrivate: false, locale: \\\"en\\\", path: \\\"DefaultPath\\\", tags: [], title: \\\"DefaultTitle\\\") { responseResult { succeeded, message } } } }\"}";
+
 
 
 /**
@@ -350,8 +352,8 @@ void renderMutation(pageList** head){
     log_message(LOG_DEBUG, "Exiting function renderMutation");
 }
 
-void movePageContentMutation(pageList** head){
-    log_message(LOG_DEBUG, "Entering function movePageContentMutation");
+void movePageMutation(pageList** head){
+    log_message(LOG_DEBUG, "Entering function movePageMutation");
     
     pageList* current = *head;
     while (current)  {
@@ -362,7 +364,7 @@ void movePageContentMutation(pageList** head){
         current = current->next;
     }
     
-    log_message(LOG_DEBUG, "Exiting function movePageContentMutation");
+    log_message(LOG_DEBUG, "Exiting function movePageMutation");
 }
 
 pageList* populatePageList(pageList** head, char *filterType, char *filterCondition){
@@ -374,4 +376,16 @@ pageList* populatePageList(pageList** head, char *filterType, char *filterCondit
     
     log_message(LOG_DEBUG, "Exiting function populatePageList");
     return temp;
+}
+
+void createPageMutation(char* path, char* content, char* title){
+    log_message(LOG_DEBUG, "Entering function createPageMutation");
+    
+    char *temp_query = template_create_page_mutation;
+    temp_query = replaceWord(temp_query, default_page.path, path);
+    temp_query = replaceWord(temp_query, default_page.content, content);
+    temp_query = replaceWord(temp_query, default_page.title, title);
+    wikiApi(temp_query);
+    
+    log_message(LOG_DEBUG, "Exiting function createPageMutation");
 }
