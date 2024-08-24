@@ -387,7 +387,6 @@ char* createList(char *list, pageList** sectionTitle, pageList* links){
 
     freePageList(&links);
 
-    
     log_message(LOG_DEBUG, "Exiting function createList");
 
     return tempList;

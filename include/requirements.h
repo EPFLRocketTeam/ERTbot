@@ -107,7 +107,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str);
  * 
  * @todo Add compatibility with tabs/groups of requirements
  */
-char *buildDrlFromJSONRequirementList(cJSON *requirementList);
+char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem);
 
 /**
  * @brief Builds a `pageList` entry from a JSON object containing requirements for a specific requirement ID.
@@ -206,5 +206,5 @@ char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, i
 void countVerificationStatus(cJSON *requirementList, int* verificationStatusCount);
 
 
-char *buildVcdList(cJSON *requirementList);
+char *buildVcdList(cJSON *requirementList, char* subSystem);
 #endif

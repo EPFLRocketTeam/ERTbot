@@ -369,7 +369,7 @@ pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, ch
 
 }
 
-char *buildDrlFromJSONRequirementList(cJSON *requirementList){
+char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem){
     log_message(LOG_DEBUG, "Entering function buildDrlFromJSONRequirementList");
     
     // Get the requirements array from the requirementList object
@@ -421,7 +421,9 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList){
             DRL = appendStrings(DRL, "- [");
             DRL = appendStrings(DRL, id->valuestring);
             DRL = appendStrings(DRL, "](/");
-            DRL = appendStrings(DRL, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/");
+            DRL = appendStrings(DRL, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_");
+            DRL = appendStrings(DRL, subSystem);
+            DRL = appendStrings(DRL, "_DRL/");
             DRL = appendStrings(DRL, id->valuestring);
             DRL = appendStrings(DRL, ") **");
         }
@@ -874,7 +876,7 @@ void countVerificationStatus(cJSON *requirementList, int* verificationStatusCoun
     return;
 }
 
-char *buildVcdList(cJSON *requirementList){
+char *buildVcdList(cJSON *requirementList, char* subSystem){
     log_message(LOG_DEBUG, "Entering function buildVcdList");
     
     // Get the requirements array from the requirementList object
@@ -1027,7 +1029,9 @@ char *buildVcdList(cJSON *requirementList){
                 *targetList = appendStrings(*targetList, "- [");
                 *targetList = appendStrings(*targetList, id->valuestring);
                 *targetList = appendStrings(*targetList, "](/");
-                *targetList = appendStrings(*targetList, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/");
+                *targetList = appendStrings(*targetList, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_");
+                *targetList = appendStrings(*targetList, subSystem);
+                *targetList = appendStrings(*targetList, "_DRL/");
                 *targetList = appendStrings(*targetList, id->valuestring);
                 *targetList = appendStrings(*targetList, ") **");
             }

@@ -449,7 +449,7 @@ void syncDrlToSheet(command cmd){
     batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
 
     cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response); 
-    char *DRL = buildDrlFromJSONRequirementList(requirementList);
+    char *DRL = buildDrlFromJSONRequirementList(requirementList, cmd.argument_1);
 
     pageList* drlPage = NULL;
     drlPage = addPageToList(&drlPage, TEST_DRL_PAGE_ID, "", "", "", "", "", "", "");
@@ -524,7 +524,7 @@ void updateVcdPage(command cmd){
     char *pieChart = createVcdPieChart(verificationStatusCount);
 
     char *VCD = pieChart;
-    char *listOfRequirements = buildVcdList(requirementList);
+    char *listOfRequirements = buildVcdList(requirementList, cmd.argument_1);
     VCD = appendStrings(VCD, listOfRequirements);
     
     pageList* vcdPage = NULL;
