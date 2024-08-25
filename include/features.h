@@ -205,4 +205,8 @@ void updateVcdPage(command cmd);
 void onPageUpdate(command cmd);
 
 void updateStatsPage(command cmd);
+
+void testCreatePage();
+
+void createMissingRequirementPages(command cmd);
 #endif

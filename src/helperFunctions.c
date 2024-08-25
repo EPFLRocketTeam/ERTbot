@@ -290,7 +290,7 @@ void replaceStringInWiki(pageList** head, char* oldString, char* newString) {
         current->content = replaceWord(current->content, "\\", "\\\\");
         current->content = replaceWord(current->content, "\"", "\\\"");
         updatePageContentMutation(current);
-        renderMutation(&current);
+        renderMutation(&current, false);
         current = current->next;
     }
 
@@ -639,35 +639,35 @@ void freePageList(pageList** head) {
         
         // Debugging prints
         if (temp->id){
-            log_message(LOG_DEBUG, "Freeing page struct variable id: %p\n", (void*)temp->id);
+            log_message(LOG_DEBUG, "Freeing page struct variable id: %p", (void*)temp->id);
             free(temp->id);
         }
         if (temp->title){
-            log_message(LOG_DEBUG, "Freeing page struct variable title: %p\n", (void*)temp->title);
+            log_message(LOG_DEBUG, "Freeing page struct variable title: %p", (void*)temp->title);
             free(temp->title);
         }
         if (temp->path){
-            log_message(LOG_DEBUG, "Freeing page struct variable path: %p\n", (void*)temp->path);
+            log_message(LOG_DEBUG, "Freeing page struct variable path: %p", (void*)temp->path);
             free(temp->path);
         }
         if (temp->description){
-            log_message(LOG_DEBUG, "Freeing page struct variable description: %p\n", (void*)temp->description);
+            log_message(LOG_DEBUG, "Freeing page struct variable description: %p", (void*)temp->description);
             free(temp->description);
         }
         if (temp->content){
-            log_message(LOG_DEBUG, "Freeing page struct variable content: %p\n", (void*)temp->content);
+            log_message(LOG_DEBUG, "Freeing page struct variable content: %p", (void*)temp->content);
             free(temp->content);
         }
         if (temp->updatedAt){
-            log_message(LOG_DEBUG, "Freeing page struct variable updatedAt: %p\n", (void*)temp->updatedAt);
+            log_message(LOG_DEBUG, "Freeing page struct variable updatedAt: %p", (void*)temp->updatedAt);
             free(temp->updatedAt);
         }
         if (temp->createdAt){ 
-            log_message(LOG_DEBUG, "Freeing page struct variable createdAt: %p\n", (void*)temp->createdAt);
+            log_message(LOG_DEBUG, "Freeing page struct variable createdAt: %p", (void*)temp->createdAt);
             free(temp->createdAt);
         }
         if (temp->authorId){ 
-            log_message(LOG_DEBUG, "Freeing page struct variable authorId: %p\n", (void*)temp->authorId);
+            log_message(LOG_DEBUG, "Freeing page struct variable authorId: %p", (void*)temp->authorId);
             free(temp->authorId);
         }
         
@@ -1094,7 +1094,7 @@ void appendMentionedIn(pageList** head){
     subjectPage->content = replaceWord(subjectPage->content, "\n", "\\\\n");
     subjectPage->content = replaceWord(subjectPage->content, "\"", "\\\"");
     updatePageContentMutation(subjectPage);
-    renderMutation(&subjectPage);
+    renderMutation(&subjectPage, false);
 
     
     log_message(LOG_DEBUG, "Exiting function appendMentionedIn");

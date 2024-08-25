@@ -45,7 +45,7 @@ void updatePageContentMutation(pageList* head);
  * @note Ensure that `replaceWord` and `wikiApi` functions are correctly implemented. The `template_render_page_mutation` should 
  *       be a valid mutation query template. The list of pages should be properly initialized and linked.
  */
-void renderMutation(pageList** head);
+void renderMutation(pageList** head, bool renderEntireList);
 
 /**
  * @brief Moves the content of pages by sending a mutation query for each page in the list.

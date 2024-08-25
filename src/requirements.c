@@ -124,7 +124,7 @@ char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 
     //TITLE
     if (cJSON_IsString(id) && id->valuestring) {
-        pageContent = appendStrings(pageContent, "# ");
+        pageContent = appendStrings(pageContent, "\n# ");
         pageContent = appendStrings(pageContent, id->valuestring);
         pageContent = appendStrings(pageContent, ": ");
     }
@@ -143,28 +143,28 @@ char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 
 
     //INFORMATION BOX: SOURCES AND ASSIGNEE
-    if (cJSON_IsString(source) && source->valuestring && strcmp(source->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
+    if (cJSON_IsString(source) && source->valuestring && strcmp(source->valuestring, "") != 0) {
         pageContent = appendStrings(pageContent, "\n>**Source**: ");
         pageContent = appendStrings(pageContent, source->valuestring);
         pageContent = appendStrings(pageContent, "\n");
     }
-    if (cJSON_IsString(author) && author->valuestring && strcmp(author->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
+    if (cJSON_IsString(author) && author->valuestring && strcmp(author->valuestring, "") != 0) {
         pageContent = appendStrings(pageContent, ">**Author**: ");
         pageContent = appendStrings(pageContent, author->valuestring);
         pageContent = appendStrings(pageContent, "\n");
     }
-    if (cJSON_IsString(assignee) && assignee->valuestring && strcmp(assignee->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
+    if (cJSON_IsString(assignee) && assignee->valuestring && strcmp(assignee->valuestring, "") != 0) {
         pageContent = appendStrings(pageContent, ">**Assignee**: ");
         pageContent = appendStrings(pageContent, assignee->valuestring);
         pageContent = appendStrings(pageContent, "\n");
     }
-    if (strcmp(source->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 || strcmp(author->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 || strcmp(assignee->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
+    if (strcmp(source->valuestring, "") != 0 || strcmp(author->valuestring, "") != 0 || strcmp(assignee->valuestring, "") != 0) {
         pageContent = appendStrings(pageContent, "{.is-info}\n");
     }
 
 
     //JUSTIFICATION
-    if (cJSON_IsString(justification) && justification->valuestring && strcmp(justification->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
+    if (cJSON_IsString(justification) && justification->valuestring && strcmp(justification->valuestring, "") != 0) {
         pageContent = appendStrings(pageContent, "\n## Justification\n");
         pageContent = appendStrings(pageContent, justification->valuestring);
         pageContent = appendStrings(pageContent, "\n");
@@ -414,7 +414,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
             return NULL;
         }
 
-        if(cJSON_GetArrayItem(req_array, REQ_ID_COL) == NULL){
+        if(cJSON_GetArrayItem(req_array, REQ_ID_COL) == NULL || strcmp(cJSON_GetArrayItem(req_array, REQ_ID_COL)->valuestring, "")==0){
             log_message(LOG_DEBUG, "ID is empty");
             break;
         }

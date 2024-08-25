@@ -111,7 +111,7 @@ char* replaceParagraph(char* original, char* newSubstring, char* startPtr, char*
     
     // Check for null pointers
     if (original == NULL || newSubstring == NULL || startPtr == NULL || endPtr == NULL) {
-        log_message(LOG_ERROR, "Null pointer input original:%ld, %ld, %ld, %ld", (long)original, (long)newSubstring, (long)startPtr, (long)endPtr);
+        log_message(LOG_ERROR, "Null pointer input original:%ld, newSubstring: %ld, startPtr: %ld, endPtr: %ld", (long)original, (long)newSubstring, (long)startPtr, (long)endPtr);
         return NULL;
     }
 

@@ -78,7 +78,7 @@ void buildLinksTracker() {
 
 
     updatePageContentMutation(linkTrackerPage);
-    renderMutation(&linkTrackerPage);
+    renderMutation(&linkTrackerPage, false);
     // Free the memory used by the linked list
     freePageList(&linkTrackerPage);// Free the memory used by the linked list
     freePageList(&listOfAllPages);// Free the memory used by the linked list
@@ -148,7 +148,7 @@ void updateLinksTracker() {
     
 
     updatePageContentMutation(linkTrackerPage);
-    renderMutation(&linkTrackerPage);
+    renderMutation(&linkTrackerPage, false);
 
     // Free the memory used by the linked list
     freePageList(&linkTrackerPage);// Free the memory used by the linked list
@@ -202,7 +202,7 @@ void buildImageTracker(command cmd) {
         freePageList(&links);
     } 
     updatePageContentMutation(&imageTrackerPage);
-    renderMutation(&imageTrackerPage);
+    renderMutation(&imageTrackerPage, false);
     // Free the memory used by the linked list
     freePageList(&imageTrackerPage);// Free the memory used by the linked list
     freePageList(&listOfAllPages);// Free the memory used by the linked list
@@ -296,7 +296,7 @@ void movePage(command cmd){
         temporaryPage->content = replaceWord(temporaryPage->content, "\"", "\\\"");
         updatePageContentMutation(temporaryPage);
         log_message(LOG_DEBUG, "Updated Page");
-        renderMutation(&temporaryPage);
+        renderMutation(&temporaryPage, false);
         log_message(LOG_DEBUG, "Rendered Page");
         IncomingLinks = IncomingLinks->next;
         freePageList(&temporaryPage);
@@ -312,7 +312,7 @@ void movePage(command cmd){
     linkTrackerPage->content = replaceWord(linkTrackerPage->content, "\\n", "\\\\n");
     updatePageContentMutation(linkTrackerPage);
     log_message(LOG_DEBUG, "Updated Page");
-    renderMutation(&linkTrackerPage);
+    renderMutation(&linkTrackerPage, false);
     log_message(LOG_DEBUG, "Rendered Page");
 
     freePageList(&subjectPage);
@@ -459,7 +459,7 @@ void syncDrlToSheet(command cmd){
     drlPage->content = replaceWord(drlPage->content, "\"", "\\\\\\\"");
 
     updatePageContentMutation(drlPage);
-    renderMutation(&drlPage);
+    renderMutation(&drlPage, false);
 
     freePageList(&drlPage);
     cJSON_Delete(requirementList);
@@ -533,7 +533,7 @@ void updateVcdPage(command cmd){
     vcdPage->content = replaceWord(vcdPage->content, "\"", "\\\\\\\"");
 
     updatePageContentMutation(vcdPage);
-    renderMutation(&vcdPage);
+    renderMutation(&vcdPage, false);
 
     /* Stacked Area chart
     char *extractedText = extractText(vcdPage->content, "<!-- Status history -->\\n```kroki\\nvegalite\\n", "\\n```\\n", false, false);
@@ -561,6 +561,7 @@ void updateRequirementPage(command cmd){
     char *sheetId;
     pageList* requirementPagesHead = NULL;
     char *path = cmd.argument_1;
+    path = replaceWord(path, "\\", "");
 
     if(strcmp(cmd.argument_1, "ST")==0){
         path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/";
@@ -631,24 +632,33 @@ void updateRequirementPage(command cmd){
             cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
 
             if (cJSON_IsString(id) && id->valuestring && strcmp(id->valuestring, currentReqPage->title) == 0){
+                currentReqPage = getPage(&currentReqPage);
+                currentReqPage->content = replaceWord(currentReqPage->content, "\\n", "\n");
                 char* importedRequirementInformation = buildRequirementPageFromJSONRequirementList(requirement);
                 char* flag = "<!--";
                 flag = appendStrings(flag, id->valuestring);
                 flag = appendStrings(flag, "-->");
 
+                log_message(LOG_DEBUG, "initialising pointer to flags");
                 char* start = currentReqPage->content;
                 char* end = currentReqPage->content;
 
+                log_message(LOG_DEBUG, "Looking for flag: %s in currentReqPage->content: %s", flag, currentReqPage->content);
                 start = strstr(start, flag);
                 start = start + strlen(flag);
-                end = strstr(end, flag);
+
+                log_message(LOG_DEBUG, "Looking for flag: %s in start+1: %s", flag, start+1);
+                end = strstr(start + 1, flag);
+                end--;
                 
                 currentReqPage->content = replaceParagraph(currentReqPage->content, importedRequirementInformation, start, end);
 
                 currentReqPage->content = replaceWord(currentReqPage->content, "\n", "\\\\n");
-                currentReqPage->content = replaceWord(currentReqPage->content, "\"", "\\\"");
+                currentReqPage->content = replaceWord(currentReqPage->content, "\"", "\\\\\\\"");
+                log_message(LOG_DEBUG, "About to update page:%s", currentReqPage->path);
+                //getchar();
                 updatePageContentMutation(currentReqPage);
-                renderMutation(&currentReqPage);
+                renderMutation(&currentReqPage, false);
 
                 break;
             }
@@ -712,7 +722,7 @@ void onPageUpdate(command cmd){
         targetPage->content = replaceWord(targetPage->content, "\\", "\\\\");
         targetPage->content = replaceWord(targetPage->content, "\"", "\\\"");
         updatePageContentMutation(targetPage);
-        renderMutation(&targetPage);
+        renderMutation(&targetPage, false);
         freePageList(&targetPage);
         sendMessageToSlack("onPageUpdate called on page id:");
         sendMessageToSlack(cmd.argument_1);
@@ -751,7 +761,7 @@ void updateStatsPage(command cmd){
     statsPage = addPageToList(&statsPage, "1178", "", "", "", linksListOfPages, "", "", "");
     log_message(LOG_DEBUG, "statsPage id set");
     updatePageContentMutation(statsPage);
-    renderMutation(&statsPage);
+    renderMutation(&statsPage, false);
     sendMessageToSlack("stats page updated");
 
     log_message(LOG_DEBUG, "Exiting function updateStatsPage");
@@ -830,8 +840,16 @@ void createMissingRequirementPages(command cmd){
         pageList* currentReqPage = requirementPagesHead;
         int foundPage = 0;
 
+        log_message(LOG_DEBUG, "Looking for page corresponding to requiremet: %s", id->valuestring);
+
+        if(!strstr(id->valuestring, "2024_")){
+            log_message(LOG_DEBUG, "Found a group, skipping");
+            continue;
+        }
+
         while(currentReqPage){
             if (cJSON_IsString(id) && id->valuestring && strcmp(id->valuestring, currentReqPage->title) == 0){
+                log_message(LOG_DEBUG, "Found %s, breaking", currentReqPage->title);
                 foundPage = 1;
                 break;
             }
@@ -848,6 +866,8 @@ void createMissingRequirementPages(command cmd){
             reqContent = appendStrings(reqContent, id->valuestring);
             reqContent = appendStrings(reqContent, "-->\\\\n");
             reqContent = appendStrings(reqContent, reqContent);
+            log_message(LOG_DEBUG, "About to create new page path:%s\nTitle:%s", reqPath, id->valuestring);
+            //getchar();
             createPageMutation(reqPath, reqContent, id->valuestring);
         }
 
@@ -858,7 +878,6 @@ void createMissingRequirementPages(command cmd){
     freePageList(&requirementPagesHead);
     
     log_message(LOG_DEBUG, "Exiting function updateRequirementPage");
+    sendMessageToSlack("Pages were created");
     return;
-
-
 }

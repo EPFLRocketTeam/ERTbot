@@ -264,6 +264,7 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
         breakdownCommand(slackMsg->message, &cmd);
         log_message(LOG_DEBUG, "Command broke down");
         *headOfCommandQueue = addCommandToQueue(headOfCommandQueue, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
+        sendMessageToSlack("Command added to queue");
         log_message(LOG_INFO, "Received a %s command on slack", cmd.function);
         log_message(LOG_DEBUG, "Command added to queue");
     }
@@ -382,7 +383,7 @@ command** executeCommand(command** commandQueue){
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateRequirementPage") == 0){
         updateRequirementPage(**commandQueue);
-        sendMessageToSlack("Page created.");
+        sendMessageToSlack("Pages updated.");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateVcdPage") == 0){
@@ -411,6 +412,9 @@ command** executeCommand(command** commandQueue){
         updateStatsPage(**commandQueue);
     }
 
+    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "createMissingRequirementPages") == 0){
+        createMissingRequirementPages(**commandQueue);
+    }
 
 /*
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "getPDF") == 0){
