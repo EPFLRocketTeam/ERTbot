@@ -212,6 +212,8 @@ char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
     int isVerification = 0;
     int verificationCount = 0;
 
+    log_message(LOG_DEBUG, "Going to start filling in the verification section");
+
     for(int reviewNumber = 1; reviewNumber <= MAXIMUM_NUMBER_OF_REVIEWS; reviewNumber++){
         for (int verificationNumber = 1; verificationNumber <= MAXIMUM_NUMBER_OF_VERIFICATIONS_PER_REVIEW; verificationNumber++){
 
@@ -226,12 +228,19 @@ char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 
             char *reviewName = REVIEW_1_NAME;
 
-            if(reviewNumber = 1){reviewName = REVIEW_1_NAME;}
-            if(reviewNumber = 2){reviewName = REVIEW_2_NAME;}
-            if(reviewNumber = 3){reviewName = REVIEW_3_NAME;}
-            if(reviewNumber = 4){reviewName = REVIEW_4_NAME;}
+            switch(reviewNumber) {
+                case 1: reviewName = REVIEW_1_NAME; break;
+                case 2: reviewName = REVIEW_2_NAME; break;
+                case 3: reviewName = REVIEW_3_NAME; break;
+                case 4: reviewName = REVIEW_4_NAME; break;
+                case 5: reviewName = REVIEW_5_NAME; break;
+                case 6: reviewName = REVIEW_6_NAME; break;
+            }
+            
 
             if(strcmp(verificationMethod->valuestring, REQ_SHEET_EMPTY_VALUE) != 0){
+
+                log_message(LOG_DEBUG, "Verification method found");
                 
                 verificationCount++;
 
@@ -262,6 +271,7 @@ char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 
                 }
 
+                log_message(LOG_DEBUG, "Page content: %s",  pageContent);
 
             }
 
@@ -467,6 +477,20 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
         cJSON_AddStringToObject(req, "Review 4 Verification 2 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_2_STATUS_COL)->valuestring);
         cJSON_AddStringToObject(req, "Review 4 Verification 3 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_3_METHOD_COL)->valuestring);
         cJSON_AddStringToObject(req, "Review 4 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_3_STATUS_COL)->valuestring);
+
+        cJSON_AddStringToObject(req, "Review 5 Verification 1 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_1_METHOD_COL)->valuestring);
+        cJSON_AddStringToObject(req, "Review 5 Verification 1 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_1_STATUS_COL)->valuestring);
+        cJSON_AddStringToObject(req, "Review 5 Verification 2 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_2_METHOD_COL)->valuestring);
+        cJSON_AddStringToObject(req, "Review 5 Verification 2 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_2_STATUS_COL)->valuestring);
+        cJSON_AddStringToObject(req, "Review 5 Verification 3 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_3_METHOD_COL)->valuestring);
+        cJSON_AddStringToObject(req, "Review 5 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_3_STATUS_COL)->valuestring);
+
+        cJSON_AddStringToObject(req, "Review 6 Verification 1 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_1_METHOD_COL)->valuestring);
+        cJSON_AddStringToObject(req, "Review 6 Verification 1 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_1_STATUS_COL)->valuestring);
+        cJSON_AddStringToObject(req, "Review 6 Verification 2 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_2_METHOD_COL)->valuestring);
+        cJSON_AddStringToObject(req, "Review 6 Verification 2 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_2_STATUS_COL)->valuestring);
+        cJSON_AddStringToObject(req, "Review 6 Verification 3 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_3_METHOD_COL)->valuestring);
+        cJSON_AddStringToObject(req, "Review 6 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_3_STATUS_COL)->valuestring);
 
         //cJSON_AddStringToObject(req, "Path", cJSON_GetArrayItem(req_array, REQ_PATH_COL)->valuestring);
         

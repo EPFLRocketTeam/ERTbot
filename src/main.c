@@ -63,7 +63,7 @@ int main(){
 
         else{log_message(LOG_DEBUG, "No command received.");}
 
-        sleep(2);
+        //sleep(2);
     }
 
     sendMessageToSlack("Shutting Down");

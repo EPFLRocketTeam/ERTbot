@@ -337,39 +337,39 @@ void syncSheetToDrl(command cmd){
 
     if(strcmp(cmd.argument_1, "ST")==0){
         drlPage->id = "420";
-        sheetId = "ST!A3:AI300";
+        sheetId = "ST!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "PR")==0){
         drlPage->id = "414";
-        sheetId = "PR!A3:AI300";
+        sheetId = "PR!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "FD")==0){
         drlPage->id = "416";
-        sheetId = "FD!A3:AI300";
+        sheetId = "FD!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "RE")==0){
         drlPage->id = "419";
-        sheetId = "RE!A3:AI300";
+        sheetId = "RE!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "GS")==0){
         drlPage->id = "417";
-        sheetId = "GS!A3:AI300";
+        sheetId = "GS!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "AV")==0){
         drlPage->id = "421";
-        sheetId = "AV!A3:AI300";
+        sheetId = "AV!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "TE")==0){
         drlPage->id = 
-        sheetId = "TE!A3:AI300";
+        sheetId = "TE!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "PL")==0){
         drlPage->id = "418";
-        sheetId = "PL!A3:AI300";
+        sheetId = "PL!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "GE")==0){
         drlPage->id = "415";
-        sheetId = "GE!A3:AI300";
+        sheetId = "GE!A3:AT300";
     }
 
     drlPage = getPage(&drlPage); //get content and updated at values
@@ -410,39 +410,39 @@ void syncDrlToSheet(command cmd){
 
     if(strcmp(cmd.argument_1, "ST")==0){
         drlPageId = "420";
-        sheetId = "ST!A3:AI300";
+        sheetId = "ST!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "PR")==0){
         drlPageId = "414";
-        sheetId = "PR!A3:AI300";
+        sheetId = "PR!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "FD")==0){
         drlPageId = "416";
-        sheetId = "FD!A3:AI300";
+        sheetId = "FD!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "RE")==0){
         drlPageId = "419";
-        sheetId = "RE!A3:AI300";
+        sheetId = "RE!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "GS")==0){
         drlPageId = "417";
-        sheetId = "GS!A3:AI300";
+        sheetId = "GS!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "AV")==0){
         drlPageId = "421";
-        sheetId = "AV!A3:AI300";
+        sheetId = "AV!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "TE")==0){
         drlPageId = 
-        sheetId = "TE!A3:AI300";
+        sheetId = "TE!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "PL")==0){
         drlPageId = "418";
-        sheetId = "PL!A3:AI300";
+        sheetId = "PL!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "GE")==0){
         drlPageId = "415";
-        sheetId = "GE!A3:AI300";
+        sheetId = "GE!A3:AT300";
     }
     
     batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
@@ -479,39 +479,39 @@ void updateVcdPage(command cmd){
 
     if(strcmp(cmd.argument_1, "ST")==0){
         vcdPageId = "1186";
-        sheetId = "ST!A3:AI300";
+        sheetId = "ST!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "PR")==0){
         vcdPageId = "1187";
-        sheetId = "PR!A3:AI300";
+        sheetId = "PR!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "FD")==0){
         vcdPageId = "1182";
-        sheetId = "FD!A3:AI300";
+        sheetId = "FD!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "RE")==0){
         vcdPageId = "1185";
-        sheetId = "RE!A3:AI300";
+        sheetId = "RE!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "GS")==0){
         vcdPageId = "1183";
-        sheetId = "GS!A3:AI300";
+        sheetId = "GS!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "AV")==0){
         vcdPageId = "1181";
-        sheetId = "AV!A3:AI300";
+        sheetId = "AV!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "TE")==0){
         vcdPageId = 
-        sheetId = "TE!A3:AI300";
+        sheetId = "TE!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "PL")==0){
         vcdPageId = "1184";
-        sheetId = "PL!A3:AI300";
+        sheetId = "PL!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "GE")==0){
         vcdPageId = "1180";
-        sheetId = "GE!A3:AI300";
+        sheetId = "GE!A3:AT300";
     }
 
     batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
@@ -563,48 +563,76 @@ void updateRequirementPage(command cmd){
     char *path = cmd.argument_1;
     path = replaceWord(path, "\\", "");
 
-    if(strcmp(cmd.argument_1, "ST")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/";
-        sheetId = "ST!A3:AI300";
+
+    
+    if(strstr(cmd.argument_1, "ST")){
+        sheetId = "ST!A3:AT300";
+        if(strcmp(cmd.argument_1, "ST")==0){
+            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/";
+        }
     }
-    if(strcmp(cmd.argument_1, "PR")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PR_DRL/";
-        sheetId = "PR!A3:AI300";
+    
+    if(strstr(cmd.argument_1, "PR")){
+        sheetId = "PR!A3:AT300";
+        if(strcmp(cmd.argument_1, "PR")==0){
+            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PR_DRL/";
+        }
     }
-    if(strcmp(cmd.argument_1, "FD")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_FD_DRL/";
-        sheetId = "FD!A3:AI300";
+    
+    if(strstr(cmd.argument_1, "FD")){
+        sheetId = "FD!A3:AT300";
+        if(strcmp(cmd.argument_1, "FD")==0){
+            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_FD_DRL/";
+        }
     }
-    if(strcmp(cmd.argument_1, "RE")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_RE_DRL/";
-        sheetId = "RE!A3:AI300";
+    
+    if(strstr(cmd.argument_1, "RE")){
+        sheetId = "RE!A3:AT300";
+        if(strcmp(cmd.argument_1, "RE")==0){
+            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_RE_DRL/";
+        }
     }
-    if(strcmp(cmd.argument_1, "GS")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GS_DRL/";
-        sheetId = "GS!A3:AI300";
+    
+    if(strstr(cmd.argument_1, "GS")){
+        sheetId = "GS!A3:AT300";
+        if(strcmp(cmd.argument_1, "GS")==0){
+            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GS_DRL/";
+        }
     }
-    if(strcmp(cmd.argument_1, "AV")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_AV_DRL/";
-        sheetId = "AV!A3:AI300";
+    
+    if(strstr(cmd.argument_1, "AV")){
+        sheetId = "AV!A3:AT300";
+        if(strcmp(cmd.argument_1, "AV")==0){
+            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_AV_DRL/";
+        }
     }
-    if(strcmp(cmd.argument_1, "TE")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_TE_DRL/";
-        sheetId = "TE!A3:AI300";
+    
+    if(strstr(cmd.argument_1, "TE")){
+        sheetId = "TE!A3:AT300";
+        if(strcmp(cmd.argument_1, "TE")==0){
+            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_TE_DRL/";
+        }
     }
-    if(strcmp(cmd.argument_1, "PL")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PL_DRL/";
-        sheetId = "PL!A3:AI300";
+    
+    if(strstr(cmd.argument_1, "PL")){
+        sheetId = "PL!A3:AT300";
+        if(strcmp(cmd.argument_1, "PL")==0){
+            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PL_DRL/";
+        }
     }
-    if(strcmp(cmd.argument_1, "GE")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GE_DRL/";
-        sheetId = "GE!A3:AI300";
+    
+    if(strstr(cmd.argument_1, "GE")){
+        sheetId = "GE!A3:AT300";
+        if(strcmp(cmd.argument_1, "GE")==0){
+            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GE_DRL/";
+        }
     }
 
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
 
 
     batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
-    log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
+    //log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
     
     cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
 
@@ -777,39 +805,39 @@ void createMissingRequirementPages(command cmd){
 
     if(strcmp(cmd.argument_1, "ST")==0){
         path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/";
-        sheetId = "ST!A3:AI300";
+        sheetId = "ST!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "PR")==0){
         path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PR_DRL/";
-        sheetId = "PR!A3:AI300";
+        sheetId = "PR!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "FD")==0){
         path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_FD_DRL/";
-        sheetId = "FD!A3:AI300";
+        sheetId = "FD!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "RE")==0){
         path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_RE_DRL/";
-        sheetId = "RE!A3:AI300";
+        sheetId = "RE!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "GS")==0){
         path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GS_DRL/";
-        sheetId = "GS!A3:AI300";
+        sheetId = "GS!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "AV")==0){
         path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_AV_DRL/";
-        sheetId = "AV!A3:AI300";
+        sheetId = "AV!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "TE")==0){
         path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_TE_DRL/";
-        sheetId = "TE!A3:AI300";
+        sheetId = "TE!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "PL")==0){
         path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PL_DRL/";
-        sheetId = "PL!A3:AI300";
+        sheetId = "PL!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "GE")==0){
         path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GE_DRL/";
-        sheetId = "GE!A3:AI300";
+        sheetId = "GE!A3:AT300";
     }
 
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
