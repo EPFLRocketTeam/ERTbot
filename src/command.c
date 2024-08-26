@@ -17,11 +17,12 @@
 #include "../include/command.h"
 #include "../include/log.h"
 #include "../include/requirements.h"
+#include <sys/socket.h>
 
 
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands, command* command, int period) {
     log_message(LOG_DEBUG, "Entering function addPeriodicCommand");
-    
+
     PeriodicCommand* newCommand = (PeriodicCommand*)malloc(sizeof(PeriodicCommand));
     newCommand->command = command;  // Duplicate the command string
     newCommand->period = period;
@@ -49,7 +50,7 @@ static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicComma
 
 static command* addCommandToQueue(command** head,  char *function, char *argument_1, char *argument_2, char *argument_3, char *argument_4, char *argument_5, char *argument_6, char *argument_7, char *argument_8, char *argument_9) {
     log_message(LOG_DEBUG, "Entering function addCommandToQueue");
-        
+
     command* newNode = (command *)malloc(sizeof(command));
     if (!newNode) {
         log_message(LOG_ERROR, "Memory allocation error");
@@ -149,14 +150,14 @@ static command* addCommandToQueue(command** head,  char *function, char *argumen
     lastNode->next = newNode;
 
     log_message(LOG_DEBUG, "Command added to queue");
-    
+
     log_message(LOG_DEBUG, "Exiting function addCommandToQueue");
     return *head;
 }
 
 void removeFirstCommand(command **head) {
     log_message(LOG_DEBUG, "Entering function removeFirstCommand");
-    
+
     log_message(LOG_DEBUG, "About to remove first command");
 
     if (*head == NULL) {
@@ -173,7 +174,7 @@ void removeFirstCommand(command **head) {
     *head = (*head)->next;
 
     // Free the memory of the removed node
-    
+
     if (temp->function && temp->function != NULL){
         free(temp->function);
     }
@@ -215,17 +216,17 @@ void removeFirstCommand(command **head) {
     }
 
     log_message(LOG_DEBUG, "freed all variables");
-    
+
     free(temp);
 
     log_message(LOG_DEBUG, "freed struct");
-    
-    log_message(LOG_DEBUG, "Exiting function removeFirstCommand"); 
+
+    log_message(LOG_DEBUG, "Exiting function removeFirstCommand");
 }
 
 static command** checkAndEnqueuePeriodicCommands(command** commandQueue, PeriodicCommand** headOfPeriodicCommands) {
     log_message(LOG_DEBUG, "Entering function checkAndEnqueuePeriodicCommands");
-    
+
     time_t currentTime = time(NULL);
     PeriodicCommand* periodicCommand = (*headOfPeriodicCommands);
 
@@ -240,7 +241,7 @@ static command** checkAndEnqueuePeriodicCommands(command** commandQueue, Periodi
         }
         periodicCommand = periodicCommand->next;
     }
-    
+
     log_message(LOG_DEBUG, "Exiting function checkAndEnquePeriodicCommands");
     return commandQueue;
 }
@@ -258,8 +259,8 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
 
 
     slackMsg = getSlackMessage(slackMsg);
-    
-    //If received a message which was not sent by bot, breakdown message into command structure and return command 
+
+    //If received a message which was not sent by bot, breakdown message into command structure and return command
     if(strcmp(slackMsg->sender, "U06RQCAT0H1") != 0){
         breakdownCommand(slackMsg->message, &cmd);
         log_message(LOG_DEBUG, "Command broke down");
@@ -268,10 +269,10 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
         log_message(LOG_INFO, "Received a %s command on slack", cmd.function);
         log_message(LOG_DEBUG, "Command added to queue");
     }
-    
+
     //If last message was sent by bot, free allocated memory and return emtpy command
     else{log_message(LOG_DEBUG, "No commands sent on slack"); }//log.info
-    
+
     if (chunk.response) {
         chunk.response = NULL;
         chunk.size = 0;
@@ -280,7 +281,7 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
     free(slackMsg->message);
     free(slackMsg->sender);
     free(slackMsg->timestamp);
-    
+
     log_message(LOG_DEBUG, "Exiting function lookForCommandOnSlack");
     return headOfCommandQueue;
 
@@ -288,7 +289,7 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
 
 static command** lookForNewlyUpdatedPages(command** commandQueue){
     log_message(LOG_DEBUG, "Entering function lookForNewlyUpdatedPages");
-    
+
     pageList* updatedPages = NULL;
     log_message(LOG_DEBUG, "Last Page refresh check happened at: %s", lastPageRefreshCheck);
     updatedPages = populatePageList(&updatedPages, "time", lastPageRefreshCheck);
@@ -303,25 +304,25 @@ static command** lookForNewlyUpdatedPages(command** commandQueue){
 
     freePageList(&updatedPagesHead);
     lastPageRefreshCheck = getCurrentEDTTimeString();
-    
+
     log_message(LOG_DEBUG, "Exiting function lookForNewlyUpdatedPages");
     return commandQueue;
 }
 
 command** checkForCommand(command** headOfCommandQueue, PeriodicCommand** headOfPeriodicCommands){
     log_message(LOG_DEBUG, "Entering function checkForCommand");
-    
+
     headOfCommandQueue = lookForCommandOnSlack(headOfCommandQueue);
     headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);
     //headOfCommandQueue = checkAndEnqueuePeriodicCommands(headOfCommandQueue, headOfPeriodicCommands);
-    
+
     log_message(LOG_DEBUG, "Exiting function checkForCommand");
     return headOfCommandQueue;
 }
 
 PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicCommands){
     log_message(LOG_DEBUG, "Entering function initializePeriodicCommands");
-    
+
     command* getRyansHomePage = (command*)malloc(sizeof(command));
     getRyansHomePage->function = "updateStatsPage";
     getRyansHomePage->argument_1 = NULL;
@@ -338,14 +339,14 @@ PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicComm
     headOfPeriodicCommands = (PeriodicCommand**)malloc(sizeof(PeriodicCommand*));
     *headOfPeriodicCommands = NULL;
     *headOfPeriodicCommands = addPeriodicCommand(headOfPeriodicCommands, getRyansHomePage, 3600);
-    
+
     log_message(LOG_DEBUG, "Exiting function initializePeriodicCommands");
     return headOfPeriodicCommands;
 }
 
 command** executeCommand(command** commandQueue){
     log_message(LOG_DEBUG, "Entering function executeCommand");
-    
+
     //TerminalCommandFeatures
     if((*commandQueue)->function && strcmp((*commandQueue)->function, "getPages") == 0){ //works
         getPages(**commandQueue);
@@ -376,17 +377,17 @@ command** executeCommand(command** commandQueue){
         sendMessageToSlack("Finished parsing.");
     }
 
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "syncDRLToSheet") == 0){
+    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateDRL") == 0){
         syncDrlToSheet(**commandQueue);
         sendMessageToSlack("Finished parsing.");
     }
 
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateRequirementPage") == 0){
+    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateReq") == 0){
         updateRequirementPage(**commandQueue);
         sendMessageToSlack("Pages updated.");
     }
 
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateVcdPage") == 0){
+    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateVCD") == 0){
         updateVcdPage(**commandQueue);
         sendMessageToSlack("Page created.");
     }
@@ -395,7 +396,7 @@ command** executeCommand(command** commandQueue){
         refreshOAuthToken();
         sendMessageToSlack("Token Refreshed");
     }
-    
+
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "onPageUpdate") == 0){
         onPageUpdate(**commandQueue);
     }
@@ -472,7 +473,30 @@ command** executeCommand(command** commandQueue){
     */
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "help") == 0){
-        sendMessageToSlack("Here is a list of the possible commands: ");
+        sendMessageToSlack("Here is a list of commands: ");
+        sendMessageToSlack("shutdown");
+        sendMessageToSlack("-> Description: Will shutdown the ERTbot once all of the commands in the queue are complete.");
+        sendMessageToSlack("-----------------");
+        sendMessageToSlack("updateVCD");
+        sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
+        sendMessageToSlack("-> example: updateVCD ST");
+        sendMessageToSlack("-----------------");
+        sendMessageToSlack("updateReq");
+        sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update (will update all of the requirement pages of the subsystem)");
+        sendMessageToSlack("-> or");
+        sendMessageToSlack("-> Argument (oligatory): ID of the requirement you want to update");
+        sendMessageToSlack("-> example 1: updateReq ST");
+        sendMessageToSlack("-> example 2: updateReq 2024_C_SE_ST_REQ_01");
+        sendMessageToSlack("-----------------");
+        sendMessageToSlack("updateDRL");
+        sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
+        sendMessageToSlack("-> example: updateDRL ST");
+        //sendMessageToSlack("-----------------");
+        //sendMessageToSlack("movePage");
+        //sendMessageToSlack("-> :alert: WARNING :alert: : This feature is still partially broken. Please run buildLinksTracker before moving a page.");
+        //sendMessageToSlack("-> Description: moves a page and updates all of the links on the wiki");
+        //sendMessageToSlack("-> Argument (2) (obligatory): the current path of the page and the new path of the page.");
+        //sendMessageToSlack("-> Example: movePage competition/current_path competition/new_path");
     }
 
     else{
@@ -480,8 +504,8 @@ command** executeCommand(command** commandQueue){
     }
 
     removeFirstCommand(commandQueue);
-    
+
     log_message(LOG_DEBUG, "Exiting function executeCommand");
     return commandQueue;
-    
+
 }
