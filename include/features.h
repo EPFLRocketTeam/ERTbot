@@ -181,7 +181,7 @@ void syncDrlToSheet(command cmd);
  * 
  * @warning not finished yet
  */
-void createRequirementPage(command cmd);
+void updateRequirementPage(command cmd);
 
 /**
  * @brief Creates and updates a VCD (Verification Control Document) page based on data from a Google Sheets document and chart updates.
@@ -200,9 +200,13 @@ void createRequirementPage(command cmd);
  * 
  * @warning NOT FINISHED
  */
-void createVcdPage(command cmd);
+void updateVcdPage(command cmd);
 
 void onPageUpdate(command cmd);
 
 void updateStatsPage(command cmd);
+
+void testCreatePage();
+
+void createMissingRequirementPages(command cmd);
 #endif

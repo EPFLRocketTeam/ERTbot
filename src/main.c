@@ -41,7 +41,7 @@ command** headOfCommandQueue;
 
 
 int main(){
-    log_message(LOG_DEBUG, "Starting program\n\n");
+    log_message(LOG_DEBUG, "\n\n\n\n\n\nStarting program\n\n");
     
     initializeApiTokenVariables();
     headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
@@ -63,7 +63,7 @@ int main(){
 
         else{log_message(LOG_DEBUG, "No command received.");}
 
-        sleep(2);
+        //sleep(2);
     }
 
     sendMessageToSlack("Shutting Down");

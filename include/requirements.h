@@ -107,7 +107,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str);
  * 
  * @todo Add compatibility with tabs/groups of requirements
  */
-char *buildDrlFromJSONRequirementList(cJSON *requirementList);
+char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem);
 
 /**
  * @brief Builds a `pageList` entry from a JSON object containing requirements for a specific requirement ID.
@@ -138,7 +138,7 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList);
  * 
  * @todo Function is too long it needs to be broken up into smaller functions.
  */
-pageList* buildRequirementPageFromJSONRequirementList(cJSON *requirementList, char *requirementId);
+char *buildRequirementPageFromJSONRequirementList(cJSON *requirement);
 
 /**
  * @brief Appends a section listing pages that mention the current page.
@@ -176,7 +176,7 @@ void appendMentionedIn(pageList** head);
  * - It replaces placeholder values (`DefaultUnverifiedPopulation`, `DefaultPartiallyVerifiedPopulation`, `DefaultVerifiedPopulation`) in the template with the provided arguments.
  * - The final Vega chart specification is returned, ready to be used for rendering a pie chart.
  */
-char *createVcdPieChart(char *unverifiedPopulation, char *partiallyVerifiedPopulation, char *verifiedPopulation);
+char *createVcdPieChart(int* verificationStatusCount);
 
 /**
  * @brief Updates a JSON string representing a stacked area chart with new weekly data.
@@ -202,4 +202,9 @@ char *createVcdPieChart(char *unverifiedPopulation, char *partiallyVerifiedPopul
  */
 char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue);
 
+
+void countVerificationStatus(cJSON *requirementList, int* verificationStatusCount);
+
+
+char *buildVcdList(cJSON *requirementList, char* subSystem);
 #endif
