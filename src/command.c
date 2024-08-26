@@ -48,6 +48,55 @@ static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicComma
     return *headOfPeriodicCommands;
 }
 
+static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands, command* command, char* time_str) {
+    log_message(LOG_DEBUG, "Entering function scheduleDailyCommand");
+
+    int hours, minutes;
+    sscanf(time_str, "%d:%d", &hours, &minutes); // Parse the time string
+
+
+    PeriodicCommand* newCommand = (PeriodicCommand*)malloc(sizeof(PeriodicCommand));
+    newCommand->command = command;  // Duplicate the command string
+    newCommand->period = 86400;
+    newCommand->next = NULL;
+
+    time_t now = time(NULL);
+    struct tm* now_tm = localtime(&now);
+
+    struct tm next_execution = *now_tm;
+    next_execution.tm_hour = hours;
+    next_execution.tm_min = minutes;
+    next_execution.tm_sec = 0;
+
+    time_t next_execution_time = mktime(&next_execution);
+
+    // If the execution time has already passed today, schedule it for tomorrow
+    if (next_execution_time <= now) {
+        next_execution_time += 24 * 60 * 60; // Add 24 hours in seconds
+    }
+
+    newCommand->next_time = next_execution_time;  // Set the next execution time
+
+    // If the list is empty, make the new node the first node
+    if (*headOfPeriodicCommands == NULL) {
+        *headOfPeriodicCommands = newCommand;
+        return *headOfPeriodicCommands;
+    }
+
+    // Traverse the list to find the last node
+    PeriodicCommand* lastNode = *headOfPeriodicCommands;
+    while (lastNode->next != NULL) {
+        lastNode = lastNode->next;
+    }
+
+    // Link the new node after the last node
+    lastNode->next = newCommand;
+
+    log_message(LOG_DEBUG, "Exiting function scheduleDailyCommand");
+
+    return *headOfPeriodicCommands;
+}
+
 static command* addCommandToQueue(command** head,  char *function, char *argument_1, char *argument_2, char *argument_3, char *argument_4, char *argument_5, char *argument_6, char *argument_7, char *argument_8, char *argument_9) {
     log_message(LOG_DEBUG, "Entering function addCommandToQueue");
 
@@ -324,21 +373,107 @@ PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicComm
     log_message(LOG_DEBUG, "Entering function initializePeriodicCommands");
 
     command* getRyansHomePage = (command*)malloc(sizeof(command));
-    getRyansHomePage->function = "updateStatsPage";
-    getRyansHomePage->argument_1 = NULL;
-    getRyansHomePage->argument_2 = NULL;
-    getRyansHomePage->argument_3 = NULL;
-    getRyansHomePage->argument_4 = NULL;
-    getRyansHomePage->argument_5 = NULL;
-    getRyansHomePage->argument_6 = NULL;
-    getRyansHomePage->argument_7 = NULL;
-    getRyansHomePage->argument_8 = NULL;
-    getRyansHomePage->argument_9 = NULL;
-    getRyansHomePage->next = NULL;
+    breakdownCommand("updateStatsPage", getRyansHomePage);
+
+    command* updateVCD_ST =(command*)malloc(sizeof(command));
+    breakdownCommand("updateVCD ST", updateVCD_ST);
+
+    command* updateVCD_GE =(command*)malloc(sizeof(command));
+    breakdownCommand("updateVCD GE", updateVCD_GE);
+
+    command* updateVCD_PR =(command*)malloc(sizeof(command));
+    breakdownCommand("updateVCD PR", updateVCD_PR);
+
+    command* updateVCD_FD =(command*)malloc(sizeof(command));
+    breakdownCommand("updateVCD FD", updateVCD_FD);
+
+    command* updateVCD_RE =(command*)malloc(sizeof(command));
+    breakdownCommand("updateVCD RE", updateVCD_RE);
+
+    command* updateVCD_GS =(command*)malloc(sizeof(command));
+    breakdownCommand("updateVCD GS", updateVCD_GS);
+
+    command* updateVCD_AV =(command*)malloc(sizeof(command));
+    breakdownCommand("updateVCD AV", updateVCD_AV);
+
+    command* updateVCD_PL =(command*)malloc(sizeof(command));
+    breakdownCommand("updateVCD PL", updateVCD_PL);
+
+    command* updateReq_ST =(command*)malloc(sizeof(command));
+    breakdownCommand("updateReq ST", updateReq_ST);
+
+    command* updateReq_GE =(command*)malloc(sizeof(command));
+    breakdownCommand("updateReq GE", updateReq_GE);
+
+    command* updateReq_PR =(command*)malloc(sizeof(command));
+    breakdownCommand("updateReq PR", updateReq_PR);
+
+    command* updateReq_FD =(command*)malloc(sizeof(command));
+    breakdownCommand("updateReq FD", updateReq_FD);
+
+    command* updateReq_RE =(command*)malloc(sizeof(command));
+    breakdownCommand("updateReq RE", updateReq_RE);
+
+    command* updateReq_GS =(command*)malloc(sizeof(command));
+    breakdownCommand("updateReq GS", updateReq_GS);
+
+    command* updateReq_AV =(command*)malloc(sizeof(command));
+    breakdownCommand("updateReq AV", updateReq_AV);
+
+    command* updateReq_PL =(command*)malloc(sizeof(command));
+    breakdownCommand("updateReq PL", updateReq_PL);
+
+    command* updateDRL_ST =(command*)malloc(sizeof(command));
+    breakdownCommand("updateDRL ST", updateDRL_ST);
+
+    command* updateDRL_GE =(command*)malloc(sizeof(command));
+    breakdownCommand("updateDRL GE", updateDRL_GE);
+
+    command* updateDRL_PR =(command*)malloc(sizeof(command));
+    breakdownCommand("updateDRL PR", updateDRL_PR);
+
+    command* updateDRL_FD =(command*)malloc(sizeof(command));
+    breakdownCommand("updateDRL FD", updateDRL_FD);
+
+    command* updateDRL_RE =(command*)malloc(sizeof(command));
+    breakdownCommand("updateDRL RE", updateDRL_RE);
+
+    command* updateDRL_GS =(command*)malloc(sizeof(command));
+    breakdownCommand("updateDRL GS", updateDRL_GS);
+
+    command* updateDRL_AV =(command*)malloc(sizeof(command));
+    breakdownCommand("updateDRL AV", updateDRL_AV);
+
+    command* updateDRL_PL =(command*)malloc(sizeof(command));
+    breakdownCommand("updateDRL PL", updateDRL_PL);
 
     headOfPeriodicCommands = (PeriodicCommand**)malloc(sizeof(PeriodicCommand*));
     *headOfPeriodicCommands = NULL;
     *headOfPeriodicCommands = addPeriodicCommand(headOfPeriodicCommands, getRyansHomePage, 3600);
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_ST, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_GE, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_PR, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_FD, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_RE, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_GS, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_AV, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_PL, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_ST, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_GE, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_PR, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_FD, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_RE, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_GS, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_AV, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_PL, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_ST, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_GE, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_PR, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_FD, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_RE, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_GS, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_AV, "04:00");
+    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_PL, "04:00");
 
     log_message(LOG_DEBUG, "Exiting function initializePeriodicCommands");
     return headOfPeriodicCommands;
