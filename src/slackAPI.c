@@ -4,6 +4,7 @@
  * @brief 
  * 
  * @details Contains all of the functions which are only used to interact with the Slack APIs.
+ * @todo add redundancy in case of slack message failure
  */
 
 #include "../include/struct.h"
@@ -128,7 +129,8 @@ void checkLastSlackMessage() {
         long http_code = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         if (http_code != 200) {
-            log_message(LOG_ERROR, "checkLastSlackMessage: HTTP request failed with status code %ld\n", http_code);
+            log_message(LOG_ERROR, "checkLastSlackMessage: HTTP request failed with status code %ld", http_code);
+            log_message(LOG_ERROR, "chunk.resposnse: %s", chunk.response);
         }
 
         // Clean up

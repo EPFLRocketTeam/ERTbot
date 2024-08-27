@@ -13,7 +13,7 @@
 #include "../include/log.h"
 #include "../include/requirements.h"
 
-char *template_DRL = "# General Design Requirements List\n\n\n# table {.tabset}\n\n";
+char *template_DRL = "# $SubSystem$ Design Requirements List\n# table {.tabset}";
 char *template_REQ = "";
 
 
@@ -294,6 +294,34 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem){
 
     char *DRL = strdup(template_DRL);
 
+    if(strcmp(subSystem, "GE") == 0){
+        DRL = replaceWord(DRL, "$SubSystem$", "General");
+    }
+    if(strcmp(subSystem, "ST") == 0){
+        DRL = replaceWord(DRL, "$SubSystem$", "Structure");
+    }
+    if(strcmp(subSystem, "PR") == 0){
+        DRL = replaceWord(DRL, "$SubSystem$", "Propulsion");
+    }
+    if(strcmp(subSystem, "FD") == 0){
+        DRL = replaceWord(DRL, "$SubSystem$", "Flight Dynamics");
+    }
+    if(strcmp(subSystem, "RE") == 0){
+        DRL = replaceWord(DRL, "$SubSystem$", "Recovery");
+    }
+    if(strcmp(subSystem, "GS") == 0){
+        DRL = replaceWord(DRL, "$SubSystem$", "Ground Segment");
+    }
+    if(strcmp(subSystem, "AV") == 0){
+        DRL = replaceWord(DRL, "$SubSystem$", "Avionics");
+    }
+    if(strcmp(subSystem, "PL") == 0){
+        DRL = replaceWord(DRL, "$SubSystem$", "Payload");
+    }
+    if(strcmp(subSystem, "TE") == 0){
+        DRL = replaceWord(DRL, "$SubSystem$", "Test");
+    }
+
     int isFirstGroup = 1;
 
     // Iterate over each requirement object in the requirements array
@@ -315,7 +343,7 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem){
             break;
         }
         
-        if(title == NULL){
+        if(title == NULL || strstr(id->valuestring, "2024_") == NULL){
             log_message(LOG_DEBUG, "Found a new group");
 
             if(!isFirstGroup){
@@ -332,6 +360,7 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem){
 
         if (cJSON_IsString(id) && id->valuestring) {
             log_message(LOG_DEBUG, "ID: %s", id->valuestring);
+            log_message(LOG_DEBUG, "title: %s", title->valuestring);
             DRL = appendStrings(DRL, "- [");
             DRL = appendStrings(DRL, id->valuestring);
             DRL = appendStrings(DRL, "](/");
@@ -852,8 +881,8 @@ char *buildVcdList(cJSON *requirementList, char* subSystem){
             break;
         }
         
-        if(title == NULL){
-            log_message(LOG_DEBUG, "Found a new group");
+        if(title == NULL|| strstr(id->valuestring, "2024_") == NULL){
+            log_message(LOG_DEBUG, "Found a new group: %s", id->valuestring);
             continue;
         }
 
@@ -1023,5 +1052,4 @@ char *buildVcdList(cJSON *requirementList, char* subSystem){
     
     log_message(LOG_DEBUG, "Exiting function buildVcdList");
     return VCD;
-
 }

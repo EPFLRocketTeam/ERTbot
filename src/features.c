@@ -451,7 +451,7 @@ void syncDrlToSheet(command cmd){
     char *DRL = buildDrlFromJSONRequirementList(requirementList, cmd.argument_1);
 
     pageList* drlPage = NULL;
-    drlPage = addPageToList(&drlPage, TEST_DRL_PAGE_ID, "", "", "", "", "", "", "");
+    drlPage = addPageToList(&drlPage, drlPageId, "", "", "", "", "", "", "");
     drlPage->content = DRL;
 
 

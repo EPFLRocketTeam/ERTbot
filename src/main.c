@@ -44,26 +44,39 @@ int main(){
     log_message(LOG_DEBUG, "\n\n\n\n\n\nStarting program\n\n");
     
     initializeApiTokenVariables();
-    headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
     lastPageRefreshCheck = getCurrentEDTTimeString();
+    headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
+    
 
     headOfCommandQueue = (command**)malloc(sizeof(command*));
     *headOfCommandQueue = NULL;
 
     sendMessageToSlack("Wiki-Toolbox is Online");
     
+    int cyclesSinceLastCommand = 0; //reduce number of API calls when "Idling"
+
     while(1){
         
         headOfCommandQueue = checkForCommand(headOfCommandQueue, headOfPeriodicCommands);
         
         if(*headOfCommandQueue){
+            cyclesSinceLastCommand = 0;
             log_message(LOG_DEBUG, "command received");
             headOfCommandQueue = executeCommand(headOfCommandQueue);
         }
 
-        else{log_message(LOG_DEBUG, "No command received.");}
+        else{
+            cyclesSinceLastCommand ++;
+            log_message(LOG_DEBUG, "No command received.");
+        }
+        
+        if(cyclesSinceLastCommand>20){
+            sleep(2);
+        }
 
-        //sleep(2);
+        if(cyclesSinceLastCommand>200){
+            sleep(28);
+        }
     }
 
     sendMessageToSlack("Shutting Down");
