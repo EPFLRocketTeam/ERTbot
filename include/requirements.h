@@ -104,8 +104,6 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str);
  * - After processing all requirements, the function appends "{.links-list}" to the end of the DRL string.
  * - If any errors are encountered (e.g., missing "requirements" array or incorrect object format), appropriate error messages are printed.
  * - The function returns the final DRL string.
- * 
- * @todo Add compatibility with tabs/groups of requirements
  */
 char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem);
 
@@ -196,9 +194,7 @@ char *createVcdPieChart(int* verificationStatusCount);
  * - Three new JSON objects are created, each representing one of the statuses ("Verified", "Partially Verified", "Unverified") with their corresponding values and the specified week.
  * - These new JSON objects are added to the "values" array.
  * - The updated JSON structure is converted back to a string and returned.
- * - If any error occurs during parsing or updating, the function returns `NULL`.
- * 
- * @todo separate each section into a new section which is only added when values are known
+ * - If any error occurs during parsing or updating, the function returns `NULL`. 
  */
 char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue);
 

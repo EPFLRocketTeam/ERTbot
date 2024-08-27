@@ -140,8 +140,6 @@ void getPages(command cmd);
  * 
  * @note
  * - The `batchUpdateSheet` function requires a valid Google Sheets API token and sheet ID, which are hardcoded in this function.
- * 
- * @todo update so that it can be used with any DRL page (not hardcoded to a single page), needs to be compatible with tabs
  */
 void syncSheetToDrl(command cmd);
 
@@ -159,8 +157,6 @@ void syncSheetToDrl(command cmd);
  * - Allocates and updates a DRL page with the new content, ensuring special characters are escaped correctly.
  * - Updates the DRL page content using `updatePageContentMutation` and renders it with `renderMutation`.
  * - Frees allocated memory and handles JSON and page list deallocation.
- * 
- * @todo update so that it can be used with any DRL page (not hardcoded to a single page), needs to be compatible with tabs
  */
 void syncDrlToSheet(command cmd);
 

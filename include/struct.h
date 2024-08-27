@@ -146,8 +146,7 @@ extern pageList default_page;
  * - `function`: A string representing the name of the function to be executed.
  * - `argument_1` to `argument_9`: Strings representing the arguments that are passed to the function. 
  *   These fields are optional and may be left NULL if not used.
- * 
- * @todo - update documentation
+ * - `next`: A pointer to the next command in a sequence, allowing commands to be chained together.
  */
 typedef struct command {
     char *function;
@@ -176,9 +175,7 @@ extern command** headOfCommandQueue;
  * - `cmd`: A `command` structure representing the function and its associated arguments.
  * - `pointer_1`: A pointer to additional data or information related to the flag.
  * - `pointer_2`: Another pointer to additional data or information related to the flag.
- * - `next`: A pointer to the next `wikiFlag` in the list, enabling the creation of a linked list of flags.
- * 
- * @todo remove, no longer needed, everything can passs through command structure.
+ * - `next`: A pointer to the next `wikiFlag` in the list, enabling the creation of a linked list of flags. 
  */
 typedef struct wikiFlag {
     command cmd;
