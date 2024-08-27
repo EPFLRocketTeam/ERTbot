@@ -315,7 +315,7 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem){
             break;
         }
         
-        if(title == NULL){
+        if(title == NULL || strstr(id->valuestring, "2024_") == NULL){
             log_message(LOG_DEBUG, "Found a new group");
 
             if(!isFirstGroup){
@@ -332,6 +332,7 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem){
 
         if (cJSON_IsString(id) && id->valuestring) {
             log_message(LOG_DEBUG, "ID: %s", id->valuestring);
+            log_message(LOG_DEBUG, "title: %s", title->valuestring);
             DRL = appendStrings(DRL, "- [");
             DRL = appendStrings(DRL, id->valuestring);
             DRL = appendStrings(DRL, "](/");
