@@ -13,7 +13,7 @@
 #include "../include/log.h"
 #include "../include/requirements.h"
 
-char *template_DRL = "# $SubSystem$ Design Requirements List\n\n\n# table {.tabset}\n\n";
+char *template_DRL = "# $SubSystem$ Design Requirements List\n# table {.tabset}";
 char *template_REQ = "";
 
 
@@ -321,8 +321,6 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem){
     if(strcmp(subSystem, "TE") == 0){
         DRL = replaceWord(DRL, "$SubSystem$", "Test");
     }
-
-
 
     int isFirstGroup = 1;
 
