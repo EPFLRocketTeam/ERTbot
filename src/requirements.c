@@ -881,8 +881,8 @@ char *buildVcdList(cJSON *requirementList, char* subSystem){
             break;
         }
         
-        if(title == NULL){
-            log_message(LOG_DEBUG, "Found a new group");
+        if(title == NULL|| strstr(id->valuestring, "2024_") == NULL){
+            log_message(LOG_DEBUG, "Found a new group: %s", id->valuestring);
             continue;
         }
 
