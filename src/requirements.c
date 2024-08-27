@@ -1052,5 +1052,4 @@ char *buildVcdList(cJSON *requirementList, char* subSystem){
     
     log_message(LOG_DEBUG, "Exiting function buildVcdList");
     return VCD;
-
 }

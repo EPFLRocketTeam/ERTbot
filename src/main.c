@@ -44,8 +44,9 @@ int main(){
     log_message(LOG_DEBUG, "\n\n\n\n\n\nStarting program\n\n");
     
     initializeApiTokenVariables();
-    headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
     lastPageRefreshCheck = getCurrentEDTTimeString();
+    headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
+    
 
     headOfCommandQueue = (command**)malloc(sizeof(command*));
     *headOfCommandQueue = NULL;
