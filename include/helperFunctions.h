@@ -460,4 +460,6 @@ void freeWikiFlagList(wikiFlag** head);
 
 char* convert_timestamp_to_cest(char *timestamp);
 
+char* buildPageDistributionPieChart(pageList* head);
+
 #endif

@@ -780,10 +780,20 @@ void updateStatsPage(command cmd){
         current = current->next;
     }
 
-    freePageList(&head);
+
+
+    
 
     linksListOfPages = appendStrings(linksListOfPages, "{.links-list}");
+
+    linksListOfPages = appendStrings(linksListOfPages, "\n\n# Page Distribution\n");
+    linksListOfPages = appendStrings(linksListOfPages, buildPageDistributionPieChart(head));
+
+    freePageList(&head);
     linksListOfPages = replaceWord(linksListOfPages, "\n", "\\\\n");
+    linksListOfPages = replaceWord(linksListOfPages, "\"", "\\\\\\\"");
+
+    
 
     pageList* statsPage = NULL;
     statsPage = addPageToList(&statsPage, "1178", "", "", "", linksListOfPages, "", "", "");
