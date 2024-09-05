@@ -1094,7 +1094,6 @@ void appendMentionedIn(pageList** head){
     subjectPage->content = replaceWord(subjectPage->content, "\"", "\\\"");
     updatePageContentMutation(subjectPage);
     renderMutation(&subjectPage, false);
-
     
     log_message(LOG_DEBUG, "Exiting function appendMentionedIn");
     

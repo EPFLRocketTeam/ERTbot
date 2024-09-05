@@ -63,7 +63,7 @@ int main(){
             cyclesSinceLastCommand = 0;
             log_message(LOG_DEBUG, "command received");
             headOfCommandQueue = executeCommand(headOfCommandQueue);
-        }
+        } 
 
         else{
             cyclesSinceLastCommand ++;

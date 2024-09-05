@@ -316,7 +316,7 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
     log_message(LOG_DEBUG, "Entering function lookForCommandonSlack");
 
     command cmd;
-    slackMessage* slackMsg = (slackMessage*)malloc(sizeof(slackMessage*));;
+    slackMessage* slackMsg = (slackMessage*)malloc(sizeof(slackMessage));;
 
     slackMsg->message = malloc(200);
     if (slackMsg->message == NULL) {
@@ -506,6 +506,11 @@ command** executeCommand(command** commandQueue){
 
     else if((*commandQueue)->function && strcmp((*commandQueue)->function, "shutdown") == 0){ //works
         sendMessageToSlack("Shutting down");
+
+        if(chunk.response){
+            free(chunk.response);
+        }
+
         exit(0);
     }
 
@@ -554,11 +559,19 @@ command** executeCommand(command** commandQueue){
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildMap") == 0){ //works
-        sendMessageToSlack(buildMap(**commandQueue));
+        char* map = buildMap(**commandQueue);
+        
+        sendMessageToSlack(map);
+
+        free(map);
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildLocalGraph") == 0){ //Works
-        buildLocalGraph(**commandQueue);
+        char* localGraph = buildLocalGraph(**commandQueue);
+
+        sendMessageToSlack(localGraph);
+
+        free(localGraph);
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateStatsPage") == 0){

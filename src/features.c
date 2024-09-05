@@ -318,6 +318,11 @@ void movePage(command cmd){
     freePageList(&subjectPage);
     freePageList(&linkTrackerPage);
 
+    free(originalPathWithParentheseAndSlash);
+    free(newPathWithParentheseAndSlash);
+    free(originalPathWithLineReturn);
+    free(newPathWithLineReturn);
+
     
     log_message(LOG_DEBUG, "Exiting function movePage");
     return;
@@ -371,6 +376,8 @@ void syncSheetToDrl(command cmd){
         drlPage->id = "415";
         sheetId = "GE!A3:AT300";
     }
+
+
 
     drlPage = getPage(&drlPage); //get content and updated at values
 
@@ -526,6 +533,8 @@ void updateVcdPage(command cmd){
     char *listOfRequirements = buildVcdList(requirementList, cmd.argument_1);
     VCD = appendStrings(VCD, listOfRequirements);
     
+    free(listOfRequirements);
+
     pageList* vcdPage = NULL;
     vcdPage = addPageToList(&vcdPage, vcdPageId, "", "", "", VCD, "", "", "");
 
@@ -550,6 +559,9 @@ void updateVcdPage(command cmd){
     
     cJSON_Delete(requirementList);
     freePageList(&vcdPage);
+
+    free(VCD);
+
     log_message(LOG_DEBUG, "Exiting function updateVcdPage");
     return;
 }
@@ -669,7 +681,7 @@ void updateRequirementPage(command cmd){
 
                 log_message(LOG_DEBUG, "initialising pointer to flags");
                 char* start = currentReqPage->content;
-                char* end = currentReqPage->content;
+                char* end;
 
                 log_message(LOG_DEBUG, "Looking for flag: %s in currentReqPage->content: %s", flag, currentReqPage->content);
                 start = strstr(start, flag);
@@ -687,6 +699,8 @@ void updateRequirementPage(command cmd){
                 //getchar();
                 updatePageContentMutation(currentReqPage);
                 renderMutation(&currentReqPage, false);
+
+                free(flag);
 
                 break;
             }
@@ -737,6 +751,7 @@ void onPageUpdate(command cmd){
             targetPage->content = replaceParagraph(targetPage->content, map, wikiCommand->pointerToEndOfFirstMarker, wikiCommand->pointerToBeginningOfSecondMarker);
 
             wasPageModified = 1;
+            free(map);
         }
 
         log_message(LOG_DEBUG, "going to send message to slack");
@@ -755,6 +770,8 @@ void onPageUpdate(command cmd){
         sendMessageToSlack("onPageUpdate called on page id:");
         sendMessageToSlack(cmd.argument_1);
     }
+
+    freeWikiFlagList(&wikiCommand);
     
     log_message(LOG_DEBUG, "Exiting function onPageUpdate");
 }
@@ -780,10 +797,6 @@ void updateStatsPage(command cmd){
         current = current->next;
     }
 
-
-
-    
-
     linksListOfPages = appendStrings(linksListOfPages, "{.links-list}");
 
     linksListOfPages = appendStrings(linksListOfPages, "\n\n# Page Distribution\n");
@@ -793,14 +806,14 @@ void updateStatsPage(command cmd){
     linksListOfPages = replaceWord(linksListOfPages, "\n", "\\\\n");
     linksListOfPages = replaceWord(linksListOfPages, "\"", "\\\\\\\"");
 
-    
-
     pageList* statsPage = NULL;
     statsPage = addPageToList(&statsPage, "1178", "", "", "", linksListOfPages, "", "", "");
     log_message(LOG_DEBUG, "statsPage id set");
     updatePageContentMutation(statsPage);
     renderMutation(&statsPage, false);
     sendMessageToSlack("stats page updated");
+
+    free(linksListOfPages);
 
     log_message(LOG_DEBUG, "Exiting function updateStatsPage");
 }
@@ -907,6 +920,9 @@ void createMissingRequirementPages(command cmd){
             log_message(LOG_DEBUG, "About to create new page path:%s\nTitle:%s", reqPath, id->valuestring);
             //getchar();
             createPageMutation(reqPath, reqContent, id->valuestring);
+
+            free(reqPath);
+            free(reqContent);
         }
 
     }

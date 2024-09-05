@@ -533,6 +533,11 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
     
     log_message(LOG_DEBUG, "Exiting function parseArrayIntoJSONRequirementList");
 
+
+    if(chunk.response){
+        free(chunk.response);
+    }
+
     return json;
 }
 
@@ -1008,13 +1013,8 @@ char *buildVcdList(cJSON *requirementList, char* subSystem){
 
             log_message(LOG_DEBUG, "targetList string value: %s", targetList);
 
-
-
         }
-
-
     }
-
 
     UVROD =  appendStrings(UVROD, "\n{.links-list}");
     IPVROD =  appendStrings(IPVROD, "\n{.links-list}");
@@ -1049,6 +1049,44 @@ char *buildVcdList(cJSON *requirementList, char* subSystem){
     VCD = appendStrings(VCD, VTE);
     VCD = appendStrings(VCD, VIN);
     VCD = appendStrings(VCD, VAN);
+
+
+    if(UVROD){
+        free(UVROD);
+    }
+    if(IPVROD){
+        free(IPVROD);
+    }
+    if(VROD){
+        free(VROD);
+    }
+    if(UVTE){
+        free(UVTE);
+    }
+    if(IPVTE){
+        free(IPVTE);
+    }
+    if(VTE){
+        free(VTE);
+    }
+    if(UVIN){
+        free(UVIN);
+    }
+    if(IPVIN){
+        free(IPVIN);
+    }
+    if(VIN){
+        free(VIN);
+    }
+    if(UVAN){
+        free(UVAN);
+    }
+    if(IPVAN){
+        free(IPVAN);
+    }
+    if(VAN){
+        free(VAN);
+    }
     
     log_message(LOG_DEBUG, "Exiting function buildVcdList");
     return VCD;

@@ -335,6 +335,11 @@ void updatePageContentMutation(pageList* head){
 
     log_message(LOG_DEBUG, "About to update send query: %s\n", temp_query);
     wikiApi(temp_query);
+
+    if(chunk.response){
+        free(chunk.response);
+    }
+
     log_message(LOG_DEBUG, "Exiting function updatePageContentMutation");
 }
 
@@ -354,6 +359,10 @@ void renderMutation(pageList** head, bool renderEntireList){
         current = current->next;
     }
     
+    if(chunk.response){
+        free(chunk.response);
+    }
+
     log_message(LOG_DEBUG, "Exiting function renderMutation");
 }
 
@@ -368,6 +377,10 @@ void movePageMutation(pageList** head){
         wikiApi(temp_query);
         current = current->next;
     }
+
+    if(chunk.response){
+        free(chunk.response);
+    }
     
     log_message(LOG_DEBUG, "Exiting function movePageMutation");
 }
@@ -378,6 +391,10 @@ pageList* populatePageList(pageList** head, char *filterType, char *filterCondit
     pageList* temp = *head;
     getListQuery(filterType);
     temp = parseJSON(&temp, chunk.response, filterType, filterCondition);
+
+    if(chunk.response){
+        free(chunk.response);
+    }
     
     log_message(LOG_DEBUG, "Exiting function populatePageList");
     return temp;
