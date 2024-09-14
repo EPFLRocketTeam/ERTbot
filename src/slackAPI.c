@@ -25,6 +25,12 @@
 
 #define MAX_MESSAGE_LENGTH 100000
 
+static size_t muteCallback(void *ptr, size_t size, size_t nmemb, void *userdata) {
+    // Do nothing with the data
+    return size * nmemb;
+}
+
+
 int sendMessageToSlack( char *message) {
     log_message(LOG_DEBUG, "Entering function sendMessageToSlack");
     
@@ -47,6 +53,9 @@ int sendMessageToSlack( char *message) {
 
         // Set the POST data (JSON payload)
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
+
+        // Set the write function to ignore the response
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, muteCallback);
 
         // Add headers
         headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
