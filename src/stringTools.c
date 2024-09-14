@@ -23,36 +23,36 @@
 char* replaceWord( char* inputString,  char* wordToReplace,  char* newWord) {
     log_message(LOG_DEBUG, "Entering function replaceWord");
     
-  char* result; 
-  int i, cnt = 0; 
-  int newWordLength = strlen(newWord); 
-  int wordToReplaceLength = strlen(wordToReplace); 
+    char* result; 
+    int i, cnt = 0; 
+    int newWordLength = strlen(newWord); 
+    int wordToReplaceLength = strlen(wordToReplace); 
 
-  // Counting the number of times old word 
-  // occur in the string 
-  for (i = 0; inputString[i] != '\0'; i++) { 
-      if (strstr(&inputString[i], wordToReplace) == &inputString[i]) { 
-          cnt++; 
+    // Counting the number of times old word 
+    // occur in the string 
+    for (i = 0; inputString[i] != '\0'; i++) { 
+        if (strstr(&inputString[i], wordToReplace) == &inputString[i]) { 
+            cnt++; 
 
-          // Jumping to index after the old word. 
-          i += wordToReplaceLength - 1; 
+            // Jumping to index after the old word. 
+            i += wordToReplaceLength - 1; 
       } 
-  } 
+    } 
 
-  // Making new string of enough length 
-  result = (char*)malloc(i + cnt * (newWordLength - wordToReplaceLength) + 1); 
+    // Making new string of enough length 
+    result = (char*)malloc(i + cnt * (newWordLength - wordToReplaceLength) + 1); 
 
-  i = 0; 
-  while (*inputString) { 
-      // compare the substring with the result 
-      if (strstr(inputString, wordToReplace) == inputString) { 
+    i = 0; 
+    while (*inputString) { 
+        // compare the substring with the result 
+        if (strstr(inputString, wordToReplace) == inputString) { 
         strcpy(&result[i], newWord); 
         i += newWordLength; 
         inputString += wordToReplaceLength; 
-      } 
-      else
+        } 
+        else
         result[i++] = *inputString++; 
-  } 
+    } 
 
   result[i] = '\0';
   

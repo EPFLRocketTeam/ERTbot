@@ -675,8 +675,7 @@ void updateRequirementPage(command cmd){
                 currentReqPage = getPage(&currentReqPage);
                 currentReqPage->content = replaceWord(currentReqPage->content, "\\n", "\n");
                 char* importedRequirementInformation = buildRequirementPageFromJSONRequirementList(requirement);
-                char* flag = "<!--";
-                flag = appendToString(flag, id->valuestring);
+                char* flag = createCombinedString("<!--", id->valuestring);
                 flag = appendToString(flag, "-->");
 
                 log_message(LOG_DEBUG, "initialising pointer to flags");
@@ -784,7 +783,11 @@ void updateStatsPage(command cmd){
 
     pageList* current = head;
 
-    char* linksListOfPages = "# Recently Edited Pages\n";
+    const char* linksListOfPages_header = "# Recently Edited Pages\n";
+
+    char *linksListOfPages = (char *)malloc(strlen(linksListOfPages_header) + 1);
+
+    strcpy(linksListOfPages, linksListOfPages_header);
 
     for(int i = 0; i < 5; i++){
         linksListOfPages = appendToString(linksListOfPages, "- [");

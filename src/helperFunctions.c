@@ -308,7 +308,12 @@ char* createMapWBS(pageList** paths) {
     int numberOfParentFolders = 0;
     int baseDepth, currentDepth, numberOfStars;
     
-    char *map = "```plantuml\n@startwbs\n<style>\nwbsDiagram {\n  Linecolor black\nBackGroundColor white\n  hyperlinkColor black\n}\n</style>";
+    const char *map_header = "```plantuml\n@startwbs\n<style>\nwbsDiagram {\n  Linecolor black\nBackGroundColor white\n  hyperlinkColor black\n}\n</style>";
+
+    char *map = (char *)malloc(strlen(map_header) + 1);
+
+    strcpy(map, map_header);
+
     baseDepth = countSlashes(current->path);
     while (current != NULL) {
         currentDepth = countSlashes(current->path);

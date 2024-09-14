@@ -776,7 +776,7 @@ void populateTitleAndHeader( char *filename, char *docPath) {
 
     }
 
-    appendStrings(buffer, "\\end{document}");
+    createCombinedString(buffer, "\\end{document}");
 
     bytesRead = strlen(buffer);
 

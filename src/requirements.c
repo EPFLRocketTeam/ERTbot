@@ -538,6 +538,8 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
         free(chunk.response);
     }
 
+    cJSON_Delete(input_json);
+
     return json;
 }
 
@@ -847,24 +849,55 @@ char *buildVcdList(cJSON *requirementList, char* subSystem){
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
     }
 
-    char *VCD = "\n# Verification Status for next Review\n\n# {.tabset}";
+    const char *VCD_header = "\n# Verification Status for next Review\n\n# {.tabset}";
 
-    char *UVROD = "\n### Review Of Design\n";
-    char *IPVROD = "\n### Review Of Design\n";
-    char *VROD  = "\n### Review Of Design\n";
+    const char *UVROD_header = "\n### Review Of Design\n";
+    const char *IPVROD_header = "\n### Review Of Design\n";
+    const char *VROD_header  = "\n### Review Of Design\n";
 
-    char *UVTE = "\n### Test\n";
-    char *IPVTE = "\n### Test\n";
-    char *VTE  = "\n### Test\n";
+    const char *UVTE_header = "\n### Test\n";
+    const char *IPVTE_header = "\n### Test\n";
+    const char *VTE_header  = "\n### Test\n";
 
-    char *UVIN = "\n### Inspection\n";
-    char *IPVIN = "\n### Inspection\n";
-    char *VIN  = "\n### Inspection\n";
+    const char *UVIN_header = "\n### Inspection\n";
+    const char *IPVIN_header = "\n### Inspection\n";
+    const char *VIN_header  = "\n### Inspection\n";
 
-    char *UVAN = "\n### Analysis\n";
-    char *IPVAN = "\n### Analysis\n";
-    char *VAN  = "\n### Analysis\n";
+    const char *UVAN_header = "\n### Analysis\n";
+    const char *IPVAN_header = "\n### Analysis\n";
+    const char *VAN_header  = "\n### Analysis\n";
     
+
+    char *VCD = (char *)malloc(strlen(VCD_header) + 1);
+    char *UVROD = (char *)malloc(strlen(UVROD_header) + 1);
+    char *IPVROD = (char *)malloc(strlen(IPVROD_header) + 1);
+    char *VROD = (char *)malloc(strlen(VROD_header) + 1);
+    char *UVTE = (char *)malloc(strlen(UVTE_header) + 1);
+    char *IPVTE = (char *)malloc(strlen(IPVTE_header) + 1);
+    char *VTE = (char *)malloc(strlen(VTE_header) + 1);
+    char *UVIN = (char *)malloc(strlen(UVIN_header) + 1);
+    char *IPVIN = (char *)malloc(strlen(IPVIN_header) + 1);
+    char *VIN = (char *)malloc(strlen(VIN_header) + 1);
+    char *UVAN = (char *)malloc(strlen(UVAN_header) + 1);
+    char *IPVAN = (char *)malloc(strlen(IPVAN_header) + 1);
+    char *VAN = (char *)malloc(strlen(VAN_header) + 1);
+
+
+    strcpy(VCD, VCD_header);
+    strcpy(UVROD, UVROD_header);
+    strcpy(IPVROD, IPVROD_header);
+    strcpy(VROD, VROD_header);
+    strcpy(UVTE, UVTE_header);
+    strcpy(IPVTE, IPVTE_header);
+    strcpy(VTE, VTE_header);
+    strcpy(UVIN, UVIN_header);
+    strcpy(IPVIN, IPVIN_header);
+    strcpy(VIN, VIN_header);
+    strcpy(UVAN, UVAN_header);
+    strcpy(IPVAN, IPVAN_header);
+    strcpy(VAN, VAN_header);
+
+
 
     // Iterate over each requirement object in the requirements array
     int num_reqs = cJSON_GetArraySize(requirements);
