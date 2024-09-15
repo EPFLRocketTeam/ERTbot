@@ -12,10 +12,11 @@
         "helperfunctions.h": "c",
         "config.h": "c",
         "log.h": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "stdbool.h": "c"
     },
     "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
-        "clang-analyzer-security.insecureAPI.strcpy",
         "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling",
+        "clang-analyzer-security.insecureAPI.strcpy"
     ]
 }

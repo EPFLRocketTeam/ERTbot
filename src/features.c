@@ -282,8 +282,8 @@ void movePage(command cmd){
     log_message(LOG_DEBUG, "cmd.argument_1:%s.\n", cmd.argument_1);
     IncomingLinks = findIncomingLinks(&IncomingLinks, linkTrackerPage->content, cmd.argument_1);
 
-    char *originalPathWithParentheseAndSlash = appendStrings("(/", cmd.argument_1);
-    char *newPathWithParentheseAndSlash = appendStrings("(/", cmd.argument_2);
+    char *originalPathWithParentheseAndSlash = createCombinedString("(/", cmd.argument_1);
+    char *newPathWithParentheseAndSlash = createCombinedString("(/", cmd.argument_2);
 
     log_message(LOG_DEBUG, "Going to start modifying target pages");
     while(IncomingLinks != NULL){
@@ -303,8 +303,8 @@ void movePage(command cmd){
     }
 
 
-    char *originalPathWithLineReturn = appendStrings(cmd.argument_1, "\\n");
-    char *newPathWithLineReturn = appendStrings(cmd.argument_2, "\\n");
+    char *originalPathWithLineReturn = createCombinedString(cmd.argument_1, "\\n");
+    char *newPathWithLineReturn = createCombinedString(cmd.argument_2, "\\n");
 
     linkTrackerPage->content = replaceWord(linkTrackerPage->content, originalPathWithParentheseAndSlash, newPathWithParentheseAndSlash);
     linkTrackerPage->content = replaceWord(linkTrackerPage->content, originalPathWithLineReturn, newPathWithLineReturn);
@@ -317,6 +317,11 @@ void movePage(command cmd){
 
     freePageList(&subjectPage);
     freePageList(&linkTrackerPage);
+
+    free(originalPathWithParentheseAndSlash);
+    free(newPathWithParentheseAndSlash);
+    free(originalPathWithLineReturn);
+    free(newPathWithLineReturn);
 
     
     log_message(LOG_DEBUG, "Exiting function movePage");
@@ -371,6 +376,8 @@ void syncSheetToDrl(command cmd){
         drlPage->id = "415";
         sheetId = "GE!A3:AT300";
     }
+
+
 
     drlPage = getPage(&drlPage); //get content and updated at values
 
@@ -524,8 +531,10 @@ void updateVcdPage(command cmd){
 
     char *VCD = pieChart;
     char *listOfRequirements = buildVcdList(requirementList, cmd.argument_1);
-    VCD = appendStrings(VCD, listOfRequirements);
+    VCD = appendToString(VCD, listOfRequirements);
     
+    free(listOfRequirements);
+
     pageList* vcdPage = NULL;
     vcdPage = addPageToList(&vcdPage, vcdPageId, "", "", "", VCD, "", "", "");
 
@@ -540,8 +549,8 @@ void updateVcdPage(command cmd){
     extractedText = replaceWord(extractedText, "\\n", "\n");
     extractedText = replaceWord(extractedText, "\\\"", "\"");
     char *stackedAreaChart = updateVcdStackedAreaChart(extractedText, "20/24", 33, 33, 34);    
-    stackedAreaChart = appendStrings("<!-- Status history -->\n```kroki\nvegalite\n", stackedAreaChart);
-    stackedAreaChart = appendStrings(stackedAreaChart, "\n```\n");
+    stackedAreaChart = createCombinedString("<!-- Status history -->\n```kroki\nvegalite\n", stackedAreaChart);
+    stackedAreaChart = appendToString(stackedAreaChart, "\n```\n");
     fprintf(stderr, "\n\n%s\n\n", stackedAreaChart);
     free(stackedAreaChart);
     //free(extractedText);
@@ -550,6 +559,9 @@ void updateVcdPage(command cmd){
     
     cJSON_Delete(requirementList);
     freePageList(&vcdPage);
+
+    free(VCD);
+
     log_message(LOG_DEBUG, "Exiting function updateVcdPage");
     return;
 }
@@ -663,13 +675,12 @@ void updateRequirementPage(command cmd){
                 currentReqPage = getPage(&currentReqPage);
                 currentReqPage->content = replaceWord(currentReqPage->content, "\\n", "\n");
                 char* importedRequirementInformation = buildRequirementPageFromJSONRequirementList(requirement);
-                char* flag = "<!--";
-                flag = appendStrings(flag, id->valuestring);
-                flag = appendStrings(flag, "-->");
+                char* flag = createCombinedString("<!--", id->valuestring);
+                flag = appendToString(flag, "-->");
 
                 log_message(LOG_DEBUG, "initialising pointer to flags");
                 char* start = currentReqPage->content;
-                char* end = currentReqPage->content;
+                char* end;
 
                 log_message(LOG_DEBUG, "Looking for flag: %s in currentReqPage->content: %s", flag, currentReqPage->content);
                 start = strstr(start, flag);
@@ -687,6 +698,8 @@ void updateRequirementPage(command cmd){
                 //getchar();
                 updatePageContentMutation(currentReqPage);
                 renderMutation(&currentReqPage, false);
+
+                free(flag);
 
                 break;
             }
@@ -733,10 +746,11 @@ void onPageUpdate(command cmd){
         
         if(wikiCommand->cmd.function && strcmp(wikiCommand->cmd.function, "buildMap") == 0){
             char* map = buildMap(wikiCommand->cmd);
-            map = appendStrings("\n", map);
+            map = createCombinedString("\n", map);
             targetPage->content = replaceParagraph(targetPage->content, map, wikiCommand->pointerToEndOfFirstMarker, wikiCommand->pointerToBeginningOfSecondMarker);
 
             wasPageModified = 1;
+            free(map);
         }
 
         log_message(LOG_DEBUG, "going to send message to slack");
@@ -755,6 +769,8 @@ void onPageUpdate(command cmd){
         sendMessageToSlack("onPageUpdate called on page id:");
         sendMessageToSlack(cmd.argument_1);
     }
+
+    freeWikiFlagList(&wikiCommand);
     
     log_message(LOG_DEBUG, "Exiting function onPageUpdate");
 }
@@ -767,33 +783,31 @@ void updateStatsPage(command cmd){
 
     pageList* current = head;
 
-    char* linksListOfPages = "# Recently Edited Pages\n";
+    const char* linksListOfPages_header = "# Recently Edited Pages\n";
+
+    char *linksListOfPages = (char *)malloc(strlen(linksListOfPages_header) + 1);
+
+    strcpy(linksListOfPages, linksListOfPages_header);
 
     for(int i = 0; i < 5; i++){
-        linksListOfPages = appendStrings(linksListOfPages, "- [");
-        linksListOfPages = appendStrings(linksListOfPages, current->title);
-        linksListOfPages = appendStrings(linksListOfPages, "](/");
-        linksListOfPages = appendStrings(linksListOfPages, current->path);
-        linksListOfPages = appendStrings(linksListOfPages, ")\n**Updated on:** ");
-        linksListOfPages = appendStrings(linksListOfPages, convert_timestamp_to_cest(current->updatedAt));
-        linksListOfPages = appendStrings(linksListOfPages, "\n");
+        linksListOfPages = appendToString(linksListOfPages, "- [");
+        linksListOfPages = appendToString(linksListOfPages, current->title);
+        linksListOfPages = appendToString(linksListOfPages, "](/");
+        linksListOfPages = appendToString(linksListOfPages, current->path);
+        linksListOfPages = appendToString(linksListOfPages, ")\n**Updated on:** ");
+        linksListOfPages = appendToString(linksListOfPages, convert_timestamp_to_cest(current->updatedAt));
+        linksListOfPages = appendToString(linksListOfPages, "\n");
         current = current->next;
     }
 
+    linksListOfPages = appendToString(linksListOfPages, "{.links-list}");
 
-
-    
-
-    linksListOfPages = appendStrings(linksListOfPages, "{.links-list}");
-
-    linksListOfPages = appendStrings(linksListOfPages, "\n\n# Page Distribution\n");
-    linksListOfPages = appendStrings(linksListOfPages, buildPageDistributionPieChart(head));
+    linksListOfPages = appendToString(linksListOfPages, "\n\n# Page Distribution\n");
+    linksListOfPages = appendToString(linksListOfPages, buildPageDistributionPieChart(head));
 
     freePageList(&head);
     linksListOfPages = replaceWord(linksListOfPages, "\n", "\\\\n");
     linksListOfPages = replaceWord(linksListOfPages, "\"", "\\\\\\\"");
-
-    
 
     pageList* statsPage = NULL;
     statsPage = addPageToList(&statsPage, "1178", "", "", "", linksListOfPages, "", "", "");
@@ -801,6 +815,8 @@ void updateStatsPage(command cmd){
     updatePageContentMutation(statsPage);
     renderMutation(&statsPage, false);
     sendMessageToSlack("stats page updated");
+
+    free(linksListOfPages);
 
     log_message(LOG_DEBUG, "Exiting function updateStatsPage");
 }
@@ -899,14 +915,17 @@ void createMissingRequirementPages(command cmd){
         }
 
         if (foundPage == 0){
-            char *reqPath = appendStrings(path, id->valuestring);
+            char *reqPath = createCombinedString(path, id->valuestring);
             char *reqContent = "<!--";
-            reqContent = appendStrings(reqContent, id->valuestring);
-            reqContent = appendStrings(reqContent, "-->\\\\n");
-            reqContent = appendStrings(reqContent, reqContent);
+            reqContent = appendToString(reqContent, id->valuestring);
+            reqContent = appendToString(reqContent, "-->\\\\n");
+            reqContent = appendToString(reqContent, reqContent);
             log_message(LOG_DEBUG, "About to create new page path:%s\nTitle:%s", reqPath, id->valuestring);
             //getchar();
             createPageMutation(reqPath, reqContent, id->valuestring);
+
+            free(reqPath);
+            free(reqContent);
         }
 
     }

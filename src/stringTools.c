@@ -23,36 +23,36 @@
 char* replaceWord( char* inputString,  char* wordToReplace,  char* newWord) {
     log_message(LOG_DEBUG, "Entering function replaceWord");
     
-  char* result; 
-  int i, cnt = 0; 
-  int newWordLength = strlen(newWord); 
-  int wordToReplaceLength = strlen(wordToReplace); 
+    char* result; 
+    int i, cnt = 0; 
+    int newWordLength = strlen(newWord); 
+    int wordToReplaceLength = strlen(wordToReplace); 
 
-  // Counting the number of times old word 
-  // occur in the string 
-  for (i = 0; inputString[i] != '\0'; i++) { 
-      if (strstr(&inputString[i], wordToReplace) == &inputString[i]) { 
-          cnt++; 
+    // Counting the number of times old word 
+    // occur in the string 
+    for (i = 0; inputString[i] != '\0'; i++) { 
+        if (strstr(&inputString[i], wordToReplace) == &inputString[i]) { 
+            cnt++; 
 
-          // Jumping to index after the old word. 
-          i += wordToReplaceLength - 1; 
+            // Jumping to index after the old word. 
+            i += wordToReplaceLength - 1; 
       } 
-  } 
+    } 
 
-  // Making new string of enough length 
-  result = (char*)malloc(i + cnt * (newWordLength - wordToReplaceLength) + 1); 
+    // Making new string of enough length 
+    result = (char*)malloc(i + cnt * (newWordLength - wordToReplaceLength) + 1); 
 
-  i = 0; 
-  while (*inputString) { 
-      // compare the substring with the result 
-      if (strstr(inputString, wordToReplace) == inputString) { 
+    i = 0; 
+    while (*inputString) { 
+        // compare the substring with the result 
+        if (strstr(inputString, wordToReplace) == inputString) { 
         strcpy(&result[i], newWord); 
         i += newWordLength; 
         inputString += wordToReplaceLength; 
-      } 
-      else
+        } 
+        else
         result[i++] = *inputString++; 
-  } 
+    } 
 
   result[i] = '\0';
   
@@ -294,8 +294,8 @@ char* getDocType(char* str) {
     return (char*)(str + length - 3);
 }
 
-char* appendStrings(char *str1,  char *str2) {
-    log_message(LOG_DEBUG, "Entering function appendStrings");
+char* createCombinedString(char *str1,  char *str2) {
+    log_message(LOG_DEBUG, "Entering function createCombinedString");
     
     // Calculate the length of str1 and str2
     size_t len1 = strlen(str1);
@@ -314,7 +314,7 @@ char* appendStrings(char *str1,  char *str2) {
     strcat(combined, str2);
     
     
-    log_message(LOG_DEBUG, "Exiting function appendStrings");
+    log_message(LOG_DEBUG, "Exiting function createCombinedString");
     return combined;
 }
 
@@ -422,4 +422,30 @@ char* extractText(char *inputString, char *startDelimiter, char *endDelimiter, b
     
     log_message(LOG_DEBUG, "Exiting function extractText");
     return substring;
+}
+
+char* appendToString(char *original, const char *strToAppend) {
+    log_message(LOG_DEBUG, "Entering function appendToString");
+
+    if (strToAppend == NULL) {
+        return original; // Nothing to append
+    }
+
+    // Calculate the length of original string and the string to append
+    size_t lenOriginal = original ? strlen(original) : 0;
+    size_t lenAppend = strlen(strToAppend);
+    
+    // Reallocate memory for the combined string (original + append + null terminator)
+    char *combined = realloc(original, lenOriginal + lenAppend + 1);
+    
+    if (combined == NULL) {
+        log_message(LOG_ERROR, "Memory reallocation failed");
+        exit(1);
+    }
+
+    // Copy/concatenate the new string
+    strcpy(combined + lenOriginal, strToAppend); // Append strToAppend to the end of original
+    
+    log_message(LOG_DEBUG, "Exiting function appendToString");
+    return combined; // Return the reallocated and combined string
 }

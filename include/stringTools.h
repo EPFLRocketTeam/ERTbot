@@ -205,7 +205,7 @@ char* getDocType(char* str);
  * @warning Ensure that `str1` and `str2` are not `NULL`. Memory allocation failure will result in the program exiting 
  *          with an error message.
  */
-char* appendStrings(char *str1, char *str2);
+char* createCombinedString(char *str1, char *str2);
 
 /**
  * @brief Truncates a string at the first occurrence of a space character.
@@ -293,4 +293,24 @@ char* returnTextUntil(char* str, char* delimiter);
  *          allocation failure and check for null pointers in practice.
  */
 char* extractText(char *inputString, char *startDelimiter, char *endDelimiter, bool includeStart, bool includeEnd);
+
+/**
+ * @brief Appends one string to another, dynamically reallocating memory as needed.
+ *
+ * This function takes an original string and appends a second string (`strToAppend`) to it.
+ * Memory for the combined string is reallocated, ensuring the result fits both strings.
+ * If the original string is NULL, it is treated as an empty string. The caller is responsible
+ * for freeing the final returned string to avoid memory leaks.
+ *
+ * @param original Pointer to the original string. Can be NULL, which is treated as an empty string.
+ * @param strToAppend Pointer to the string that will be appended to the original string. If NULL, the original string is returned without changes.
+ * @return A pointer to the combined string with `strToAppend` appended to `original`.
+ *         The returned string is dynamically allocated and must be freed by the caller.
+ *
+ * @note The function internally uses `realloc`, so it may change the memory address of the `original` string.
+ * @note If memory reallocation fails, the program will log an error and terminate with `exit(1)`.
+ *
+ * @warning The caller is responsible for freeing the memory of the returned string to avoid memory leaks.
+ */
+char* appendToString(char *original, const char *strToAppend);
 #endif

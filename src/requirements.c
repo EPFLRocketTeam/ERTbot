@@ -124,50 +124,50 @@ char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 
     //TITLE
     if (cJSON_IsString(id) && id->valuestring) {
-        pageContent = appendStrings(pageContent, "\n# ");
-        pageContent = appendStrings(pageContent, id->valuestring);
-        pageContent = appendStrings(pageContent, ": ");
+        pageContent = appendToString(pageContent, "\n# ");
+        pageContent = appendToString(pageContent, id->valuestring);
+        pageContent = appendToString(pageContent, ": ");
     }
     if (cJSON_IsString(title) && title->valuestring) {
-        pageContent = appendStrings(pageContent, title->valuestring);
-        pageContent = appendStrings(pageContent, "\n");
+        pageContent = appendToString(pageContent, title->valuestring);
+        pageContent = appendToString(pageContent, "\n");
     }
 
 
     //DESCRIPTION
     if (cJSON_IsString(description) && description->valuestring) {
-        pageContent = appendStrings(pageContent, ">**Description**: ");
-        pageContent = appendStrings(pageContent, description->valuestring);
-        pageContent = appendStrings(pageContent, "\n");
+        pageContent = appendToString(pageContent, ">**Description**: ");
+        pageContent = appendToString(pageContent, description->valuestring);
+        pageContent = appendToString(pageContent, "\n");
     }
 
 
     //INFORMATION BOX: SOURCES AND ASSIGNEE
     if (cJSON_IsString(source) && source->valuestring && strcmp(source->valuestring, "") != 0) {
-        pageContent = appendStrings(pageContent, "\n>**Source**: ");
-        pageContent = appendStrings(pageContent, source->valuestring);
-        pageContent = appendStrings(pageContent, "\n");
+        pageContent = appendToString(pageContent, "\n>**Source**: ");
+        pageContent = appendToString(pageContent, source->valuestring);
+        pageContent = appendToString(pageContent, "\n");
     }
     if (cJSON_IsString(author) && author->valuestring && strcmp(author->valuestring, "") != 0) {
-        pageContent = appendStrings(pageContent, ">**Author**: ");
-        pageContent = appendStrings(pageContent, author->valuestring);
-        pageContent = appendStrings(pageContent, "\n");
+        pageContent = appendToString(pageContent, ">**Author**: ");
+        pageContent = appendToString(pageContent, author->valuestring);
+        pageContent = appendToString(pageContent, "\n");
     }
     if (cJSON_IsString(assignee) && assignee->valuestring && strcmp(assignee->valuestring, "") != 0) {
-        pageContent = appendStrings(pageContent, ">**Assignee**: ");
-        pageContent = appendStrings(pageContent, assignee->valuestring);
-        pageContent = appendStrings(pageContent, "\n");
+        pageContent = appendToString(pageContent, ">**Assignee**: ");
+        pageContent = appendToString(pageContent, assignee->valuestring);
+        pageContent = appendToString(pageContent, "\n");
     }
     if (strcmp(source->valuestring, "") != 0 || strcmp(author->valuestring, "") != 0 || strcmp(assignee->valuestring, "") != 0) {
-        pageContent = appendStrings(pageContent, "{.is-info}\n");
+        pageContent = appendToString(pageContent, "{.is-info}\n");
     }
 
 
     //JUSTIFICATION
     if (cJSON_IsString(justification) && justification->valuestring && strcmp(justification->valuestring, "") != 0) {
-        pageContent = appendStrings(pageContent, "\n## Justification\n");
-        pageContent = appendStrings(pageContent, justification->valuestring);
-        pageContent = appendStrings(pageContent, "\n");
+        pageContent = appendToString(pageContent, "\n## Justification\n");
+        pageContent = appendToString(pageContent, justification->valuestring);
+        pageContent = appendToString(pageContent, "\n");
     }
 
 
@@ -175,16 +175,16 @@ char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
     if (cJSON_IsString(compliance) && compliance->valuestring && strcmp(compliance->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
         
         if(strcmp(compliance->valuestring, "Compliant") == 0){
-            pageContent = appendStrings(pageContent, "\n# Compliance\n");
-            pageContent = appendStrings(pageContent, ":green_circle: Compliant\n");
+            pageContent = appendToString(pageContent, "\n# Compliance\n");
+            pageContent = appendToString(pageContent, ":green_circle: Compliant\n");
         }
         if(strcmp(compliance->valuestring, "Unknown") == 0){
-            pageContent = appendStrings(pageContent, "\n# Compliance\n");
-            pageContent = appendStrings(pageContent, ":orange_circle: Unknown\n");
+            pageContent = appendToString(pageContent, "\n# Compliance\n");
+            pageContent = appendToString(pageContent, ":orange_circle: Unknown\n");
         }
         if(strcmp(compliance->valuestring, "Uncompliant") == 0){
-            pageContent = appendStrings(pageContent, "\n# Compliance\n");
-            pageContent = appendStrings(pageContent, ":red_circle: Uncompliant\n");
+            pageContent = appendToString(pageContent, "\n# Compliance\n");
+            pageContent = appendToString(pageContent, ":red_circle: Uncompliant\n");
         }
     }
 
@@ -193,16 +193,16 @@ char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
     if (cJSON_IsString(criticality) && criticality->valuestring && strcmp(criticality->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
         
         if(strcmp(criticality->valuestring, "Low") == 0){
-            pageContent = appendStrings(pageContent, "\n# Criticality\n");
-            pageContent = appendStrings(pageContent, ":green_circle: Low\n");
+            pageContent = appendToString(pageContent, "\n# Criticality\n");
+            pageContent = appendToString(pageContent, ":green_circle: Low\n");
         }
         if(strcmp(criticality->valuestring, "Medium") == 0){
-            pageContent = appendStrings(pageContent, "\n# Criticality\n");
-            pageContent = appendStrings(pageContent, ":orange_circle: Medium\n");
+            pageContent = appendToString(pageContent, "\n# Criticality\n");
+            pageContent = appendToString(pageContent, ":orange_circle: Medium\n");
         }
         if(strcmp(criticality->valuestring, "High") == 0){
-            pageContent = appendStrings(pageContent, "\n# Criticality\n");
-            pageContent = appendStrings(pageContent, ":red_circle: High\n");
+            pageContent = appendToString(pageContent, "\n# Criticality\n");
+            pageContent = appendToString(pageContent, ":red_circle: High\n");
         }
     }
 
@@ -245,29 +245,29 @@ char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
                 verificationCount++;
 
                 if(isVerification == 0){
-                    pageContent = appendStrings(pageContent, "\n# Verification");
+                    pageContent = appendToString(pageContent, "\n# Verification");
                     isVerification = 1;
                 }
 
                 char temp_verificationNumber[100];
                 snprintf(temp_verificationNumber, sizeof(temp_verificationNumber), "\n## Verification %d\n", verificationCount);
-                pageContent = appendStrings(pageContent, temp_verificationNumber);
+                pageContent = appendToString(pageContent, temp_verificationNumber);
 
-                pageContent = appendStrings(pageContent, "**Method**: ");
-                pageContent = appendStrings(pageContent, verificationMethod->valuestring);
-                pageContent = appendStrings(pageContent, "\n**Deadline**: ");
-                pageContent = appendStrings(pageContent, reviewName);
-                pageContent = appendStrings(pageContent, "\n");
+                pageContent = appendToString(pageContent, "**Method**: ");
+                pageContent = appendToString(pageContent, verificationMethod->valuestring);
+                pageContent = appendToString(pageContent, "\n**Deadline**: ");
+                pageContent = appendToString(pageContent, reviewName);
+                pageContent = appendToString(pageContent, "\n");
 
                 if(strcmp(verificationStatus->valuestring, REQ_SHEET_EMPTY_VALUE) != 0){
-                    pageContent = appendStrings(pageContent, "**Status**: ");
+                    pageContent = appendToString(pageContent, "**Status**: ");
 
-                    if(strcmp(verificationStatus->valuestring, "Completed") == 0){pageContent = appendStrings(pageContent, ":green_circle:");}
-                    if(strcmp(verificationStatus->valuestring, "In progress") == 0){pageContent = appendStrings(pageContent, ":orange_circle:");}
-                    if(strcmp(verificationStatus->valuestring, "Uncompleted") == 0){pageContent = appendStrings(pageContent, ":red_circle:");}
+                    if(strcmp(verificationStatus->valuestring, "Completed") == 0){pageContent = appendToString(pageContent, ":green_circle:");}
+                    if(strcmp(verificationStatus->valuestring, "In progress") == 0){pageContent = appendToString(pageContent, ":orange_circle:");}
+                    if(strcmp(verificationStatus->valuestring, "Uncompleted") == 0){pageContent = appendToString(pageContent, ":red_circle:");}
 
-                    pageContent = appendStrings(pageContent, verificationStatus->valuestring);
-                    pageContent = appendStrings(pageContent, "\n");
+                    pageContent = appendToString(pageContent, verificationStatus->valuestring);
+                    pageContent = appendToString(pageContent, "\n");
 
                 }
 
@@ -347,46 +347,46 @@ char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem){
             log_message(LOG_DEBUG, "Found a new group");
 
             if(!isFirstGroup){
-                DRL = appendStrings(DRL, "{.links-list}");
+                DRL = appendToString(DRL, "{.links-list}");
                 isFirstGroup = 0;
             }
             else{isFirstGroup = 0;}
 
-            DRL = appendStrings(DRL, "\n\n\n## ");
-            DRL = appendStrings(DRL, id->valuestring);
-            DRL = appendStrings(DRL, "\n");
+            DRL = appendToString(DRL, "\n\n\n## ");
+            DRL = appendToString(DRL, id->valuestring);
+            DRL = appendToString(DRL, "\n");
             continue;
         }
 
         if (cJSON_IsString(id) && id->valuestring) {
             log_message(LOG_DEBUG, "ID: %s", id->valuestring);
             log_message(LOG_DEBUG, "title: %s", title->valuestring);
-            DRL = appendStrings(DRL, "- [");
-            DRL = appendStrings(DRL, id->valuestring);
-            DRL = appendStrings(DRL, "](/");
-            DRL = appendStrings(DRL, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_");
-            DRL = appendStrings(DRL, subSystem);
-            DRL = appendStrings(DRL, "_DRL/");
-            DRL = appendStrings(DRL, id->valuestring);
-            DRL = appendStrings(DRL, ") **");
+            DRL = appendToString(DRL, "- [");
+            DRL = appendToString(DRL, id->valuestring);
+            DRL = appendToString(DRL, "](/");
+            DRL = appendToString(DRL, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_");
+            DRL = appendToString(DRL, subSystem);
+            DRL = appendToString(DRL, "_DRL/");
+            DRL = appendToString(DRL, id->valuestring);
+            DRL = appendToString(DRL, ") **");
         }
         
         
         
         if (cJSON_IsString(title) && title->valuestring) {
             log_message(LOG_DEBUG, "title: %s", title->valuestring);
-            DRL = appendStrings(DRL, title->valuestring);
-            DRL = appendStrings(DRL, "**\n");
+            DRL = appendToString(DRL, title->valuestring);
+            DRL = appendToString(DRL, "**\n");
         }
         if (cJSON_IsString(description) && description->valuestring) {
             log_message(LOG_DEBUG, "Description: %s", description->valuestring);
-            DRL = appendStrings(DRL, description->valuestring);
-            DRL = appendStrings(DRL, "\n");
+            DRL = appendToString(DRL, description->valuestring);
+            DRL = appendToString(DRL, "\n");
         }
 
     }
 
-    DRL = appendStrings(DRL, "{.links-list}");
+    DRL = appendToString(DRL, "{.links-list}");
     
     log_message(LOG_DEBUG, "Exiting function buildDrlFromJSONRequirementList");
 
@@ -532,6 +532,13 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
 
     
     log_message(LOG_DEBUG, "Exiting function parseArrayIntoJSONRequirementList");
+
+
+    if(chunk.response){
+        free(chunk.response);
+    }
+
+    cJSON_Delete(input_json);
 
     return json;
 }
@@ -842,24 +849,55 @@ char *buildVcdList(cJSON *requirementList, char* subSystem){
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
     }
 
-    char *VCD = "\n# Verification Status for next Review\n\n# {.tabset}";
+    const char *VCD_header = "\n# Verification Status for next Review\n\n# {.tabset}";
 
-    char *UVROD = "\n### Review Of Design\n";
-    char *IPVROD = "\n### Review Of Design\n";
-    char *VROD  = "\n### Review Of Design\n";
+    const char *UVROD_header = "\n### Review Of Design\n";
+    const char *IPVROD_header = "\n### Review Of Design\n";
+    const char *VROD_header  = "\n### Review Of Design\n";
 
-    char *UVTE = "\n### Test\n";
-    char *IPVTE = "\n### Test\n";
-    char *VTE  = "\n### Test\n";
+    const char *UVTE_header = "\n### Test\n";
+    const char *IPVTE_header = "\n### Test\n";
+    const char *VTE_header  = "\n### Test\n";
 
-    char *UVIN = "\n### Inspection\n";
-    char *IPVIN = "\n### Inspection\n";
-    char *VIN  = "\n### Inspection\n";
+    const char *UVIN_header = "\n### Inspection\n";
+    const char *IPVIN_header = "\n### Inspection\n";
+    const char *VIN_header  = "\n### Inspection\n";
 
-    char *UVAN = "\n### Analysis\n";
-    char *IPVAN = "\n### Analysis\n";
-    char *VAN  = "\n### Analysis\n";
+    const char *UVAN_header = "\n### Analysis\n";
+    const char *IPVAN_header = "\n### Analysis\n";
+    const char *VAN_header  = "\n### Analysis\n";
     
+
+    char *VCD = (char *)malloc(strlen(VCD_header) + 1);
+    char *UVROD = (char *)malloc(strlen(UVROD_header) + 1);
+    char *IPVROD = (char *)malloc(strlen(IPVROD_header) + 1);
+    char *VROD = (char *)malloc(strlen(VROD_header) + 1);
+    char *UVTE = (char *)malloc(strlen(UVTE_header) + 1);
+    char *IPVTE = (char *)malloc(strlen(IPVTE_header) + 1);
+    char *VTE = (char *)malloc(strlen(VTE_header) + 1);
+    char *UVIN = (char *)malloc(strlen(UVIN_header) + 1);
+    char *IPVIN = (char *)malloc(strlen(IPVIN_header) + 1);
+    char *VIN = (char *)malloc(strlen(VIN_header) + 1);
+    char *UVAN = (char *)malloc(strlen(UVAN_header) + 1);
+    char *IPVAN = (char *)malloc(strlen(IPVAN_header) + 1);
+    char *VAN = (char *)malloc(strlen(VAN_header) + 1);
+
+
+    strcpy(VCD, VCD_header);
+    strcpy(UVROD, UVROD_header);
+    strcpy(IPVROD, IPVROD_header);
+    strcpy(VROD, VROD_header);
+    strcpy(UVTE, UVTE_header);
+    strcpy(IPVTE, IPVTE_header);
+    strcpy(VTE, VTE_header);
+    strcpy(UVIN, UVIN_header);
+    strcpy(IPVIN, IPVIN_header);
+    strcpy(VIN, VIN_header);
+    strcpy(UVAN, UVAN_header);
+    strcpy(IPVAN, IPVAN_header);
+    strcpy(VAN, VAN_header);
+
+
 
     // Iterate over each requirement object in the requirements array
     int num_reqs = cJSON_GetArraySize(requirements);
@@ -983,72 +1021,105 @@ char *buildVcdList(cJSON *requirementList, char* subSystem){
 
             if (cJSON_IsString(id) && id->valuestring) {
                 log_message(LOG_DEBUG, "ID: %s", id->valuestring);
-                *targetList = appendStrings(*targetList, "- [");
-                *targetList = appendStrings(*targetList, id->valuestring);
-                *targetList = appendStrings(*targetList, "](/");
-                *targetList = appendStrings(*targetList, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_");
-                *targetList = appendStrings(*targetList, subSystem);
-                *targetList = appendStrings(*targetList, "_DRL/");
-                *targetList = appendStrings(*targetList, id->valuestring);
-                *targetList = appendStrings(*targetList, ") **");
+                *targetList = appendToString(*targetList, "- [");
+                *targetList = appendToString(*targetList, id->valuestring);
+                *targetList = appendToString(*targetList, "](/");
+                *targetList = appendToString(*targetList, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_");
+                *targetList = appendToString(*targetList, subSystem);
+                *targetList = appendToString(*targetList, "_DRL/");
+                *targetList = appendToString(*targetList, id->valuestring);
+                *targetList = appendToString(*targetList, ") **");
             }
         
             if (cJSON_IsString(title) && title->valuestring) {
                 log_message(LOG_DEBUG, "title: %s", title->valuestring);
-                *targetList = appendStrings(*targetList, title->valuestring);
-                *targetList = appendStrings(*targetList, "**\n");
+                *targetList = appendToString(*targetList, title->valuestring);
+                *targetList = appendToString(*targetList, "**\n");
             }
 
             if (cJSON_IsString(assignee) && assignee->valuestring) {
                 log_message(LOG_DEBUG, "assignee: %s", assignee->valuestring);
-                *targetList = appendStrings(*targetList, "**Assignee**: ");
-                *targetList = appendStrings(*targetList, assignee->valuestring);
-                *targetList = appendStrings(*targetList, "\n");
+                *targetList = appendToString(*targetList, "**Assignee**: ");
+                *targetList = appendToString(*targetList, assignee->valuestring);
+                *targetList = appendToString(*targetList, "\n");
             }
 
             log_message(LOG_DEBUG, "targetList string value: %s", targetList);
 
-
-
         }
-
-
     }
 
+    UVROD =  appendToString(UVROD, "\n{.links-list}");
+    IPVROD =  appendToString(IPVROD, "\n{.links-list}");
+    VROD  =  appendToString(VROD, "\n{.links-list}");
 
-    UVROD =  appendStrings(UVROD, "\n{.links-list}");
-    IPVROD =  appendStrings(IPVROD, "\n{.links-list}");
-    VROD  =  appendStrings(VROD, "\n{.links-list}");
+    UVTE =  appendToString(UVTE, "\n{.links-list}");
+    IPVTE =  appendToString(IPVTE, "\n{.links-list}");
+    VTE  =  appendToString(VTE, "\n{.links-list}");
 
-    UVTE =  appendStrings(UVTE, "\n{.links-list}");
-    IPVTE =  appendStrings(IPVTE, "\n{.links-list}");
-    VTE  =  appendStrings(VTE, "\n{.links-list}");
+    UVIN =  appendToString(UVIN, "\n{.links-list}");
+    IPVIN =  appendToString(IPVIN, "\n{.links-list}");
+    VIN  =  appendToString(VIN, "\n{.links-list}");
 
-    UVIN =  appendStrings(UVIN, "\n{.links-list}");
-    IPVIN =  appendStrings(IPVIN, "\n{.links-list}");
-    VIN  =  appendStrings(VIN, "\n{.links-list}");
+    UVAN =  appendToString(UVAN, "\n{.links-list}");
+    IPVAN =  appendToString(IPVAN, "\n{.links-list}");
+    VAN  =  appendToString(VAN, "\n{.links-list}");
 
-    UVAN =  appendStrings(UVAN, "\n{.links-list}");
-    IPVAN =  appendStrings(IPVAN, "\n{.links-list}");
-    VAN  =  appendStrings(VAN, "\n{.links-list}");
+    VCD = appendToString(VCD, "\n## Unverified Requirements\n");
+    VCD = appendToString(VCD, UVROD);
+    VCD = appendToString(VCD, UVTE);
+    VCD = appendToString(VCD, UVIN);
+    VCD = appendToString(VCD, UVAN);
 
-    VCD = appendStrings(VCD, "\n## Unverified Requirements\n");
-    VCD = appendStrings(VCD, UVROD);
-    VCD = appendStrings(VCD, UVTE);
-    VCD = appendStrings(VCD, UVIN);
-    VCD = appendStrings(VCD, UVAN);
+    VCD = appendToString(VCD, "\n## Verification In Progress\n");
+    VCD = appendToString(VCD, IPVROD);
+    VCD = appendToString(VCD, IPVTE);
+    VCD = appendToString(VCD, IPVIN);
+    VCD = appendToString(VCD, IPVAN);
 
-    VCD = appendStrings(VCD, "\n## Verification In Progress\n");
-    VCD = appendStrings(VCD, IPVROD);
-    VCD = appendStrings(VCD, IPVTE);
-    VCD = appendStrings(VCD, IPVIN);
-    VCD = appendStrings(VCD, IPVAN);
+    VCD = appendToString(VCD, "\n## Verified Requirements\n");
+    VCD = appendToString(VCD, VROD);
+    VCD = appendToString(VCD, VTE);
+    VCD = appendToString(VCD, VIN);
+    VCD = appendToString(VCD, VAN);
 
-    VCD = appendStrings(VCD, "\n## Verified Requirements\n");
-    VCD = appendStrings(VCD, VROD);
-    VCD = appendStrings(VCD, VTE);
-    VCD = appendStrings(VCD, VIN);
-    VCD = appendStrings(VCD, VAN);
+
+    if(UVROD){
+        free(UVROD);
+    }
+    if(IPVROD){
+        free(IPVROD);
+    }
+    if(VROD){
+        free(VROD);
+    }
+    if(UVTE){
+        free(UVTE);
+    }
+    if(IPVTE){
+        free(IPVTE);
+    }
+    if(VTE){
+        free(VTE);
+    }
+    if(UVIN){
+        free(UVIN);
+    }
+    if(IPVIN){
+        free(IPVIN);
+    }
+    if(VIN){
+        free(VIN);
+    }
+    if(UVAN){
+        free(UVAN);
+    }
+    if(IPVAN){
+        free(IPVAN);
+    }
+    if(VAN){
+        free(VAN);
+    }
     
     log_message(LOG_DEBUG, "Exiting function buildVcdList");
     return VCD;

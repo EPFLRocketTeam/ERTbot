@@ -308,7 +308,12 @@ char* createMapWBS(pageList** paths) {
     int numberOfParentFolders = 0;
     int baseDepth, currentDepth, numberOfStars;
     
-    char *map = "```plantuml\n@startwbs\n<style>\nwbsDiagram {\n  Linecolor black\nBackGroundColor white\n  hyperlinkColor black\n}\n</style>";
+    const char *map_header = "```plantuml\n@startwbs\n<style>\nwbsDiagram {\n  Linecolor black\nBackGroundColor white\n  hyperlinkColor black\n}\n</style>";
+
+    char *map = (char *)malloc(strlen(map_header) + 1);
+
+    strcpy(map, map_header);
+
     baseDepth = countSlashes(current->path);
     while (current != NULL) {
         currentDepth = countSlashes(current->path);
@@ -328,14 +333,14 @@ char* createMapWBS(pageList** paths) {
                         dirPath = getDirPath(dirPath);
                     }
                     numberOfStars = currentDepth - baseDepth - i + 1;
-                    map = appendStrings(map, "\n");
+                    map = appendToString(map, "\n");
                     for(numberOfStars; numberOfStars > 0; --numberOfStars){
-                        map = appendStrings(map, "*");
+                        map = appendToString(map, "*");
                     }
-                    map = appendStrings(map, "_ ");
-                    map = appendStrings(map, " ");
-                    map = appendStrings(map, getDocId(dirPath));
-                    map = appendStrings(map, "\n");
+                    map = appendToString(map, "_ ");
+                    map = appendToString(map, " ");
+                    map = appendToString(map, getDocId(dirPath));
+                    map = appendToString(map, "\n");
 
                 }
 
@@ -345,15 +350,15 @@ char* createMapWBS(pageList** paths) {
 
 
         numberOfStars = currentDepth - baseDepth + 1;
-        map = appendStrings(map, "\n");
+        map = appendToString(map, "\n");
         for(numberOfStars; numberOfStars > 0; --numberOfStars){
-            map = appendStrings(map, "*");
+            map = appendToString(map, "*");
         }
-        map = appendStrings(map, " [[https://rocket-team.epfl.ch/en/");
-        map = appendStrings(map, current->path);
-        map = appendStrings(map, " ");
-        map = appendStrings(map, current->title);
-        map = appendStrings(map, "]]\n");
+        map = appendToString(map, " [[https://rocket-team.epfl.ch/en/");
+        map = appendToString(map, current->path);
+        map = appendToString(map, " ");
+        map = appendToString(map, current->title);
+        map = appendToString(map, "]]\n");
 
         current = current->next;
         if(isFirstLoop == 1){
@@ -362,7 +367,7 @@ char* createMapWBS(pageList** paths) {
         }
         previous = previous->next;
     }
-    map = appendStrings(map, "\n\n\n@endwbs\n```\n\n\n");
+    map = appendToString(map, "\n\n\n@endwbs\n```\n\n\n");
     
     log_message(LOG_DEBUG, "Exiting function createMapWBS");
     return map;
@@ -372,16 +377,16 @@ char* createList(char *list, pageList** sectionTitle, pageList* links){
     log_message(LOG_DEBUG, "Entering function createList");
     
     char *tempList = list;
-    tempList = appendStrings(tempList, "\\\\n\\\\n");
-    tempList = appendStrings(tempList, "## [");
-    tempList = appendStrings(tempList, (*sectionTitle)->title);
-    tempList = appendStrings(tempList, "](/");
-    tempList = appendStrings(tempList, (*sectionTitle)->path);
-    tempList = appendStrings(tempList, ")");
-    //tempList = appendStrings(tempList, "\\\\n");
+    tempList = appendToString(tempList, "\\\\n\\\\n");
+    tempList = appendToString(tempList, "## [");
+    tempList = appendToString(tempList, (*sectionTitle)->title);
+    tempList = appendToString(tempList, "](/");
+    tempList = appendToString(tempList, (*sectionTitle)->path);
+    tempList = appendToString(tempList, ")");
+    //tempList = appendToString(tempList, "\\\\n");
     while (links != NULL) {
-        tempList = appendStrings(tempList, "\\\\n");
-        tempList = appendStrings(tempList, links->path);
+        tempList = appendToString(tempList, "\\\\n");
+        tempList = appendToString(tempList, links->path);
         links = links->next;
     }
 
@@ -400,18 +405,18 @@ char* updateList(char *list, pageList *sectionTitle, pageList *links) {
     char *tempList = sectionTitle->path;
     log_message(LOG_DEBUG, "path:%s\n", sectionTitle->path);
 
-    tempList = appendStrings(tempList, ")\\n" );
+    tempList = appendToString(tempList, ")\\n" );
 
     
     link = links;
     while (link != NULL) {
 
-        tempList = appendStrings(tempList, link->path);
-        tempList = appendStrings(tempList, "\\n");
+        tempList = appendToString(tempList, link->path);
+        tempList = appendToString(tempList, "\\n");
         link = link->next;
     }
 
-    char *temp = appendStrings(sectionTitle->path, ")");
+    char *temp = createCombinedString(sectionTitle->path, ")");
 
     // Find and replace old list
     char *startPtr = strstr(list, temp);
@@ -591,20 +596,20 @@ char* createLocalGraphMindMap(pageList** tempPage, pageList** incomingPaths, pag
     pageList *currentOutgoingLink = *outgoingPaths;
     char *localGraph;
     localGraph = "```plantuml\n@startmindmap\n<style>\nmindmapDiagram {\n  .myStyle*{\n Linecolor black\n	BackGroundColor white\n  hyperlinkColor black\n}\n}\n</style>";;
-    localGraph = appendStrings(localGraph, "\n+");
-    localGraph = appendStrings(localGraph, " [[https://rocket-team.epfl.ch/en/");
-    localGraph = appendStrings(localGraph, (*tempPage)->path);
-    localGraph = appendStrings(localGraph, " ");
-    localGraph = appendStrings(localGraph, (*tempPage)->title);
-    localGraph = appendStrings(localGraph, "]]\n");
+    localGraph = appendToString(localGraph, "\n+");
+    localGraph = appendToString(localGraph, " [[https://rocket-team.epfl.ch/en/");
+    localGraph = appendToString(localGraph, (*tempPage)->path);
+    localGraph = appendToString(localGraph, " ");
+    localGraph = appendToString(localGraph, (*tempPage)->title);
+    localGraph = appendToString(localGraph, "]]\n");
 
     while (currentIncomingLink != NULL) {
-        localGraph = appendStrings(localGraph, "\n--");
-        localGraph = appendStrings(localGraph, " [[https://rocket-team.epfl.ch/en/");
-        localGraph = appendStrings(localGraph, currentIncomingLink->path);
-        localGraph = appendStrings(localGraph, " ");
-        localGraph = appendStrings(localGraph, currentIncomingLink->title);
-        localGraph = appendStrings(localGraph, "]]\n");
+        localGraph = appendToString(localGraph, "\n--");
+        localGraph = appendToString(localGraph, " [[https://rocket-team.epfl.ch/en/");
+        localGraph = appendToString(localGraph, currentIncomingLink->path);
+        localGraph = appendToString(localGraph, " ");
+        localGraph = appendToString(localGraph, currentIncomingLink->title);
+        localGraph = appendToString(localGraph, "]]\n");
         currentIncomingLink = currentIncomingLink->next;
 
     }
@@ -612,16 +617,16 @@ char* createLocalGraphMindMap(pageList** tempPage, pageList** incomingPaths, pag
     currentOutgoingLink = currentOutgoingLink->next;
 
     while(currentOutgoingLink != NULL){
-        localGraph = appendStrings(localGraph, "\n++");
-        localGraph = appendStrings(localGraph, " [[https://rocket-team.epfl.ch/en/");
-        localGraph = appendStrings(localGraph, currentOutgoingLink->path);
-        localGraph = appendStrings(localGraph, " ");
-        localGraph = appendStrings(localGraph, getDocId(currentOutgoingLink->path));
-        localGraph = appendStrings(localGraph, "]]\n");
+        localGraph = appendToString(localGraph, "\n++");
+        localGraph = appendToString(localGraph, " [[https://rocket-team.epfl.ch/en/");
+        localGraph = appendToString(localGraph, currentOutgoingLink->path);
+        localGraph = appendToString(localGraph, " ");
+        localGraph = appendToString(localGraph, getDocId(currentOutgoingLink->path));
+        localGraph = appendToString(localGraph, "]]\n");
         currentOutgoingLink = currentOutgoingLink->next;
     }
 
-    localGraph = appendStrings(localGraph, "\n\n\n@endmindmap\n```\n\n\n");
+    localGraph = appendToString(localGraph, "\n\n\n@endmindmap\n```\n\n\n");
 
     freePageList(&currentIncomingLink);
     freePageList(&currentOutgoingLink);
@@ -1078,23 +1083,22 @@ void appendMentionedIn(pageList** head){
 
     pageList* IncomingLinks = findIncomingLinks(&IncomingLinks, linkTrackerPage->content, subjectPage->path);
 
-    subjectPage->content = appendStrings(subjectPage->content, "\n# Mentiond in\n");
+    subjectPage->content = appendToString(subjectPage->content, "\n# Mentiond in\n");
     while (IncomingLinks != NULL) {
-        subjectPage->content = appendStrings(subjectPage->content, "- [");
-        subjectPage->content = appendStrings(subjectPage->content, IncomingLinks->title);
-        subjectPage->content = appendStrings(subjectPage->content, "](");
-        subjectPage->content = appendStrings(subjectPage->content, IncomingLinks->path);
-        subjectPage->content = appendStrings(subjectPage->content, ")\n");
+        subjectPage->content = appendToString(subjectPage->content, "- [");
+        subjectPage->content = appendToString(subjectPage->content, IncomingLinks->title);
+        subjectPage->content = appendToString(subjectPage->content, "](");
+        subjectPage->content = appendToString(subjectPage->content, IncomingLinks->path);
+        subjectPage->content = appendToString(subjectPage->content, ")\n");
         IncomingLinks = IncomingLinks->next;
     }
 
-    subjectPage->content = appendStrings(subjectPage->content, "{.links-list}\n");
+    subjectPage->content = appendToString(subjectPage->content, "{.links-list}\n");
 
     subjectPage->content = replaceWord(subjectPage->content, "\n", "\\\\n");
     subjectPage->content = replaceWord(subjectPage->content, "\"", "\\\"");
     updatePageContentMutation(subjectPage);
     renderMutation(&subjectPage, false);
-
     
     log_message(LOG_DEBUG, "Exiting function appendMentionedIn");
     
