@@ -9,6 +9,10 @@
  * 
  * @todo - Add an option to run through terminal commands instead of slack commands
  *       - Add Feature: appendToListOfPages and prependToListOfPages
+ *       - Redo replaceWord implementation to fix memory leaks
+ *       - Redo replaceParagraph implementation to fix memory leaks
+ * 
+ * @warning replaceWord function is still causing memory leaks (responsible for 1/3 of memory leaks)
  */
 
 #include "../include/struct.h"

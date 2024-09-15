@@ -546,7 +546,7 @@ command** executeCommand(command** commandQueue){
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateVCD") == 0){
         updateVcdPage(**commandQueue);
-        sendMessageToSlack("Page created.");
+        sendMessageToSlack("VCD page updated");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "refreshOAuthToken") == 0){
