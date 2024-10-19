@@ -440,7 +440,7 @@ void syncDrlToSheet(command cmd){
         sheetId = "AV!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "TE")==0){
-        drlPageId = 
+        drlPageId = "1883";
         sheetId = "TE!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "PL")==0){
