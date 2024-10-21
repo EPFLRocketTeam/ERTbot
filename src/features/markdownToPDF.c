@@ -1168,6 +1168,96 @@ char* preProcessing(char* pageContent, char *docID){
     return tempPageContent;
 }
 
+static void filterLinks(pageList** head) {
+    log_message(LOG_DEBUG, "Entering function filterLinks");
+    
+    pageList* current = *head;
+    while (current != NULL) {
+        current->path = removeAfterSpace(current->path);
+        current = current->next;
+    }
+
+    
+    log_message(LOG_DEBUG, "Exiting function filterLinks");
+}
+
+static void prepend_file(char *source_filename, char *destination_filename) {
+    log_message(LOG_DEBUG, "Entering function prepend_file");
+    
+    // Open source file for reading
+    FILE *source_file = fopen(source_filename, "r");
+    if (source_file == NULL) {
+        log_message(LOG_ERROR, "Error opening source file.");
+        return;
+    }
+
+    // Open destination file for reading and writing
+    FILE *destination_file = fopen(destination_filename, "r+");
+    if (destination_file == NULL) {
+        log_message(LOG_ERROR, "Error opening destination file.");
+        fclose(source_file);
+        return;
+    }
+
+    // Move cursor to the end of destination file
+    fseek(destination_file, 0, SEEK_END);
+
+    // Get size of destination file
+    long size = ftell(destination_file);
+
+    // Allocate buffer to store destination file contents
+    char *buffer = (char *)malloc(size);
+    if (buffer == NULL) {
+        log_message(LOG_ERROR, "Memory allocation failed.");
+        fclose(source_file);
+        fclose(destination_file);
+        return;
+    }
+
+    // Read contents of destination file
+    fseek(destination_file, 0, SEEK_SET);
+    fread(buffer, 1, size, destination_file);
+
+    // Move cursor back to the beginning of destination file
+    fseek(destination_file, 0, SEEK_SET);
+
+    // Write contents of source file to destination file
+    char source_buffer[1024];
+    size_t bytesRead;
+    while ((bytesRead = fread(source_buffer, 1, sizeof(source_buffer), source_file)) > 0) {
+        fwrite(source_buffer, 1, bytesRead, destination_file);
+    }
+
+    // Write back the contents of the destination file
+    fwrite(buffer, 1, size, destination_file);
+
+    // Free allocated memory and close files
+    free(buffer);
+    fclose(source_file);
+    fclose(destination_file);
+    
+    log_message(LOG_DEBUG, "Exiting function prepend_file");
+}
+
+static int zipFolder(char *folderPath) {
+    log_message(LOG_DEBUG, "Entering function zipFolder");
+    
+    char zipCommand[1024];
+    snprintf(zipCommand, sizeof(zipCommand), "cd \"%s\" && zip -r \"%s.zip\" .", folderPath, folderPath);
+
+    // Execute the zip command
+    int result = system(zipCommand);
+    if (result != 0) {
+        log_message(LOG_ERROR, "Failed to create zip file for '%s'", folderPath);
+        return 1;
+    }
+
+    log_message(LOG_ERROR, "Folder '%s' successfully zipped\n", folderPath);
+    
+    log_message(LOG_DEBUG, "Exiting function zipFolder");
+    return 0;
+}
+
 void getZip(command cmd){
     log_message(LOG_DEBUG, "Entering function getZip");
     

@@ -19,6 +19,7 @@
 #include "../include/requirements.h"
 #include <sys/socket.h>
 
+#define MAX_ARGUMENTS 10
 
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands, command* command, int period) {
     log_message(LOG_DEBUG, "Entering function addPeriodicCommand");
@@ -494,6 +495,85 @@ PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicComm
 
     log_message(LOG_DEBUG, "Exiting function initializePeriodicCommands");
     return headOfPeriodicCommands;
+}
+
+static void breakdownCommand(char* sentence, command* cmd) {
+    log_message(LOG_DEBUG, "Entering function breakdownCommand");
+    
+    char* words[MAX_ARGUMENTS];
+    char* token;
+    int word_count = 0;
+
+    // Copy the sentence to avoid modifying the original string
+    char* sentence_copy = strdup(sentence);
+
+    // Tokenize the sentence
+    token = strtok(sentence_copy, " ");
+    while (token != NULL && word_count < MAX_ARGUMENTS) {
+        words[word_count++] = token;
+        token = strtok(NULL, " ");
+    }
+
+    // Check if the sentence has more than ten words
+    if (word_count > MAX_ARGUMENTS) {
+        log_message(LOG_ERROR, "Error: Sentence contains more than ten words.");
+        free(sentence_copy);
+        return;
+    }
+
+    // Initialize the command struct fields to NULL
+    cmd->function = NULL;
+    cmd->argument_1 = NULL;
+    cmd->argument_2 = NULL;
+    cmd->argument_3 = NULL;
+    cmd->argument_4 = NULL;
+    cmd->argument_5 = NULL;
+    cmd->argument_6 = NULL;
+    cmd->argument_7 = NULL;
+    cmd->argument_8 = NULL;
+    cmd->argument_9 = NULL;
+
+    // Copy words into struct fields
+    for (int i = 0; i < word_count; i++) {
+        switch (i) {
+            case 0:
+                cmd->function = strdup(words[i]);
+                break;
+            case 1:
+                cmd->argument_1 = strdup(words[i]);
+                break;
+            case 2:
+                cmd->argument_2 = strdup(words[i]);
+                break;
+            case 3:
+                cmd->argument_3 = strdup(words[i]);
+                break;
+            case 4:
+                cmd->argument_4 = strdup(words[i]);
+                break;
+            case 5:
+                cmd->argument_5 = strdup(words[i]);
+                break;
+            case 6:
+                cmd->argument_6 = strdup(words[i]);
+                break;
+            case 7:
+                cmd->argument_7 = strdup(words[i]);
+                break;
+            case 8:
+                cmd->argument_8 = strdup(words[i]);
+                break;
+            case 9:
+                cmd->argument_9 = strdup(words[i]);
+                break;
+            default:
+                break;
+        }
+    }
+
+    free(sentence_copy);
+    
+    log_message(LOG_DEBUG, "Exiting function breakdownCommand");
 }
 
 command** executeCommand(command** commandQueue){
