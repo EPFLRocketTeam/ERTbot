@@ -1,17 +1,26 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include "config.h"
+#include <stdbool.h>
+
+/**
+ * @brief Updates a specific section in a Markdown list with new links.
+ * 
+ * This function updates a section of a Markdown list by replacing an old list with a new one. 
+ * The section to be updated is identified by a path, and the new list of links is appended to this section.
+ * 
+ * @param list The original Markdown list as a string. This string will be modified to include the updated list.
+ * @param sectionTitle A pointer to a `pageList` structure representing the section to be updated. The path in this structure is used to identify the section.
+ * @param links A pointer to a `pageList` structure containing the new list of links to be added under the section.
+ * 
+ * @return The updated Markdown list as a dynamically allocated string. The caller is responsible for freeing this memory.
+ * 
+ * @details The function appends the new list of links to the specified section in the original Markdown list. It locates the section in the list using 
+ *          the `sectionTitle` path and replaces the old list with the new one. If the section or end of the section is not found, it prints an error 
+ *          message and returns the original list. The memory allocated for the new list is freed before returning.
+ * 
+ * @todo Should be replaced or at least rewritten so that it uses cJSON functions
+ */
+static char* updateList(char *list, pageList *sectionTitle, pageList* links);
 
 void updateLinksTracker() {  
     log_message(LOG_DEBUG, "Entering function updateLinksTracker");

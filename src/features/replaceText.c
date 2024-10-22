@@ -1,17 +1,20 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include <stdbool.h>
+
+/**
+ * @brief Replaces occurrences of a string in the content of all pages in a linked list, updates and rerenders the pages on the wiki.
+ * 
+ * @param head Pointer to the head of the linked list of pages.
+ * @param oldString The string to be replaced in the page content.
+ * @param newString The string to replace `oldString` with.
+ * 
+ * @details This function iterates through each page in the linked list, retrieves the page content using `getPage`, replaces occurrences
+ *          of `oldString` with `newString`, escapes backslashes and quotes in the content, and updates the page content on the wiki
+ *          using `updatePageContentMutation`. It then performs a render mutation for each page to apply the changes using `renderMutation`.
+ *          After processing all pages, it frees the memory allocated for the page list using `freePageList` and sends a message to Slack
+ *          indicating which pages have been updated.
+ */
+static void replaceStringInWiki(pageList** head, char* oldString, char* newString);
 
 void replaceText(command cmd) {
     log_message(LOG_DEBUG, "Entering function replaceText");

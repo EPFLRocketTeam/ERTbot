@@ -1,17 +1,6 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include <cjson/cJSON.h>
+#include "config.h"
 
 
 

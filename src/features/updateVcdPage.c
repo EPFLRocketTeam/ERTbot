@@ -1,17 +1,52 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include <cjson/cJSON.h>
+#include <stdbool.h>
+
+/**
+ * @brief Creates a Vega chart configuration for a pie chart depicting verification statuses.
+ * 
+ * This function generates a Vega chart specification for a pie chart that visualizes the distribution of three categories: unverified, partially verified, and verified populations. The chart is formatted using Vega's schema and is designed to be displayed with the `kroki` tool.
+ * 
+ * @param unverifiedPopulation A string representing the population of unverified items. This value is inserted into the Vega chart configuration.
+ * @param partiallyVerifiedPopulation A string representing the population of partially verified items. This value is inserted into the Vega chart configuration.
+ * @param verifiedPopulation A string representing the population of verified items. This value is inserted into the Vega chart configuration.
+ * 
+ * @return A dynamically allocated string containing the Vega chart specification. The returned string includes the provided population values substituted into the template.
+ * 
+ * @details
+ * - The function starts with a predefined Vega chart template in string format.
+ * - It replaces placeholder values (`DefaultUnverifiedPopulation`, `DefaultPartiallyVerifiedPopulation`, `DefaultVerifiedPopulation`) in the template with the provided arguments.
+ * - The final Vega chart specification is returned, ready to be used for rendering a pie chart.
+ */
+static char *createVcdPieChart(int* verificationStatusCount);
+
+/**
+ * @brief Updates a JSON string representing a stacked area chart with new weekly data.
+ * 
+ * This function updates a JSON string that contains data for a stacked area chart by adding new data points for the specified week. The new data points include verified, partially verified, and unverified values.
+ * 
+ * @param json_str A string containing the JSON data of the existing chart. This JSON is expected to have a "data" object with a "values" array where new entries will be added.
+ * @param week A string representing the week for which the data is being added. This value will be included in each new data entry.
+ * @param verifiedValue An integer representing the value for the "Verified" status for the given week.
+ * @param partiallyVerifiedValue An integer representing the value for the "Partially Verified" status for the given week.
+ * @param unverifiedValue An integer representing the value for the "Unverified" status for the given week.
+ * 
+ * @return A dynamically allocated string containing the updated JSON data, with new data points added to the "values" array. The caller is responsible for freeing this string.
+ * 
+ * @details
+ * - The function parses the input JSON string and retrieves the "values" array from the "data" object.
+ * - Three new JSON objects are created, each representing one of the statuses ("Verified", "Partially Verified", "Unverified") with their corresponding values and the specified week.
+ * - These new JSON objects are added to the "values" array.
+ * - The updated JSON structure is converted back to a string and returned.
+ * - If any error occurs during parsing or updating, the function returns `NULL`. 
+ */
+static char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue);
+
+
+static void countVerificationStatus(cJSON *requirementList, int* verificationStatusCount);
+
+
+static char *buildVcdList(cJSON *requirementList, char* subSystem);
 
 void updateVcdPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateVcdPage");

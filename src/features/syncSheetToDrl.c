@@ -1,17 +1,71 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include <cjson/cJSON.h>
+
+/**
+ * @brief Parses a list of requirements from a content string and adds them to a cJSON object (convert from wiki-DRL to cJSON requirements).
+ * 
+ * This function extracts requirement details from the given `content` string, where each requirement is formatted in a specific
+ * manner. It parses each requirement's ID, path, name, and description, and adds these details to the provided `requirements` 
+ * cJSON array.
+ * 
+ * The content string is expected to contain requirements formatted with the following flags:
+ * - ID: Begins with "\\n- ["
+ * - Path: Follows "](/"
+ * - Name: Follows ") **"
+ * - Description: Starts with "**\\n" and ends with "\\n"
+ * 
+ * @param requirements A pointer to the `cJSON` array to which parsed requirements will be added.
+ * @param content The string containing the requirements in a specified format.
+ * 
+ * @details The function performs the following steps:
+ * - Searches for the start of each requirement section using specific start flags.
+ * - Extracts the ID, path, name, and description for each requirement by calculating their lengths.
+ * - Allocates memory for the extracted strings and copies them from the content.
+ * - Adds the extracted requirement to the `requirements` cJSON array using the `addRequirementToCjsonObject` function.
+ * - Frees allocated memory for the strings after they are added to the JSON object.
+ */
+static void parseRequirementsList(cJSON *requirementList, char *content);
+
+/**
+ * @brief Adds a new requirement to a JSON array object.
+ * 
+ * This function creates a new JSON object representing a requirement and adds it to the provided JSON array. The requirement
+ * object includes fields for id, path, name, and description, each of which is initialized with the corresponding string values.
+ * 
+ * @param requirements A pointer to the `cJSON` array where the new requirement object will be added.
+ * @param idStr The string representing the ID of the requirement.
+ * @param pathStr The string representing the path of the requirement.
+ * @param nameStr The string representing the name of the requirement.
+ * @param descriptionStr The string representing the description of the requirement.
+ * 
+ * @details The function performs the following steps:
+ *          - Creates a new JSON object for the requirement.
+ *          - Creates JSON strings for the `id`, `path`, `name`, and `description` fields.
+ *          - Adds these fields to the requirement object.
+ *          - Adds the requirement object to the provided `requirements` JSON array.
+ */
+static void addRequirementToCjsonObject(cJSON *requirements, char *idStr, char *pathStr, char *nameStr, char *descriptionStr);
+
+/**
+ * @brief Converts a cJSON array of requirements into a formatted string array.
+ * 
+ * This function takes a `cJSON` array of requirements and generates a JSON-formatted string that represents the array. Each 
+ * requirement in the `cJSON` array is formatted as a list of strings, including the ID, path, name, and description. The 
+ * resulting string is formatted as a JSON array of arrays.
+ * 
+ * The function performs the following steps:
+ * - Calculates the required buffer size for the output string based on the number of requirements and their individual lengths.
+ * - Allocates memory for the output string with the calculated buffer size.
+ * - Iterates through each requirement in the `cJSON` array, extracts the ID, path, name, and description, and appends them to the 
+ *   output string in a JSON array format.
+ * - Returns the resulting formatted string.
+ * 
+ * @param requirements A pointer to the `cJSON` array containing the requirements to be converted.
+ * 
+ * @return A pointer to a dynamically allocated string containing the JSON-formatted requirements. Returns NULL if memory 
+ *         allocation fails.
+ */
+static char* parseJSONRequirementListInToArray(cJSON* requirements);
 
 void syncSheetToDrl(command cmd){
     log_message(LOG_DEBUG, "Entering function syncSheetToDRL");

@@ -1,17 +1,55 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include "config.h"
+
+/**
+ * @brief Creates a PlantUML mind map representation of a page's "local" graph, which is a graph which shows all of
+ *        the incoming and outgoing links.
+ * 
+ * This function generates a PlantUML mind map diagram for a given page. It includes the page itself, along with its 
+ * incoming and outgoing links. The diagram is formatted using PlantUML syntax and includes links with associated titles 
+ * and paths.
+ * 
+ * @param tempPage A pointer to a `pageList` structure representing the central page for which the mind map is created.
+ * @param incomingPaths A pointer to a linked list of `pageList` structures representing the pages that link to the central page.
+ * @param outgoingPaths A pointer to a linked list of `pageList` structures representing the pages linked from the central page.
+ * 
+ * @return A dynamically allocated string containing the PlantUML mind map diagram.
+ * 
+ * @details The function constructs the PlantUML mind map starting with the central page, then iterates through the incoming 
+ *          and outgoing link lists to add corresponding entries. The mind map uses "+" for the central node, "--" for incoming 
+ *          links, and "++" for outgoing links. Each link is represented with its path and title. The function also handles memory 
+ *          cleanup for the incoming and outgoing link lists after generating the diagram.
+ * 
+ * @todo rewrite with new cJSON structured link tracker
+ */
+static char* createLocalGraphMindMap(pageList** tempPage, pageList** incomingPaths, pageList** outgoingPaths);
+
+/**
+ * @brief Finds and adds outgoing links to a linked list. The links must be in a specific subject page's content.
+ * 
+ * This function searches through the provided content to find sections where the path matches the `subjectPagePath`. It
+ * extracts links from these sections and adds them to the `outgoingLinks` list. The function processes a copy of the
+ * content to avoid modifying the original content.
+ * 
+ * @param head A pointer to a pointer to the head of the linked list where the outgoing links will be added.
+ * @param linkTrackerContent A string containing the content to be searched for outgoing links.
+ * @param subjectPagePath The path of the subject page to be matched in the content.
+ * 
+ * @return A pointer to the updated list of outgoing links, which includes any newly found links that reference the
+ *         `subjectPagePath`.
+ * 
+ * @details The function performs the following steps:
+ *          - Creates a copy of the `linkTrackerContent` to process.
+ *          - Searches for sections in the content that start with "## [".
+ *          - Extracts titles, paths, and links from these sections.
+ *          - If the path matches `subjectPagePath`, it extracts and adds the links found in that section to the
+ *            `outgoingLinks` list.
+ *          - Updates the pointers to continue searching through the content.
+ *          - Frees the allocated memory for the content copy before returning.
+ * 
+ * @todo replace with a cJSON version
+ */
+static pageList* findOutgoingLinks(pageList **head, char *linkTrackerContent, char *subjectPagePath);
 
 char* buildLocalGraph(command cmd) {
     log_message(LOG_DEBUG, "Entering function buildLocalGraph");

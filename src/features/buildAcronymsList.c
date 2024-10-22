@@ -1,17 +1,59 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include "config.h"
+#include <stdio.h>
+
+
+#define MAX_WORD_LENGTH 20
+#define MAX_WORDS 1000
+
+/**
+ * @brief Finds accronyms in a string and appends the accronyms to the path give in argument (void but modifies local accronymList)
+ * 
+ * @param[in] pathToAccronymList 
+ * @param[in] str 
+ * 
+ * @details
+ * 
+ * @todo acronym list should be added to wiki instead of append file
+ */
+static void printAcronymsToFile(char* pathToAccronymList, char *str);
+
+/**
+ * @brief Sorts an array of words using the bubble sort algorithm.
+ * 
+ * This function sorts an array of strings (words) in ascending lexicographical order using the bubble sort technique.
+ * Each word is compared with the next, and if they are out of order, they are swapped. The process is repeated until
+ * the entire array is sorted.
+ * 
+ * @param words An array of strings where each string represents a word to be sorted. The array should be of size `MAX_WORDS`,
+ *              and each string should be of length `MAX_WORD_LENGTH`.
+ * @param numWords The number of words in the `words` array. This value should be less than or equal to `MAX_WORDS`.
+ * 
+ * @details The function uses a nested loop structure to implement bubble sort:
+ *          - The outer loop iterates through each word, while the inner loop compares adjacent words and swaps them if needed.
+ *          - After each pass through the array, the largest unsorted word "bubbles" up to its correct position.
+ * 
+ */
+static void sortWords(char words[MAX_WORDS][MAX_WORD_LENGTH], int numWords);
+
+/**
+ * @brief Removes duplicate words from a file and sorts the remaining words alphabetically.
+ * 
+ * This function reads words from a specified file, removes duplicates, sorts the unique words in alphabetical order,
+ * and then writes the sorted unique words back to the file. Each word is expected to be on a new line in the file.
+ * 
+ * @param filename The path to the file containing the words to be processed. The file should be in a format where each
+ *                 word is on a new line.
+ * 
+ * @details The function performs the following steps:
+ *          - Opens the file for reading and reads words line by line, storing them in an array.
+ *          - Removes any newline characters from the words.
+ *          - Closes the file after reading.
+ *          - Sorts the words using the `sortWords` function.
+ *          - Opens the file for writing and writes the sorted unique words back to the file.
+ *          - If a word is the same as the previous word, it is not written to avoid duplicates.
+ */
+static void removeDuplicatesAndSort(char *filename);
 
 void buildAcronymsList(command cmd) {
     log_message(LOG_DEBUG, "Entering function buildAcronymsList");

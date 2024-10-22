@@ -1,19 +1,40 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include <cjson/cJSON.h>
+#include "config.h"
+#include <stdbool.h>
 
 char *template_REQ = "";
+
+/**
+ * @brief Builds a `pageList` entry from a JSON object containing requirements for a specific requirement ID.
+ *        Each page's content is a requirement page.
+ * 
+ * This function generates a `pageList` entry by extracting details for a specific requirement from a JSON object. It constructs a page content string using a template and appends information such as ID, Title, Description, Source, Author, Justification, Compliance, Criticality, and Verification details. The page content is formatted in a specific markdown-like structure.
+ * 
+ * @param requirementList A `cJSON` object containing an array of requirement objects under the "requirements" key.
+ * @param requirementId A string representing the ID of the requirement to be processed.
+ * 
+ * @return A pointer to a `pageList` structure containing the generated page. If no requirement with the specified ID is found or if an error occurs, the function may return `NULL`.
+ * 
+ * @details
+ * - The function first retrieves the "requirements" array from the `requirementList` object.
+ * - It initializes the page content using a predefined template.
+ * - For each requirement object in the array, it extracts fields including "ID", "Title", "Description", "Source", "Author", "Justification", "Criticality", "Compliance", and "Verification" details.
+ * - If the ID matches the `requirementId` parameter, the page content is updated with formatted information from the requirement.
+ * - Sections are added to the page content based on the presence and values of the fields:
+ *   - **Title**: Displays the requirement ID and title.
+ *   - **Description**: Displays the description of the requirement.
+ *   - **Information Box**: Shows additional information such as Source, Author, and Assignee, if they are not empty.
+ *   - **Justification**: Adds justification if available.
+ *   - **Compliance**: Shows the compliance status with corresponding icons.
+ *   - **Criticality**: Shows the criticality level with corresponding icons.
+ *   - **Verification**: Adds verification details for multiple reviews and verification methods, including status and deadlines.
+ * - After processing, the page content is added to the `pageList` structure and the list is returned.
+ * - If any errors are encountered (e.g., missing "requirements" array or incorrect object format), appropriate error messages are printed.
+ * 
+ * @todo Function is too long it needs to be broken up into smaller functions.
+ */
+static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement);
 
 void updateRequirementPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateRequirementPages");

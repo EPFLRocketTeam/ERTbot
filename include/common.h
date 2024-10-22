@@ -1,17 +1,24 @@
-#ifndef STRUCT_H
-#define STRUCT_H
+#ifndef COMMON_H
+#define COMMON_H
 
+/* 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <curl/curl.h>
-#include <unistd.h>
-#include <sys/stat.h>
 #include <stdbool.h>
+#include <stdarg.h>
+
 #include <ctype.h>
 #include <time.h>
+#include <unistd.h>
+
+#include <curl/curl.h>
+#include <sys/stat.h>
 #include <cjson/cJSON.h>
-#include <stdarg.h>
+*/
+
+#include <stdlib.h>
+#include <time.h>
+
 
 extern char *lastPageRefreshCheck;
 
@@ -35,7 +42,7 @@ extern char *lastPageRefreshCheck;
 typedef struct memory {
     char *response;
     size_t size;
-}memory;
+} memory;
 
 /**
  * @var chunk
@@ -194,5 +201,11 @@ typedef struct PeriodicCommand {
 
 extern PeriodicCommand** headOfPeriodicCommands;
 
+
+#define LOG_DEBUG 0
+#define LOG_INFO 1
+#define LOG_ERROR 2
+
+void log_message(int level, const char *format, ...);
 
 #endif

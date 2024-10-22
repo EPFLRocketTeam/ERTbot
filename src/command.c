@@ -3,23 +3,30 @@
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
  * @brief Contains functions used to handle commands.
  */
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
 #include <sys/socket.h>
 
 #define MAX_ARGUMENTS 10
+
+/**
+ * @brief Parses a command sentence into a `command` structure.
+ * 
+ * This function takes a sentence and breaks it down into individual words, then stores these words into the fields of 
+ * a `command` structure. The sentence is expected to contain a function name followed by up to nine arguments.
+ * 
+ * @param sentence The input string containing the command sentence to be parsed.
+ * @param cmd A pointer to a `command` structure where the parsed command and arguments will be stored.
+ * 
+ * @details The function creates a copy of the input sentence to avoid modifying the original string. It then tokenizes the 
+ *          sentence using spaces as delimiters and stores each token in the appropriate field of the `command` structure. 
+ *          It handles up to ten words (one function and nine arguments). If the sentence contains more than ten words, 
+ *          an error message is printed. All allocated strings in the `command` structure are dynamically allocated and 
+ *          should be freed by the caller when no longer needed.
+ * 
+ * @note The `MAX_ARGUMENTS` constant should define the maximum number of arguments allowed (including the function name). 
+ *       The `command` structure should have fields for storing the function and up to nine arguments.
+ */
+static void breakdownCommand(char* sentence, command* cmd);
 
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands, command* command, int period) {
     log_message(LOG_DEBUG, "Entering function addPeriodicCommand");

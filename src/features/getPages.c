@@ -1,17 +1,20 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+
+/**
+ * @brief Prints the title and content of each page in the linked list to Slack.
+ * 
+ * This function iterates through the linked list of `pageList` nodes and sends the title and content of each page to Slack
+ * using `sendMessageToSlack`. It also includes formatting to clearly separate each page's information.
+ * 
+ * @param head A pointer to a pointer to the head of the linked list of `pageList` structures. The function processes each
+ *             node in the list and sends its title and content to Slack.
+ * 
+ * @details The function performs the following steps:
+ *          - Iterates through each node in the linked list.
+ *          - Retrieves the current page using `getPage` and processes the page's title and content.
+ *          - Sends the page title and content to Slack using `sendMessageToSlack`, including appropriate labels and spacing.
+ */
+static void printPages(pageList** head);
 
 void getPages(command cmd) {
     log_message(LOG_DEBUG, "Entering function getPages");

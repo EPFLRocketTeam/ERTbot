@@ -8,23 +8,44 @@
  * @todo refactor all of the code, redocument, add functionality to scale image automatically, add functionality to compile the
  *       latex document locally, remove folder after sending it to slack
  */
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
-
+#include "common.h"
+#include <stdio.h>
+#include "config.h"
 
 #define MAX_COMMAND_LENGTH 5000
+
+/**
+ * @brief Prepends the contents of one file to another file.
+ * 
+ * @param[in] source_filename The name of the file whose contents are to be prepended.
+ * @param[in] destination_filename The name of the file to which the contents are prepended.
+ * 
+ * @details This function opens the source file for reading and the destination file for both reading and writing. It reads the 
+ *          contents of the destination file, then writes the contents of the source file to the beginning of the destination file,
+ *          followed by the original contents of the destination file. The function handles memory allocation for buffering and 
+ *          ensures that all file operations are properly managed.
+ * 
+ * @note Ensure that the source and destination filenames are valid and accessible. The destination file is opened in read-write 
+ *       mode, and the source file is opened in read mode. This function does not handle file access errors beyond basic checks.
+ */
+static void prepend_file(char *source_filename, char *destination_filename);
+
+/**
+ * @brief Zips a folder into a zip file.
+ * 
+ * @param[in] folderPath The path to the folder to be zipped.
+ * 
+ * @return Returns 0 on success, or 1 if the zip operation fails.
+ * 
+ * @details This function constructs a shell command to zip the specified folder using the `zip` command-line utility. It changes the 
+ *          directory to the specified folder, creates a zip file with the same name as the folder, and includes all contents of 
+ *          the folder in the zip file. The function uses `system()` to execute the command and checks the result to determine if 
+ *          the operation was successful.
+ * 
+ * @note The function assumes that the `zip` command-line utility is installed and available in the system's PATH. Error handling 
+ *       is basic, focusing on whether the `system()` call succeeds or fails.
+ */
+static int zipFolder(char *folderPath);
 
 /**
  * @brief Converts a Markdown file to a LaTeX file using Pandoc.

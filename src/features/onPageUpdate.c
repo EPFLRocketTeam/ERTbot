@@ -1,17 +1,26 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include <stdbool.h>
+
+/**
+ * @brief Parses a text to extract and link wiki flags based on specific comment markers.
+ * 
+ * This function scans the provided text for comments marked with "<!--" and "-->". It extracts command information 
+ * from these comments and creates a linked list of `wikiFlag` structures. The `wikiFlag` structures are populated 
+ * with pointers to the extracted text segments and associated commands.
+ * 
+ * @param text The input text to be parsed for wiki flags.
+ * @param flag A `wikiFlag` structure used as a template for new flag entries. It is not modified but serves as a base for memory allocation.
+ * 
+ * @return A pointer to the head of a linked list of `wikiFlag` structures. Each node in the list contains extracted command information and text pointers.
+ * 
+ * @details The function iterates through the text looking for comment markers. It extracts text between "<!--" and "-->" markers, creates a `wikiFlag` 
+ *          structure for each pair of markers, and links these structures in a list. Odd-numbered flags are associated with pointers starting 
+ *          from the end of the comment, while even-numbered flags are associated with pointers starting from the beginning of the comment. 
+ *          The function handles multiple pairs of markers and continues parsing until the end of the text is reached.
+ */
+static wikiFlag *parseFlags(char* text);
+
+static void freeWikiFlagList(wikiFlag** head);
 
 void onPageUpdate(command cmd){
     log_message(LOG_DEBUG, "Entering function onPageUpdate");

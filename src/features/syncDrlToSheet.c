@@ -1,19 +1,30 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include <cjson/cJSON.h>
+#include <stdbool.h>
 
 char *template_DRL = "# $SubSystem$ Design Requirements List\n# table {.tabset}";
+
+/**
+ * @brief Builds a DRL (Design Requirements List) string from a JSON object containing requirements.
+ * 
+ * This function constructs a DRL string by iterating over a JSON array of requirement objects. Each requirement
+ * object is expected to contain specific fields such as "ID", "Path", "Title", and "Description". The resulting
+ * DRL string is built by appending formatted information from each requirement to a template DRL string.
+ * 
+ * @param requirementList A `cJSON` object containing an array of requirement objects under the "requirements" key.
+ * 
+ * @return A dynamically allocated string containing the formatted DRL. The caller is responsible for freeing this memory. If the input JSON is not properly formatted or if memory allocation fails, the function may return an incorrect or partially filled string.
+ * 
+ * @details
+ * - The function first retrieves the "requirements" array from the `requirementList` object.
+ * - It initializes the DRL string using a predefined template.
+ * - For each requirement object in the array, it extracts the fields "ID", "Path", "Title", and "Description".
+ * - These fields are appended to the DRL string in a specific format, including separators and markers.
+ * - After processing all requirements, the function appends "{.links-list}" to the end of the DRL string.
+ * - If any errors are encountered (e.g., missing "requirements" array or incorrect object format), appropriate error messages are printed.
+ * - The function returns the final DRL string.
+ */
+static char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem);
 
 
 void syncDrlToSheet(command cmd){

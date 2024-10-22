@@ -1,17 +1,38 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+
+/**
+ * @brief Counts the number of '/' characters in a given string.
+ * 
+ * @param[in] str The input string to be analyzed.
+ * 
+ * @return int The number of '/' characters found in the string.
+ * 
+ * @details This function iterates through the provided string and counts the occurrences of the '/' character. It returns 
+ *          the total count.
+ * 
+ * @note The input string must be a valid null-terminated string. Ensure that the input string is not NULL to avoid undefined 
+ *       behavior.
+ */
+static int countSlashes(char *str);
+
+/**
+ * @brief Creates a graph of a directory in the Work Break Down format from a list of pages.
+ * 
+ * @param paths Pointer to the head of the linked list of pages.
+ * 
+ * @return A dynamically allocated string containing the WBS map in PlantUML format.
+ * 
+ * @details This function generates a WBS map in PlantUML format from a linked list of pages. It traverses the list of pages, calculates the 
+ *          depth of each page based on its path, and builds a hierarchical WBS structure. The WBS structure is represented using asterisks 
+ *          (`*`) to indicate levels of hierarchy. For each page, it adds an entry to the WBS with a hyperlink to the page and its title. 
+ *          The function handles cases where pages are not directly related to each other by adding parent folders and adjusting the depth accordingly. 
+ *          The resulting map is enclosed in PlantUML syntax for rendering.
+ * 
+ *          The function uses `countSlashes` to determine the depth of each page, `getDirPath` to find parent directories, and `getDocId` to 
+ *          extract the document ID from the path. It uses `appendStrings` to build the final map string. The output string is dynamically 
+ *          allocated and should be freed by the caller when no longer needed.
+ */
+static char* createMapWBS(pageList** paths);
 
 char* buildMap(command cmd) {
     log_message(LOG_DEBUG, "Entering function buildMap");

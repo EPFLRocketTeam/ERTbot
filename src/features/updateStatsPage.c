@@ -1,17 +1,10 @@
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include <stdbool.h>
+
+static char* convert_timestamp_to_cest(char *timestamp);
+
+static char* buildPageDistributionPieChart(pageList* head);
+
 
 void updateStatsPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateStatsPage");
@@ -131,7 +124,7 @@ static char* convert_timestamp_to_cest(char *timestamp) {
     char *output_buffer = malloc(100); // Allocate memory for the output string
 
     if (output_buffer == NULL) {
-        fprintf(stderr, "Memory allocation failed.\n");
+        log_message(LOG_ERROR, "Memory allocation failed.\n");
         return NULL;
     }
 
@@ -140,7 +133,7 @@ static char* convert_timestamp_to_cest(char *timestamp) {
 
     // Parse the timestamp into a struct tm (UTC time)
     if (strptime(timestamp, "%Y-%m-%dT%H:%M:%S", &tm) == NULL) {
-        fprintf(stderr, "Failed to parse timestamp.\n");
+        log_message(LOG_ERROR, "Failed to parse timestamp.\n");
         free(output_buffer);
         return NULL;
     }
@@ -156,7 +149,7 @@ static char* convert_timestamp_to_cest(char *timestamp) {
 
     // Format the CEST time into a readable string
     if (strftime(output_buffer, 100, "%A, %B %d at %H:%M:%S", cest_time) == 0) {
-        fprintf(stderr, "Failed to format time.\n");
+        log_message(LOG_ERROR, "Failed to format time.\n");
         free(output_buffer);
         return NULL;
     }

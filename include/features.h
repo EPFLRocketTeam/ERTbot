@@ -1,6 +1,8 @@
 #ifndef FEATURES_H
 #define FEATURES_H
 
+#include "common.h"
+
 void replaceText(command cmd);
 
 /**
@@ -197,6 +199,53 @@ void updateRequirementPage(command cmd);
  * @warning NOT FINISHED
  */
 void updateVcdPage(command cmd);
+
+/**
+ * @brief retrieves a page from the wiki, processes, and saves it as a latex file locally.
+ * 
+ * This function handles the complete workflow of processing a page from retrieving content, downloading images, 
+ * preprocessing content, generating LaTeX and ZIP files, and finally sending notifications.
+ * 
+ * @param cmd The command structure containing arguments for processing.
+ * 
+ * @details
+ * - Sets the `id` of the temporary page to the provided argument from the command.
+ * - Retrieves the page content based on the `id`.
+ * - Downloads associated images.
+ * - Generates paths for text, LaTeX, and ZIP files based on the document ID.
+ * - Opens a text file for writing and writes the preprocessed content to it.
+ * - Converts the Markdown file to LaTeX format.
+ * - Applies default image scaling and positioning to the LaTeX file.
+ * - Prepends a template file to the LaTeX file.
+ * - Populates the LaTeX file with the document title and header information.
+ * - Zips the folder containing the LaTeX and related files.
+ * - Sends a message to Slack notifying about the file.
+ * 
+ * @note The function relies on several helper functions (`getPage`, `downloadImages`, `preProcessing`, `markdownToLatex`,
+ *       `applyDefaultImageScaleAndPosition`, `prepend_file`, `populateTitleAndHeader`, `zipFolder`, `sendMessageToSlack`).
+ *       Ensure that these functions are properly implemented and tested.
+ */
+void getZip(command cmd);
+
+/**
+ * @brief Appends a section listing pages that mention the current page.
+ * 
+ * This function updates the content of the given `pageList` to include a section that lists all pages that mention the current page. The function finds incoming links from a link tracker page, formats them as a markdown list, and appends them to the current page's content. Special characters in the content are escaped before the page is updated and rendered.
+ * 
+ * @param head A pointer to a pointer to a `pageList` structure representing the current page. The content of this page will be updated to include a list of pages that mention it.
+ * 
+ * @return This function does not return a value.
+ * 
+ * @details
+ * - The function first initializes a `linkTrackerPage` and retrieves its content.
+ * - It then uses this content to find incoming links related to the current page by calling `findIncomingLinks`.
+ * - The section titled "Mentioned in" is appended to the current page's content.
+ * - For each incoming link, a markdown list item is added to the content, linking to the page that mentions the current page.
+ * - After processing all incoming links, the content is updated with a links-list class identifier.
+ * - Special characters in the content (newline and quotation marks) are escaped using `replaceWord`.
+ * - Finally, the updated page content is saved using `updatePageContentMutation`, and the page is rendered using `renderMutation`.
+ */
+void appendMentionedIn(pageList** head);
 
 void onPageUpdate(command cmd);
 

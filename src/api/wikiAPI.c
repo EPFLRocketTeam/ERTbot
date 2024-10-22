@@ -6,20 +6,10 @@
  * @todo Tidy up how the query templates are stored/defined/decalred use snprintf wiht %s instead of default values...
  */
 
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include "common.h"
+#include <curl/curl.h>
+#include <stdbool.h>
+#include "apiHelpers.h"
 
 
 

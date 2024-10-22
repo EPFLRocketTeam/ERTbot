@@ -1,5 +1,5 @@
-#ifndef STRINGTOOLS
-#define STRINGTOOLS
+#ifndef STRING_HELPER_H
+#define STRING_HELPER_H
 
 /**
  * @brief Replaces all occurrences of a specified word in a string with a new word.
