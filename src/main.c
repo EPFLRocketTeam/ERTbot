@@ -11,7 +11,6 @@
  *       - Add Feature: appendToListOfPages and prependToListOfPages
  *       - Redo replaceWord implementation to fix memory leaks
  *       - Redo replaceParagraph implementation to fix memory leaks
- *       - Requirements with no values in the dropdown selectors cause a segfault (need to be change in parseArrayIntoJSONRequirementList)
  * 
  * @warning replaceWord function is still causing memory leaks (responsible for 1/3 of memory leaks)
  */
