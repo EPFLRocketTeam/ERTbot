@@ -6,10 +6,16 @@
  * @todo Tidy up how the query templates are stored/defined/decalred use snprintf wiht %s instead of default values...
  */
 
-#include "common.h"
-#include <curl/curl.h>
 #include <stdbool.h>
+#include <curl/curl.h>
+#include <string.h>
 #include "apiHelpers.h"
+#include "ERTbot_common.h"
+#include "stringHelpers.h"
+#include "timeHelpers.h"
+#include "pageListHelpers.h"
+
+
 
 
 

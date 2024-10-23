@@ -6,8 +6,10 @@
  * @todo revamp jsonParserGetStringValue to uses cJSON
  */
 
-#include "common.h"
 #include <stdlib.h>
+#include <string.h>
+#include "ERTbot_common.h"
+
 
 char *GITHUB_API_TOKEN;
 char *WIKI_API_TOKEN;

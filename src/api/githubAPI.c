@@ -6,11 +6,30 @@
  * @todo reactivate a github api key, test the functions on the ERTbot_server
  */
 
-#include "common.h"
-#include "apiHelpers.h"
 #include <curl/curl.h>
-#include "config.h"
+#include <string.h>
+#include "ERTbot_common.h"
+#include "ERTbot_config.h"
+#include "apiHelpers.h"
+#include "stringHelpers.h"
 
+
+/**
+ * @brief Creates any missing directories in the specified path.
+ * 
+ * @param[in] path The full path of directories to create. The function will create directories as needed, including any intermediate
+ *                 directories that do not exist.
+ * 
+ * @details This function processes the given path, creating directories one by one. It starts from the root of the path and works its
+ *          way down, creating each directory in turn if it does not already exist. The path is tokenized by '/' to handle each directory
+ *          level. It uses the `mkdir` function to create directories and checks for existing directories with `stat`. If an error occurs 
+ *          while creating a directory, the function prints an error message and stops.
+ * 
+ * @note The function assumes that the path is a valid string and that the application has the necessary permissions to create directories 
+ *       in the specified location. The `mkdir` function is used with mode `0755`, which sets the directory permissions to readable and 
+ *       executable by everyone and writable by the owner.
+ */
+static void createMissingFolders(char *path);
 
 
 int fetchImage(char* imagePath, char * pagePath){
@@ -94,21 +113,6 @@ size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) {
     return fwrite(ptr, size, nmemb, stream);
 }
 
-/**
- * @brief Creates any missing directories in the specified path.
- * 
- * @param[in] path The full path of directories to create. The function will create directories as needed, including any intermediate
- *                 directories that do not exist.
- * 
- * @details This function processes the given path, creating directories one by one. It starts from the root of the path and works its
- *          way down, creating each directory in turn if it does not already exist. The path is tokenized by '/' to handle each directory
- *          level. It uses the `mkdir` function to create directories and checks for existing directories with `stat`. If an error occurs 
- *          while creating a directory, the function prints an error message and stops.
- * 
- * @note The function assumes that the path is a valid string and that the application has the necessary permissions to create directories 
- *       in the specified location. The `mkdir` function is used with mode `0755`, which sets the directory permissions to readable and 
- *       executable by everyone and writable by the owner.
- */
 static void createMissingFolders(char *path){
     log_message(LOG_DEBUG, "Entering function createMissingFolders");
     

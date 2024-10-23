@@ -1,7 +1,14 @@
-#include "common.h"
-#include <cjson/cJSON.h>
-#include "config.h"
 #include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
+#include <cjson/cJSON.h>
+#include "ERTbot_config.h"
+#include "ERTbot_common.h"
+#include "sheetAPI.h"
+#include "stringHelpers.h"
+#include "wikiAPI.h"
+#include "requirementsHelpers.h"
+#include "pageListHelpers.h"
 
 char *template_REQ = "";
 

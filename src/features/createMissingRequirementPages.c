@@ -1,5 +1,12 @@
-#include "common.h"
+#include <string.h>
 #include <cjson/cJSON.h>
+#include "ERTbot_common.h"
+#include "sheetAPI.h"
+#include "wikiAPI.h"
+#include "requirementsHelpers.h"
+#include "stringHelpers.h"
+#include "slackAPI.h"
+#include "pageListHelpers.h"
 
 void createMissingRequirementPages(command cmd){
     refreshOAuthToken();

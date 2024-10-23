@@ -1,4 +1,7 @@
-#include "common.h"
+#include <string.h>
+#include "ERTbot_common.h"
+#include "pageListHelpers.h"
+#include "stringHelpers.h"
 
 char* createList(char *list, pageList** sectionTitle, pageList* links){
     log_message(LOG_DEBUG, "Entering function createList");

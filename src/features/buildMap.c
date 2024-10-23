@@ -1,4 +1,10 @@
-#include "common.h"
+#include <string.h>
+#include "ERTbot_common.h"
+#include "wikiAPI.h"
+#include "slackAPI.h"
+#include "pageListHelpers.h"
+#include "stringHelpers.h"
+
 
 /**
  * @brief Counts the number of '/' characters in a given string.

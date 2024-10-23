@@ -1,6 +1,6 @@
-#include "common.h"
 #include <stdio.h>
 #include <stdarg.h>
+#include "ERTbot_common.h"
 
 
 void log_message(int level, const char *format, ...) {

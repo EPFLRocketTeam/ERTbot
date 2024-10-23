@@ -8,9 +8,10 @@
  * @todo refactor all of the code, redocument, add functionality to scale image automatically, add functionality to compile the
  *       latex document locally, remove folder after sending it to slack
  */
-#include "common.h"
 #include <stdio.h>
-#include "config.h"
+#include "ERTbot_config.h"
+#include "ERTbot_common.h"
+
 
 #define MAX_COMMAND_LENGTH 5000
 

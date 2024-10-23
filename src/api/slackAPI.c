@@ -7,10 +7,11 @@
  * @todo add redundancy in case of slack message failure
  */
 
-#include "common.h"
 #include <curl/curl.h>
-#include <config.h>
+#include <ERTbot_config.h>
 #include <apiHelpers.h>
+#include "ERTbot_common.h"
+
 
 
 #define MAX_MESSAGE_LENGTH 100000

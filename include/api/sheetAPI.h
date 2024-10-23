@@ -1,5 +1,5 @@
-#ifndef SHEETAPI_H
-#define SHEETAPI_H
+#ifndef ERTBOT_SHEETAPI_H
+#define ERTBOT_SHEETAPI_H
 
 /**
  * @brief Makes an API request to a specified URL using the provided query and request type.

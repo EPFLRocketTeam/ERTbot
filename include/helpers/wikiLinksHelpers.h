@@ -1,6 +1,7 @@
-#ifndef WIKI_LINKS_HELPER_H
-#define WIKI_LINKS_HELPER_H
+#ifndef ERTBOT_WIKI_LINKS_HELPER_H
+#define ERTBOT_WIKI_LINKS_HELPER_H
 
+#include "ERTbot_common.h"
 
 /**
  * @brief Creates a formatted list of links for a given section title.

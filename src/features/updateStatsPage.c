@@ -1,5 +1,13 @@
-#include "common.h"
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include "ERTbot_common.h"
+#include "wikiAPI.h"
+#include "stringHelpers.h"
+#include "pageListHelpers.h"
+#include "slackAPI.h"
+
 
 static char* convert_timestamp_to_cest(char *timestamp);
 

@@ -1,6 +1,9 @@
-#include "common.h"
-#include "config.h"
 #include <stdbool.h>
+#include "ERTbot_common.h"
+#include "ERTbot_config.h"
+#include "wikiAPI.h"
+#include "pageListHelpers.h"
+#include "wikiLinksHelpers.h"
 
 void buildImageTracker(command cmd) {
     pageList* imageTrackerPage;

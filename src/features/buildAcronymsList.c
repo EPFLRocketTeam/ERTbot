@@ -1,7 +1,9 @@
-#include "common.h"
-#include "config.h"
 #include <stdio.h>
-
+#include <string.h>
+#include "ERTbot_common.h"
+#include "ERTbot_config.h"
+#include "wikiAPI.h"
+#include "pageListHelpers.h"
 
 #define MAX_WORD_LENGTH 20
 #define MAX_WORDS 1000

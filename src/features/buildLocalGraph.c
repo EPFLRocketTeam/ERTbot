@@ -1,5 +1,10 @@
-#include "common.h"
-#include "config.h"
+#include <string.h>
+#include "ERTbot_common.h"
+#include "ERTbot_config.h"
+#include "pageListHelpers.h"
+#include "wikiAPI.h"
+#include "wikiLinksHelpers.h"
+#include "stringHelpers.h"
 
 /**
  * @brief Creates a PlantUML mind map representation of a page's "local" graph, which is a graph which shows all of

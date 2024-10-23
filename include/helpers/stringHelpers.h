@@ -1,5 +1,7 @@
-#ifndef STRING_HELPER_H
-#define STRING_HELPER_H
+#ifndef ERTBOT_STRING_HELPER_H
+#define ERTBOT_STRING_HELPER_H
+
+#include <stdbool.h>
 
 /**
  * @brief Replaces all occurrences of a specified word in a string with a new word.

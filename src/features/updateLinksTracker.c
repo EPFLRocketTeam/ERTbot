@@ -1,6 +1,12 @@
-#include "common.h"
-#include "config.h"
 #include <stdbool.h>
+#include <string.h>
+#include "ERTbot_common.h"
+#include "ERTbot_config.h"
+#include "wikiAPI.h"
+#include "timeHelpers.h"
+#include "wikiLinksHelpers.h"
+#include "stringHelpers.h"
+#include "pageListHelpers.h"
 
 /**
  * @brief Updates a specific section in a Markdown list with new links.

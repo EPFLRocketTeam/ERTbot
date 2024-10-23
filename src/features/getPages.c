@@ -1,4 +1,10 @@
-#include "common.h"
+#include <unistd.h>
+#include "ERTbot_common.h"
+#include "pageListHelpers.h"
+#include "wikiAPI.h"
+#include "slackAPI.h"
+
+
 
 /**
  * @brief Prints the title and content of each page in the linked list to Slack.

@@ -1,5 +1,8 @@
-#ifndef WIKIAPI_H
-#define WIKIAPI_H
+#ifndef ERTBOT_WIKIAPI_H
+#define ERTBOT_WIKIAPI_H
+
+#include <stdbool.h>
+#include "ERTbot_common.h"
 
 /**
  * @brief Retrieves and updates the content of a page from the Wiki API.

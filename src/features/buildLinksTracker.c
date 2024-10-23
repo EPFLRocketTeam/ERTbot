@@ -1,6 +1,10 @@
-#include "common.h"
-#include "config.h"
 #include <stdbool.h>
+#include <string.h>
+#include "ERTbot_common.h"
+#include "ERTbot_config.h"
+#include "pageListHelpers.h"
+#include "wikiAPI.h"
+#include "wikiLinksHelpers.h"
 
 void buildLinksTracker() {
     log_message(LOG_DEBUG, "Starting the buildLinksTracker function");

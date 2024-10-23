@@ -3,15 +3,15 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**",
+                //"${workspaceFolder}/**",
                 "${workspaceFolder}/include/api",
                 "${workspaceFolder}/include/helpers",
-                "${workspaceFolder}/include/"
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c17",
-            "cppStandard": "gnu++17",
+            "cStandard": "c99",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],

@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef ERTBOT_COMMON_H
+#define ERTBOT_COMMON_H
 
 /* 
 #include <stdio.h>

@@ -1,5 +1,7 @@
-#ifndef PAGE_LIST_HELPERS_H
-#define PAGE_LIST_HELPERS_H
+#ifndef ERTBOT_PAGE_LIST_HELPERS_H
+#define ERTBOT_PAGE_LIST_HELPERS_H
+
+#include "ERTbot_common.h"
 
 /**
  * @brief Adds a new page to the end of a linked list of pages.

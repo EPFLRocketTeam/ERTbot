@@ -6,9 +6,10 @@
  */
 
 #include <curl/curl.h>
-
-#include "common.h"
+#include <string.h>
+#include "ERTbot_common.h"
 #include "apiHelpers.h"
+#include "stringHelpers.h"
 
 
 

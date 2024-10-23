@@ -1,6 +1,5 @@
 # Ignore logs directory
 /logs/
-
 /memcheck_log/
 
 #ignore executable

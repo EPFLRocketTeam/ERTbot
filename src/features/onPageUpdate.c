@@ -1,5 +1,12 @@
-#include "common.h"
 #include <stdbool.h>
+#include <string.h>
+#include "ERTbot_common.h"
+#include "pageListHelpers.h"
+#include "ERTbot_features.h"
+#include "stringHelpers.h"
+#include "wikiAPI.h"
+#include "slackAPI.h"
+#include "ERTbot_command.h"
 
 /**
  * @brief Parses a text to extract and link wiki flags based on specific comment markers.

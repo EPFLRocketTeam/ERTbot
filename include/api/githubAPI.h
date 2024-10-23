@@ -1,5 +1,9 @@
-#ifndef GITHUBAPI_H
-#define GITHUBAPI_H
+#ifndef ERTBOT_GITHUBAPI_H
+#define ERTBOT_GITHUBAPI_H
+
+#include <stdio.h>
+#include <stdlib.h>
+
 
 /**
  * @brief Fetches an image from a remote repository (on github) and saves it to a local path.

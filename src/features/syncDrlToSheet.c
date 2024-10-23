@@ -1,6 +1,14 @@
-#include "common.h"
-#include <cjson/cJSON.h>
 #include <stdbool.h>
+#include <string.h>
+#include <cjson/cJSON.h>
+#include "ERTbot_common.h"
+#include "sheetAPI.h"
+#include "requirementsHelpers.h"
+#include "stringHelpers.h"
+#include "wikiAPI.h"
+#include "pageListHelpers.h"
+
+
 
 char *template_DRL = "# $SubSystem$ Design Requirements List\n# table {.tabset}";
 

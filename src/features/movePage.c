@@ -1,6 +1,10 @@
-#include "common.h"
-#include "config.h"
 #include <stdbool.h>
+#include "ERTbot_common.h"
+#include "ERTbot_config.h"
+#include "stringHelpers.h"
+#include "wikiAPI.h"
+#include "pageListHelpers.h"
+#include "wikiLinksHelpers.h"
 
 void movePage(command cmd){
     log_message(LOG_DEBUG, "Entering function movePage");

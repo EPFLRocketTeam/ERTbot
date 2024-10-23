@@ -1,5 +1,5 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef ERTBOT_CONFIG_H
+#define ERTBOT_CONFIG_H
 //Github
 //#define GITHUB_API_TOKEN getenv("GITHUB_API_TOKEN")
 #define USER_AGENT "My-CURL-Program-ZUGMA" //User-Agent header required by GitHub API

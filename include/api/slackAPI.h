@@ -1,5 +1,8 @@
-#ifndef SLACKAPI_H
-#define SLACKAPI_H
+#ifndef ERTBOT_SLACKAPI_H
+#define ERTBOT_SLACKAPI_H
+
+#include "ERTbot_common.h"
+
 
 /**
  * @brief Sends a message to a specified Slack channel using the Slack API.

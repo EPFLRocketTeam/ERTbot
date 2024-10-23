@@ -1,6 +1,8 @@
-#include "common.h"
+#include <string.h>
 #include <cjson/cJSON.h>
-#include "config.h"
+#include "ERTbot_config.h"
+#include "ERTbot_common.h"
+
 
 
 

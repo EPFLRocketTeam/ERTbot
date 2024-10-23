@@ -4,8 +4,10 @@
  * @brief This file contains all of the helper functions which do string manipulations
  */
 
-#include "common.h"
 #include <stdbool.h>
+#include <string.h>
+#include "ERTbot_common.h"
+
 
 
 char* replaceWord( char* inputString,  char* wordToReplace,  char* newWord) {

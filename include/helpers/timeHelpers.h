@@ -1,5 +1,5 @@
-#ifndef TIME_HELPER_H
-#define TIME_HELPER_H
+#ifndef ERTBOT_TIME_HELPERS_H
+#define ERTBOT_TIME_HELPERS_H
 
 
 /**

@@ -1,6 +1,14 @@
-#include "common.h"
-#include <cjson/cJSON.h>
 #include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
+#include <cjson/cJSON.h>
+#include "sheetAPI.h"
+#include "ERTbot_common.h"
+#include "requirementsHelpers.h"
+#include "stringHelpers.h"
+#include "wikiAPI.h"
+#include "pageListHelpers.h"
+
 
 /**
  * @brief Creates a Vega chart configuration for a pie chart depicting verification statuses.

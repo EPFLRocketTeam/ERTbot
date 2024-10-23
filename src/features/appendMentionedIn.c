@@ -1,7 +1,12 @@
-#include "common.h"
 #include <stdlib.h>
 #include <stdbool.h>
-#include "config.h"
+#include "ERTbot_config.h"
+#include "ERTbot_common.h"
+#include "pageListHelpers.h"
+#include "wikiAPI.h"
+#include "stringHelpers.h"
+#include "wikiLinksHelpers.h"
+
 
 void appendMentionedIn(pageList** head){
     log_message(LOG_DEBUG, "Entering function appendMentionedIn");

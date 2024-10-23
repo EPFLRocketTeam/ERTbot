@@ -1,7 +1,7 @@
-#ifndef FEATURES_H
-#define FEATURES_H
+#ifndef ERTBOT_FEATURES_H
+#define ERTBOT_FEATURES_H
 
-#include "common.h"
+#include "ERTbot_common.h"
 
 void replaceText(command cmd);
 
@@ -29,7 +29,7 @@ void movePage(command cmd);
  * This function populates a list of daughter pages from a specified path, generates a map based on these pages,
  * and returns the map as a string. After generating the map, it cleans up by freeing the memory used for the page list.
  * 
- * @param cmd A command structure containing `argument_1`, which specifies the path to the mother file.
+ * @param cmd A command structure containing `argument_2`, which specifies the path to the mother file.
  * 
  * @return A dynamically allocated string containing the generated map. The caller is responsible for freeing this string.
  * 

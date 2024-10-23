@@ -1,5 +1,7 @@
-#ifndef REQUIREMENTS_HELPERS_H
-#define REQUIREMENTS_HELPERS_H
+#ifndef ERTBOT_REQUIREMENTS_HELPERS_H
+#define ERTBOT_REQUIREMENTS_HELPERS_H
+
+#include <cjson/cJSON.h>
 
 /**
  * @brief Parses a JSON string representing an array of requirements into a structured cJSON object.

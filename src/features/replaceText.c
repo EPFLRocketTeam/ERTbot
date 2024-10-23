@@ -1,5 +1,8 @@
-#include "common.h"
 #include <stdbool.h>
+#include "ERTbot_common.h"
+#include "wikiAPI.h"
+#include "pageListHelpers.h"
+#include "stringHelpers.h"
 
 /**
  * @brief Replaces occurrences of a string in the content of all pages in a linked list, updates and rerenders the pages on the wiki.

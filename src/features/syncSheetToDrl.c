@@ -1,5 +1,11 @@
-#include "common.h"
 #include <cjson/cJSON.h>
+#include <string.h>
+#include <stdio.h>
+#include "ERTbot_common.h"
+#include "sheetAPI.h"
+#include "stringHelpers.h"
+#include "wikiAPI.h"
+
 
 /**
  * @brief Parses a list of requirements from a content string and adds them to a cJSON object (convert from wiki-DRL to cJSON requirements).

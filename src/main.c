@@ -16,11 +16,13 @@
  * @warning replaceWord function is still causing memory leaks (responsible for 1/3 of memory leaks)
  */
 
-#include "common.h"
 #include <stdio.h>
+#include "ERTbot_common.h"
+#include "ERTbot_command.h"
+#include "apiHelpers.h"
+#include "timeHelpers.h"
+#include "slackAPI.h"
 
-
-//gcc -o wikiToolbox src/main.c src/api.c src/features.c src/githubAPI.c src/helperFunctions.c src/markdownToPDF.c src/slackAPI.c src/stringTools.c src/wikiAPI.c src/sheetAPI.c src/command.c src/log.c src/requirements.c -I../include -lcurl -lcjson
 
 memory chunk;
 

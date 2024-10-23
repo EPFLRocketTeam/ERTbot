@@ -1,4 +1,5 @@
-#include "common.h"
+#include <string.h>
+#include "ERTbot_common.h"
 
 pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt, char *authorId) {
     log_message(LOG_DEBUG, "Entering function addPageToList");

@@ -1,5 +1,5 @@
-#ifndef API_HELPERS_H
-#define API_HELPERS_H
+#ifndef ERTBOT_API_HELPERS_H
+#define ERTBOT_API_HELPERS_H
 
 /**
  * @brief Global variable which stores the API token for Github. 
