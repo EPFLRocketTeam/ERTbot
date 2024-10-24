@@ -14,7 +14,6 @@ include_directories(
     include/helpers
 )
 
-# DOES NOT CONTAIN GITHUB API or MARKDOWN to PDF
 # Add the source files
 set(SOURCES
     src/main.c
@@ -24,22 +23,9 @@ set(SOURCES
     src/api/sheetAPI.c
     src/api/slackAPI.c
     src/api/wikiAPI.c
-    src/features/appendMentionedIn.c
-    src/features/buildAcronymsList.c
-    src/features/buildImageTracker.c
-    src/features/buildLinksTracker.c
-    src/features/buildLocalGraph.c
-    src/features/buildMap.c
     src/features/createMissingRequirementPages.c
-    src/features/getPages.c
-    src/features/movePage.c
-    src/features/onPageUpdate.c
-    src/features/replaceText.c
     src/features/syncDrlToSheet.c
-    src/features/syncSheetToDrl.c
-    src/features/updateLinksTracker.c
     src/features/updateRequirementPage.c
-    src/features/updateStatsPage.c
     src/features/updateVcdPage.c
     src/helpers/pageListHelpers.c
     src/helpers/requirementsHelpers.c
