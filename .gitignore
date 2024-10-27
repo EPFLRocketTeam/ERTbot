@@ -7,3 +7,6 @@ ERTbot
 
 #Ignore build directory
 /build/
+
+#Ignore clangd setting for zed
+.clangd
