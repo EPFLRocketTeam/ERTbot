@@ -15,11 +15,7 @@
 #include "timeHelpers.h"
 #include "ERTbot_command.h"
 
-
-
 #define MAX_ARGUMENTS 10
-
-
 
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands, command* command, int period) {
     log_message(LOG_DEBUG, "Entering function addPeriodicCommand");
@@ -579,12 +575,7 @@ void breakdownCommand(char* sentence, command* cmd) {
 command** executeCommand(command** commandQueue){
     log_message(LOG_DEBUG, "Entering function executeCommand");
 
-    //TerminalCommandFeatures
-    if((*commandQueue)->function && strcmp((*commandQueue)->function, "getPages") == 0){ //works
-        getPages(**commandQueue);
-    }
-
-    else if((*commandQueue)->function && strcmp((*commandQueue)->function, "shutdown") == 0){ //works
+    if((*commandQueue)->function && strcmp((*commandQueue)->function, "shutdown") == 0){ //works
         sendMessageToSlack("Shutting down");
 
         if(chunk.response){
@@ -592,26 +583,6 @@ command** executeCommand(command** commandQueue){
         }
 
         exit(0);
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildLinksTracker") == 0){ //Works
-        buildLinksTracker();
-        sendMessageToSlack("Link tracker page created");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateLinksTracker") == 0){ //Works
-        updateLinksTracker();
-        sendMessageToSlack("Link tracker page updated");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "movePage") == 0){ //Works
-        movePage(**commandQueue);
-        sendMessageToSlack("Page has been moved and links have been updated");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "syncSheetToDRL") == 0){
-        syncSheetToDrl(**commandQueue);
-        sendMessageToSlack("Finished parsing.");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateDRL") == 0){
@@ -634,88 +605,9 @@ command** executeCommand(command** commandQueue){
         sendMessageToSlack("Token Refreshed");
     }
 
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "onPageUpdate") == 0){
-        onPageUpdate(**commandQueue);
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildMap") == 0){ //works
-        char* map = buildMap(**commandQueue);
-        
-        sendMessageToSlack(map);
-
-        free(map);
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildLocalGraph") == 0){ //Works
-        char* localGraph = buildLocalGraph(**commandQueue);
-
-        sendMessageToSlack(localGraph);
-
-        free(localGraph);
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateStatsPage") == 0){
-        updateStatsPage(**commandQueue);
-    }
-
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "createMissingRequirementPages") == 0){
         createMissingRequirementPages(**commandQueue);
     }
-
-/*
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "getPDF") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    if((*commandQueue)->function && strcmp((*commandQueue)->function, "getZip") == 0){
-        getZip(**commandQueue);
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildImageTracker") == 0){
-        //buildImageTracker(**commandQueue);
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateImageTracker") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "notifyMe") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "stopNotifyMe") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateAccronymTracker") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateBrokenLinksTracker") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateSync") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "spellCheckAI") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "summariesAI") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "suggestionsAI") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "replaceText") == 0){
-        replaceText(**commandQueue);
-    }
-    */
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "help") == 0){
         sendMessageToSlack("Here is a list of commands: ");
@@ -736,12 +628,6 @@ command** executeCommand(command** commandQueue){
         sendMessageToSlack("updateDRL");
         sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
         sendMessageToSlack("-> example: updateDRL ST");
-        //sendMessageToSlack("-----------------");
-        //sendMessageToSlack("movePage");
-        //sendMessageToSlack("-> :alert: WARNING :alert: : This feature is still partially broken. Please run buildLinksTracker before moving a page.");
-        //sendMessageToSlack("-> Description: moves a page and updates all of the links on the wiki");
-        //sendMessageToSlack("-> Argument (2) (obligatory): the current path of the page and the new path of the page.");
-        //sendMessageToSlack("-> Example: movePage competition/current_path competition/new_path");
     }
 
     else{

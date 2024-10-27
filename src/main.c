@@ -16,6 +16,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include "ERTbot_common.h"
 #include "ERTbot_command.h"
 #include "apiHelpers.h"
