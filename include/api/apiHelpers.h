@@ -1,6 +1,8 @@
 #ifndef ERTBOT_API_HELPERS_H
 #define ERTBOT_API_HELPERS_H
 
+#include <stddef.h>
+
 /**
  * @brief Global variable which stores the API token for Github.
  *        Declared in api.h, defined in api.c and initialised in
