@@ -2,7 +2,7 @@
  * @file api.c
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
  * @brief contains helper functions which are used by several api handling functions
- * 
+ *
  * @todo revamp jsonParserGetStringValue to uses cJSON
  */
 
@@ -21,7 +21,7 @@ char *GOOGLE_REFRESH_TOKEN;
 
 void initializeApiTokenVariables() {
     log_message(LOG_DEBUG, "Entering function initializeApiTokenVariables");
-    
+
     GITHUB_API_TOKEN = getenv("GITHUB_API_TOKEN");
     WIKI_API_TOKEN = getenv("WIKI_API_TOKEN");
     SLACK_API_TOKEN = getenv("SLACK_API_TOKEN");
@@ -30,14 +30,15 @@ void initializeApiTokenVariables() {
     GOOGLE_CLIENT_SECRET = getenv("GOOGLE_CLIENT_SECRET");
     GOOGLE_REFRESH_TOKEN = getenv("GOOGLE_REFRESH_TOKEN");
 
-    
+
     log_message(LOG_DEBUG, "Exiting function initializeApiTokenVAriables");
     return;
 }
 
+
 size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp) {
     log_message(LOG_DEBUG, "Entering function writeCallback");
-    
+
     size_t realsize = size * nmemb; // set the size of the chunk of memory
     struct memory *mem = (struct memory *)clientp; //points to a struct which is the buffer to store data in
 
@@ -51,14 +52,14 @@ size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp) {
     mem->size += realsize;
     mem->response[mem->size] = 0;
 
-    
+
     log_message(LOG_DEBUG, "Exiting function writeCallback");
     return realsize;
 }
 
 char *jsonParserGetStringValue(char *json, char *key) {
     log_message(LOG_DEBUG, "Entering function jsonParserGetStringValue");
-    
+
     char *start = strstr(json, key);
     if (start == NULL) {
         log_message(LOG_ERROR, "Error: Key '%s' not found in JSON", key);
@@ -69,7 +70,7 @@ char *jsonParserGetStringValue(char *json, char *key) {
     start += strlen(key) + 2;  // Skip key and the quote + colon
 
     char *end;
-    
+
     // Find the end of the string (closing quote)
     if(!strcmp(key, "\"content\"")){
         end = strstr(start, "\",\"description\"");
@@ -94,7 +95,7 @@ char *jsonParserGetStringValue(char *json, char *key) {
 
 char *jsonParserGetIntValue(char *json, char *key) {
     log_message(LOG_DEBUG, "Entering function jsonParserGetIntValue");
-    
+
     // Find the key in the JSON string
     char *start = strstr(json, key);
     if (start == NULL) {
