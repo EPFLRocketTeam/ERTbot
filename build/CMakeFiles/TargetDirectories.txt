@@ -1,3 +1,0 @@
-/home/ryan/ERTbot_source_files/ERTbot/build/CMakeFiles/ERTbot.dir
-/home/ryan/ERTbot_source_files/ERTbot/build/CMakeFiles/edit_cache.dir
-/home/ryan/ERTbot_source_files/ERTbot/build/CMakeFiles/rebuild_cache.dir
