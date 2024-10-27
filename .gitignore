@@ -10,3 +10,4 @@ ERTbot
 
 #Ignore clangd setting for zed
 .clangd
+compile_commands.json
