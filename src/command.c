@@ -15,11 +15,7 @@
 #include "timeHelpers.h"
 #include "ERTbot_command.h"
 
-
-
 #define MAX_ARGUMENTS 10
-
-
 
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands, command* command, int period) {
     log_message(LOG_DEBUG, "Entering function addPeriodicCommand");
