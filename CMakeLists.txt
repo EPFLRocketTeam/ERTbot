@@ -7,6 +7,10 @@ project(ERTbot)
 # Add the compile definition globally
 add_compile_definitions(DEBUG)
 
+# Allows clangd (lsp) to see include files
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+
 # Add the include directory
 include_directories(
     include
@@ -42,4 +46,3 @@ add_executable(ERTbot ${SOURCES})
 
 # Link the external libraries to the target
 target_link_libraries(ERTbot PRIVATE curl cjson)
-
