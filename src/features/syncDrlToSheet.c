@@ -79,6 +79,10 @@ void syncDrlToSheet(command cmd){
         drlPageId = "415";
         sheetId = "GE!A3:AT300";
     }
+    if(strcmp(cmd.argument_1, "UT")==0){
+        drlPageId = "1995";
+        sheetId = "UT!A3:AT300";
+    }
     
     batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
 
@@ -141,6 +145,10 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSy
     }
     if(strcmp(subSystem, "TE") == 0){
         DRL = replaceWord(DRL, "$SubSystem$", "Test");
+    }
+    if(strcmp(subSystem, "UT") == 0){
+        DRL = replaceWord(DRL, "$SubSystem$", "Propulsion");
+        subSystem = "PR";
     }
 
     int isFirstGroup = 1;

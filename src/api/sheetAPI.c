@@ -98,7 +98,6 @@ void batchGetSheet(char *sheetId, char *range){
 
     sheetAPI(query, modified_url, requestType);
 
-
     free(temp_url);
     free(modified_url);
     
