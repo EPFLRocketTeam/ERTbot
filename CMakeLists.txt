@@ -38,6 +38,15 @@ set(SOURCES
     src/helpers/wikiLinksHelpers.c
 )
 
+# Set the output directory for executables
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+# Create the executable from the source files
+add_executable(ERTbot ${SOURCES})
+
+# Link the external libraries to the target
+target_link_libraries(ERTbot PRIVATE curl cjson)
+
 # Unit Testing Section
 # Find pkg-config
 find_package(PkgConfig REQUIRED)

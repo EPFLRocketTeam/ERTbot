@@ -4,6 +4,7 @@
 
 #ignore executable
 ERTbot
+ERTbot_tests
 
 #Ignore build directory
 /build/
