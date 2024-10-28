@@ -34,7 +34,7 @@ PeriodicCommand** headOfPeriodicCommands;
 
 command** headOfCommandQueue;
 
-
+#ifndef TESTING
 int main(){
     log_message(LOG_DEBUG, "\n\nStarting program\n\n");
 
@@ -80,3 +80,4 @@ int main(){
 
     log_message(LOG_DEBUG, "Exiting function main");
 }
+#endif

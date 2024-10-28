@@ -55,6 +55,7 @@ set(TEST_SOURCES
 
 # Test executable
 add_executable(ERTbot_tests ${SOURCES} ${TEST_SOURCES})
+target_compile_definitions(ERTbot_tests PRIVATE TESTING)
 target_link_libraries(ERTbot_tests PRIVATE Check::Check curl cjson)
 
 # Enable CTest
