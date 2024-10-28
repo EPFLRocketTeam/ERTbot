@@ -38,17 +38,15 @@ set(SOURCES
     src/helpers/wikiLinksHelpers.c
 )
 
-# Set the output directory for executables
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
-
-# Create the executable from the source files
-add_executable(ERTbot ${SOURCES})
-
-# Link the external libraries to the target
-target_link_libraries(ERTbot PRIVATE curl cjson)
-
 # Unit Testing Section
-find_package(Check REQUIRED)
+# Find pkg-config
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(CHECK REQUIRED check)
+
+# Include Check directories
+include_directories(${CHECK_INCLUDE_DIRS})
+
+# Test source files
 set(TEST_SOURCES
     tests/test_stringHelpers.c  # Example test source file
 )
@@ -56,7 +54,7 @@ set(TEST_SOURCES
 # Test executable
 add_executable(ERTbot_tests ${SOURCES} ${TEST_SOURCES})
 target_compile_definitions(ERTbot_tests PRIVATE TESTING)
-target_link_libraries(ERTbot_tests PRIVATE Check::Check curl cjson)
+target_link_libraries(ERTbot_tests PRIVATE ${CHECK_LIBRARIES} curl cjson)
 
 # Enable CTest
 enable_testing()

@@ -14,7 +14,7 @@ END_TEST
 START_TEST(test_replace_word_B) {
     char output[50];
     char* result = replaceWord("This is a test string with an oldWord.", "old Word", "newWord");
-    ck_assert_str_eq(result, "This is a test string with an oldWord.");
+    ck_assert_str_eq(result, "This Test should fail.");
 }
 END_TEST
 
