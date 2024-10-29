@@ -22,18 +22,11 @@ START_TEST(test_syncDrlToSheet) {
     syncDrlToSheet(cmd);
 
     pageList* drlPage = NULL;
-    drlPage = addPageToList(&drlPage, "1995", "", "", "", "", "", "", "");
+    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     
     getPage(&drlPage);
 
-    log_message(LOG_DEBUG, "drlPage->content: %s", drlPage->content);
-    log_message(LOG_DEBUG, "UT_DRL %s", UT_DRL);
-
-    log_message(LOG_DEBUG, "About to check assert");
-
     ck_assert_str_eq(drlPage->content, UT_DRL);
-
-    log_message(LOG_DEBUG, "Assert checked");
 
     freePageList(&drlPage);
 }
