@@ -117,6 +117,14 @@ void updateRequirementPage(command cmd){
         }
     }
 
+    if(strcmp(cmd.argument_1, "UT")==0){
+        sheetId = "UT!A3:AT300";
+
+        if(strcmp(cmd.argument_1, "UT")==0){
+            path = "management/it/ERTbot_Test_Pages/";
+        }
+    }
+
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
 
 

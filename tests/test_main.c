@@ -1,5 +1,4 @@
 #include <check.h>
-#include <string.h>
 #include "ERTbot_common.h"
 
 #include "tests_suites.h"
