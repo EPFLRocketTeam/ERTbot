@@ -407,3 +407,25 @@ void createPageMutation(char* path, char* content, char* title){
     
     log_message(LOG_DEBUG, "Exiting function createPageMutation");
 }
+
+char *fetchAndModifyPageContent(char* pageId, char* newPageContent, char* outputString){
+
+    pageList* page = NULL;
+    page = addPageToList(&page, pageId, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    page = getPage(&page);
+
+    outputString = malloc(strlen(page->content) + 1);
+    if (outputString != NULL) {
+        strcpy(outputString, page->content);
+    }
+
+    page->content = realloc(page->content, strlen(newPageContent) + 1);
+
+    strcpy(page->content, newPageContent);
+
+    updatePageContentMutation(page);
+
+    freePageList(&page);
+
+    return outputString;
+}
