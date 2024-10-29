@@ -57,7 +57,7 @@ include_directories(${CHECK_INCLUDE_DIRS})
 
 # Test source files
 set(TEST_SOURCES
-    tests/test_stringHelpers.c  # Example test source file
+    tests/test_stringHelpers.c
 )
 
 # Test executable
