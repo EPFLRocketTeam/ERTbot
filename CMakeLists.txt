@@ -16,6 +16,7 @@ include_directories(
     include
     include/api
     include/helpers
+    tests
 )
 
 # Add the source files
@@ -58,6 +59,21 @@ include_directories(${CHECK_INCLUDE_DIRS})
 # Test source files
 set(TEST_SOURCES
     tests/test_stringHelpers.c
+    tests/api/test_apiHelpers.c
+    tests/api/test_sheetAPI.c
+    tests/api/test_slackAPI.c
+    tests/api/test_wikiAPI.c
+    tests/features/test_createMissingRequirementPages.c
+    tests/features/test_syncDrlToSheet.c
+    tests/features/test_updateRequirementPages.c
+    tests/features/test_updateVcdPage.c
+    tests/helpers/test_pageListHelpers.c
+    tests/helpers/test_requirementsHelpers.c
+    tests/helpers/test_stringHelpers.c
+    tests/helpers/test_timeHelpers.c
+    tests/helpers/test_wikiLinksHelpers.c
+    tests/test_command.c
+    tests/test_main.c
 )
 
 # Test executable

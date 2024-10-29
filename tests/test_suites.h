@@ -1,0 +1,8 @@
+#ifndef TESTS_SUITES_H
+#define TESTS_SUITES_H
+
+Suite *stringHelpers_suite(void);
+
+Suite *syncDrlToSheet_suite(void);
+
+#endif
