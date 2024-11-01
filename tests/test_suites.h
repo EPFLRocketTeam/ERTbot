@@ -1,3 +1,5 @@
+#include <check.h>
+
 #ifndef TESTS_SUITES_H
 #define TESTS_SUITES_H
 
