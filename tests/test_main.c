@@ -1,7 +1,7 @@
 #include <check.h>
 #include "ERTbot_common.h"
 
-#include "tests_suites.h"
+#include "test_suites.h"
 
 
 int main(void) {

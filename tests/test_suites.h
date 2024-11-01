@@ -5,4 +5,6 @@ Suite *stringHelpers_suite(void);
 
 Suite *syncDrlToSheet_suite(void);
 
+Suite *updateRequirementPages_suite(void);
+
 #endif
