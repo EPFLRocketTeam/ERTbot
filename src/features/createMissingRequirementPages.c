@@ -52,6 +52,10 @@ void createMissingRequirementPages(command cmd){
         path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GE_DRL/";
         sheetId = "GE!A3:AT300";
     }
+    if(strcmp(cmd.argument_1, "UT")==0){
+        path = "management/it/ERTbot_Test_Pages/";
+        sheetId = "UT2!A3:AT300";
+    }
 
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
     batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
@@ -64,7 +68,6 @@ void createMissingRequirementPages(command cmd){
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
     }
 
-    
     // Iterate over each requirement object in the requirements array
     int num_reqs = cJSON_GetArraySize(requirements);
 
@@ -98,7 +101,6 @@ void createMissingRequirementPages(command cmd){
             else{
                 currentReqPage = currentReqPage->next;
             }
-
         }
 
         if (foundPage == 0){
@@ -117,10 +119,9 @@ void createMissingRequirementPages(command cmd){
 
     }
 
-    
     cJSON_Delete(requirementList);
     freePageList(&requirementPagesHead);
-    
+
     log_message(LOG_DEBUG, "Exiting function updateRequirementPage");
     sendMessageToSlack("Pages were created");
     return;
