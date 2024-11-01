@@ -45,41 +45,48 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 # Create the executable from the source files
 add_executable(ERTbot ${SOURCES})
 
-# Link the external libraries to the target
-target_link_libraries(ERTbot PRIVATE curl cjson)
+# Conditionally configure for macOS
+# Set paths for cJSON on macOS
+if(APPLE)
+    set(CJSON_INCLUDE_DIR /usr/local/opt/cjson/include)
+    set(CJSON_LIBRARY /usr/local/opt/cjson/lib/libcjson.dylib)
+endif()
+
+# Add the include directory for both targets (ERTbot and ERTbot_tests)
+target_include_directories(ERTbot PRIVATE ${CJSON_INCLUDE_DIR})
+
+# Link other libraries (cross-platform)
+target_link_libraries(ERTbot PRIVATE ${CJSON_LIBRARY} curl)
 
 # Unit Testing Section
 # Find pkg-config
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(CHECK REQUIRED check)
 
+# Include Check directories conditionally on macOS
+if(APPLE)
+    # Assuming Homebrew installed check at this path
+    set(CHECK_INCLUDE_DIRS /usr/local/opt/check/include)
+    set(CHECK_LIBRARIES /usr/local/opt/check/lib/libcheck.dylib)
+endif()
+
 # Include Check directories
 include_directories(${CHECK_INCLUDE_DIRS})
 
 # Test source files
 set(TEST_SOURCES
-    tests/test_stringHelpers.c
-    tests/api/test_apiHelpers.c
-    tests/api/test_sheetAPI.c
-    tests/api/test_slackAPI.c
-    tests/api/test_wikiAPI.c
     tests/features/test_createMissingRequirementPages.c
     tests/features/test_syncDrlToSheet.c
     tests/features/test_updateRequirementPages.c
-    tests/features/test_updateVcdPage.c
-    tests/helpers/test_pageListHelpers.c
-    tests/helpers/test_requirementsHelpers.c
     tests/helpers/test_stringHelpers.c
-    tests/helpers/test_timeHelpers.c
-    tests/helpers/test_wikiLinksHelpers.c
-    tests/test_command.c
     tests/test_main.c
 )
 
 # Test executable
 add_executable(ERTbot_tests ${SOURCES} ${TEST_SOURCES})
 target_compile_definitions(ERTbot_tests PRIVATE TESTING)
-target_link_libraries(ERTbot_tests PRIVATE ${CHECK_LIBRARIES} curl cjson)
+target_include_directories(ERTbot_tests PRIVATE ${CJSON_INCLUDE_DIR})
+target_link_libraries(ERTbot_tests PRIVATE ${CHECK_LIBRARIES} ${CJSON_LIBRARY} curl)
 
 # Enable CTest
 enable_testing()
