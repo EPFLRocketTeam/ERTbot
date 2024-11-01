@@ -5,10 +5,10 @@
 #include "pageListHelpers.h"
 #include "wikiAPI.h"
 
+#define REQ_PAGE_1 "<!--2024_C_SE_PR_REQ_01-->\\n# 2024_C_SE_PR_REQ_01: PR declaration of purpose\\n>**Description**: PR shall design a bi-liquid propulsion system that will propel the LV to its target apogee.\\n>**Author**: Michaël Fuser\\n{.is-info}\\n<!--2024_C_SE_PR_REQ_01-->\\n"
 #define REQ_PAGE_2 "<!--2024_C_SE_PR_REQ_02-->\\n# 2024_C_SE_PR_REQ_02: Total impulse\\n>**Description**: The propulsion system shall produce an impulse of [80000][+15000/-25000]Ns.\\n>**Author**: Michaël Fuser\\n{.is-info}\\n\\n# Verification\\n## Verification 1\\n**Method**: Test\\n**Deadline**: SIR\\n**Status**: :red_circle:Uncompleted\\n<!--2024_C_SE_PR_REQ_02-->\\n"
 
 START_TEST(test_updateRequirementPages) {
-    //TEST
 
     initializeApiTokenVariables();
 
@@ -18,28 +18,13 @@ START_TEST(test_updateRequirementPages) {
 
     updateRequirementPage(cmd);
 
-    pageList* reqPage1 = NULL;
-    reqPage1 = addPageToList(&reqPage1, "1995", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-    getPage(&reqPage1);
+    char* requirementPage1 = fetchAndModifyPageContent("1999", "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->", requirementPage1);
+    ck_assert_str_eq(requirementPage1, REQ_PAGE_1);
+    free(requirementPage1);
 
-    //ck_assert_str_eq(reqPage1->content, UT_DRL);
-
-    //modify req Page
-    //update req Page
-
-    freePageList(&reqPage1);
-
-    pageList* reqPage2 = NULL;
-    reqPage2 = addPageToList(&reqPage2, "1996", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-    getPage(&reqPage2);
-
-    ck_assert_str_eq(reqPage2->content, REQ_PAGE_2);
-
-    freePageList(&reqPage2);
-
-    //modify req Page
-    //update req Page
-
+    char* requirementPage2 = fetchAndModifyPageContent("1995", "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->", requirementPage2);
+    ck_assert_str_eq(requirementPage2, REQ_PAGE_2);
+    free(requirementPage2);
 }
 END_TEST
 
