@@ -2,7 +2,7 @@
  * @file wikiAPI.c
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
  * @brief Contains all of the functions which are only used to interact with the wiki APIs.
- * 
+ *
  * @todo Tidy up how the query templates are stored/defined/decalred use snprintf wiht %s instead of default values...
  */
 
@@ -27,25 +27,26 @@ char *template_render_page_mutation = "{\"query\":\"mutation { pages { render(id
 char *template_create_user_mutation = "{\"query\":\"mutation { users { create(email: \\\"DefaultEmail\\\", name: \\\"DefaultName\\\", prodiverKey: DefaultProviderKey, groups: DefaultGroup, mustChangePassword: true, passwordRaw: \\\"DefaultPassword\\\") { responseResult { succeeded, message } } } }";
 char *template_move_page_mutation = "{\"query\":\"mutation { pages { move(id: DefaultID, destinationPath: \\\"DefaultPath\\\", destinationLocale: \\\"en\\\") { responseResult { succeeded, message } } } }\"}";
 char *template_create_page_mutation = "{\"query\":\"mutation { pages { create(content: \\\"DefaultContent\\\", description: \\\"\\\", editor: \\\"markdown\\\", isPublished: true, isPrivate: false, locale: \\\"en\\\", path: \\\"DefaultPath\\\", tags: [], title: \\\"DefaultTitle\\\") { responseResult { succeeded, message } } } }\"}";
+char *template_delete_page_mutation = "{\"query\":\"mutation { pages { delete(id: DefaultID) { responseResult { succeeded, message } } } }";
 
 
 
 /**
  * @brief Sends a GraphQL query to the Wiki API using a POST request.
- * 
+ *
  * @param[in] query Pointer to a string containing the GraphQL query to be sent.
- * 
+ *
  * @details This function initializes libcurl, sets up a POST request to the specified Wiki API endpoint with the provided
  *          GraphQL query. It includes necessary headers such as Content-Type and Authorization. The response is handled
  *          by the `writeCallback` function. After performing the request, the function checks for errors and the HTTP status
  *          code to ensure successful completion.
- * 
+ *
  * @note Ensure that `WIKI_API_TOKEN` is set correctly and the `writeCallback` function is properly defined to handle the
  *       API response.
  */
 void wikiApi(char *query){
     log_message(LOG_DEBUG, "Entering function wikiApi");
-    
+
   CURL *curl;
   CURLcode res;
   struct curl_slist *headers = NULL;
@@ -93,57 +94,57 @@ void wikiApi(char *query){
         curl_slist_free_all(headers);
     }
     curl_global_cleanup();
-    
+
     log_message(LOG_DEBUG, "Exiting function wikiApi");
 }
 
 /**
  * @brief Constructs and sends a GraphQL query to retrieve the content of a page.
- * 
+ *
  * @param[in] id Pointer to a string containing the ID of the page to retrieve.
- * 
+ *
  * @details This function creates a query based on a template by replacing a placeholder with the provided page ID. It
  *          then sends the constructed query to the Wiki API using the `wikiApi` function. Memory for the query strings is
  *          dynamically allocated and freed after use.
- * 
+ *
  * @note Ensure that `template_pages_singles_query` and `default_page.id` are correctly defined and that the `wikiApi`
  *       function is properly set up to handle the API request.
  */
 void getPageContentQuery(char* id){
     log_message(LOG_DEBUG, "Entering function getPageContentQuery");
-    
+
     char *temp_query = strdup(template_pages_singles_query); // Make a copy to modify
     char *modified_query = replaceWord(temp_query, default_page.id, id);
     wikiApi(modified_query);
     free(temp_query);
     free(modified_query);
-    
+
     log_message(LOG_DEBUG, "Exiting function getPageContentQuery");
 }
 
 /**
  * @brief Constructs and sends a GraphQL query to retrieve a list of pages, sorted by the specified criteria.
- * 
+ *
  * @param[in] sort Pointer to a string indicating the sorting criteria. Possible values are:
  *                 - "path" or "exact path" for sorting by path.
  *                 - "time" for sorting by time.
- * 
+ *
  * @details This function selects and constructs a query based on the provided sorting criteria. It creates a query by
  *          duplicating a template query string and sends it to the Wiki API using the `wikiApi` function. Memory for the
  *          query string is dynamically allocated and freed after use.
- * 
+ *
  * @note If the `sort` parameter does not match one of the expected values, an error message is printed.
- * 
+ *
  * @warning Ensure that `template_list_pages_sortByPath_query` and `template_list_pages_sortByTime_query` are correctly
  *          defined, and that the `wikiApi` function is properly set up to handle the API request.
  */
 void getListQuery(char *sort){
     log_message(LOG_DEBUG, "Entering function getListQuery");
-    
+
     if(strcmp(sort, "path") == 0 || strcmp(sort, "exact path") == 0){
         char* temp_query = strdup(template_list_pages_sortByPath_query); // Make a copy to modify
         wikiApi(temp_query);
-        free(temp_query); 
+        free(temp_query);
     }
     else if(strcmp(sort, "time") == 0){
         char *temp_query = strdup(template_list_pages_sortByTime_query); // Make a copy to modify
@@ -153,13 +154,13 @@ void getListQuery(char *sort){
     else{
         log_message(LOG_ERROR, "Error: inappropriate sort type in getListQuery function call");
     }
-    
+
     log_message(LOG_DEBUG, "Exiting function getListQuery");
 }
 
 pageList* getPage(pageList** head){
     log_message(LOG_DEBUG, "Entering function getPage");
-    
+
     pageList* current = *head;
     getPageContentQuery(current->id);
     log_message(LOG_DEBUG, "%s" ,chunk.response);
@@ -173,7 +174,7 @@ pageList* getPage(pageList** head){
     current->authorId = jsonParserGetIntValue(chunk.response, "\"authorId\"");
     log_message(LOG_DEBUG, "title: %s\n, path: %s\n, description: %s\n, content: %s\n, updatedAt: %s\n", current->title, current->path, current->description, current->content, current->updatedAt);
     free(chunk.response);
-    
+
     log_message(LOG_DEBUG, "Exiting function getPage");
     return current;
 }
@@ -181,8 +182,8 @@ pageList* getPage(pageList** head){
 // Function to filter and parse the JSON string into a Node linked list
 pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* filterCondition) {
     log_message(LOG_DEBUG, "Entering function parseJSON");
-    
-    
+
+
     if (strstr(filterCondition, "\\") != NULL) {
         filterCondition = replaceWord(filterCondition, "\\", "");
     }
@@ -316,14 +317,14 @@ pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* f
     }
 
     log_message(LOG_DEBUG, "Finished searching for pages");
-    
+
     log_message(LOG_DEBUG, "Exiting function parseJSON");
     return *head;
 }
 
 void updatePageContentMutation(pageList* head){
     log_message(LOG_DEBUG, "Entering function updatePageContentMutation");
-    
+
     char *temp_query = template_update_page_mutation;
     log_message(LOG_DEBUG, "About to update page (id: %s) to content: %s", head->id, head->content);
     temp_query = replaceWord(temp_query, default_page.id, head->id);
@@ -341,7 +342,7 @@ void updatePageContentMutation(pageList* head){
 
 void renderMutation(pageList** head, bool renderEntireList){
     log_message(LOG_DEBUG, "Entering function renderMutation");
-    
+
     pageList* current = *head;
     while (current)  {
         char *temp_query = template_render_page_mutation;
@@ -351,10 +352,10 @@ void renderMutation(pageList** head, bool renderEntireList){
         if(!renderEntireList){
             break;
         }
-        
+
         current = current->next;
     }
-    
+
     if(chunk.response){
         free(chunk.response);
     }
@@ -364,7 +365,7 @@ void renderMutation(pageList** head, bool renderEntireList){
 
 void movePageMutation(pageList** head){
     log_message(LOG_DEBUG, "Entering function movePageMutation");
-    
+
     pageList* current = *head;
     while (current)  {
         char *temp_query = template_move_page_mutation;
@@ -377,13 +378,13 @@ void movePageMutation(pageList** head){
     if(chunk.response){
         free(chunk.response);
     }
-    
+
     log_message(LOG_DEBUG, "Exiting function movePageMutation");
 }
 
 pageList* populatePageList(pageList** head, char *filterType, char *filterCondition){
     log_message(LOG_DEBUG, "Entering function populatePageList");
-    
+
     pageList* temp = *head;
     getListQuery(filterType);
     temp = parseJSON(&temp, chunk.response, filterType, filterCondition);
@@ -391,20 +392,20 @@ pageList* populatePageList(pageList** head, char *filterType, char *filterCondit
     if(chunk.response){
         free(chunk.response);
     }
-    
+
     log_message(LOG_DEBUG, "Exiting function populatePageList");
     return temp;
 }
 
 void createPageMutation(char* path, char* content, char* title){
     log_message(LOG_DEBUG, "Entering function createPageMutation");
-    
+
     char *temp_query = template_create_page_mutation;
     temp_query = replaceWord(temp_query, default_page.path, path);
     temp_query = replaceWord(temp_query, default_page.content, content);
     temp_query = replaceWord(temp_query, default_page.title, title);
     wikiApi(temp_query);
-    
+
     log_message(LOG_DEBUG, "Exiting function createPageMutation");
 }
 
@@ -428,4 +429,14 @@ char *fetchAndModifyPageContent(char* pageId, char* newPageContent, char* output
     freePageList(&page);
 
     return outputString;
+}
+
+void deletePageMutation(char* id){
+    log_message(LOG_DEBUG, "Entering function deletePageMutation");
+
+    char *temp_query = template_delete_page_mutation;
+    temp_query = replaceWord(temp_query, default_page.id, id);
+    wikiApi(temp_query);
+
+    log_message(LOG_DEBUG, "Exiting function deletePageMutation");
 }
