@@ -64,7 +64,7 @@ brew install cmake
 1. Duplicate ```script_template.sh``` into a new file called ```build_and_run.sh``` which will be the script you will call to build and run the program.
 
 2. Add you API tokens
-Replace all of the ```YOUR API TOKEN``` with your API tokens.
+Replace all of the ```YOUR API TOKEN``` place holder text with your API tokens.
 
 3. Make the script
 ```bash
