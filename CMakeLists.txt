@@ -48,15 +48,21 @@ add_executable(ERTbot ${SOURCES})
 # Conditionally configure for macOS
 # Set paths for cJSON on macOS
 if(APPLE)
+    # Set paths for cJSON on macOS
     set(CJSON_INCLUDE_DIR /usr/local/opt/cjson/include)
     set(CJSON_LIBRARY /usr/local/opt/cjson/lib/libcjson.dylib)
+
+    # Add the include directory and library path for ERTbot
+    target_link_libraries(ERTbot PRIVATE ${CJSON_LIBRARY} curl)
+    target_include_directories(ERTbot PRIVATE ${CJSON_INCLUDE_DIR})
 endif()
 
-# Add the include directory for both targets (ERTbot and ERTbot_tests)
-target_include_directories(ERTbot PRIVATE ${CJSON_INCLUDE_DIR})
 
-# Link other libraries (cross-platform)
-target_link_libraries(ERTbot PRIVATE ${CJSON_LIBRARY} curl)
+# Configure for Linux
+elseif(UNIX AND NOT APPLE)
+    # Directly link with cjson on Linux, assuming it’s installed and in the linker path
+    target_link_libraries(ERTbot PRIVATE curl cjson)
+endif()
 
 # Unit Testing Section
 # Find pkg-config
@@ -87,8 +93,18 @@ set(TEST_SOURCES
 # Test executable
 add_executable(ERTbot_tests ${SOURCES} ${TEST_SOURCES})
 target_compile_definitions(ERTbot_tests PRIVATE TESTING)
-target_include_directories(ERTbot_tests PRIVATE ${CJSON_INCLUDE_DIR})
-target_link_libraries(ERTbot_tests PRIVATE ${CHECK_LIBRARIES} ${CJSON_LIBRARY} curl)
+
+if(APPLE)
+    # Add the include directory and library path for ERTbot
+    target_include_directories(ERTbot_tests PRIVATE ${CJSON_INCLUDE_DIR})
+    target_link_libraries(ERTbot_tests PRIVATE ${CHECK_LIBRARIES} ${CJSON_LIBRARY} curl)
+endif()
+
+# Configure for Linux
+elseif(UNIX AND NOT APPLE)
+    # Directly link with cjson on Linux, assuming it’s installed and in the linker path
+    target_link_libraries(ERTbot_tests PRIVATE ${CHECK_LIBRARIES} curl cjson)
+endif()
 
 # Enable CTest
 enable_testing()
