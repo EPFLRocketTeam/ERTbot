@@ -10,7 +10,6 @@ For calling the Slack, Google Sheets, Wiki.js, and GitHub APIs.
 
 **Linux**
 ```bash
-sudo apt-get update
 sudo apt-get install libcurl4-openssl-dev
 ```
 **macOS**
@@ -55,10 +54,6 @@ sudo apt-get install cmake
 ```bash
 brew install cmake
 ```
-
-## Download Project
-
-## Config
 
 ## Create script for running
 1. Duplicate ```script_template.sh``` into a new file called ```build_and_run.sh``` which will be the script you will call to build and run the program.
