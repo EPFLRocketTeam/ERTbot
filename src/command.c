@@ -320,6 +320,10 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
         log_message(LOG_ERROR, "Memory allocation failed");
     }
 
+    if (chunk.response) {
+        chunk.response = NULL;
+        chunk.size = 0;
+    }
 
     slackMsg = getSlackMessage(slackMsg);
 
