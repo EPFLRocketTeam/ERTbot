@@ -278,7 +278,7 @@ static command** checkAndEnqueuePeriodicCommands(command** commandQueue, Periodi
 
     while (periodicCommand != NULL) {
         log_message(LOG_DEBUG, "checking if it is time to queue:%s", periodicCommand->command->function);
-        
+
         /*
         // Allocate space for the time strings
         char strNextTime[26];
@@ -291,7 +291,7 @@ static command** checkAndEnqueuePeriodicCommands(command** commandQueue, Periodi
         strCurrentTime[sizeof(strCurrentTime) - 1] = '\0';
         log_message(LOG_DEBUG, "Comparing times for periodic commands, next time: %s, current time: %s", strNextTime, strCurrentTime);
         */
-       
+
         if (periodicCommand->next_time <= currentTime) {
             // Enqueue the command into the commandQueue
             command cmd = *periodicCommand->command;
@@ -495,7 +495,7 @@ PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicComm
 
 void breakdownCommand(char* sentence, command* cmd) {
     log_message(LOG_DEBUG, "Entering function breakdownCommand");
-    
+
     char* words[MAX_ARGUMENTS];
     char* token;
     int word_count = 0;
@@ -568,7 +568,7 @@ void breakdownCommand(char* sentence, command* cmd) {
     }
 
     free(sentence_copy);
-    
+
     log_message(LOG_DEBUG, "Exiting function breakdownCommand");
 }
 
@@ -607,6 +607,7 @@ command** executeCommand(command** commandQueue){
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "createMissingRequirementPages") == 0){
         createMissingRequirementPages(**commandQueue);
+        sendMessageToSlack("Pages were created");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "help") == 0){
