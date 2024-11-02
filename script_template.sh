@@ -30,6 +30,23 @@ make || { echo "Build failed"; exit 1; }
 echo "Returning to project directory"
 cd ..
 
+# Log directory and file setup
+LOG_DIR="logs"
+if [ ! -d "$LOG_DIR" ]; then
+    echo "Creating logs directory..."
+    mkdir "$LOG_DIR"
+fi
+
+# Array of log files to check/create
+LOG_FILES=("debug.log" "error.log" "info.log")
+
+for LOG_FILE in "${LOG_FILES[@]}"; do
+    if [ ! -f "$LOG_DIR/$LOG_FILE" ]; then
+        echo "Creating $LOG_FILE in logs directory..."
+        touch "$LOG_DIR/$LOG_FILE"
+    fi
+done
+
 # Optional: Cleanup build artifacts
 # Uncomment the following line if you want to clean up after running the tests
 # rm -rf "$BUILD_DIR"
