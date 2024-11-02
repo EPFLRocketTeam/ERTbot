@@ -55,8 +55,6 @@ if(APPLE)
     # Add the include directory and library path for ERTbot
     target_link_libraries(ERTbot PRIVATE ${CJSON_LIBRARY} curl)
     target_include_directories(ERTbot PRIVATE ${CJSON_INCLUDE_DIR})
-endif()
-
 
 # Configure for Linux
 elseif(UNIX AND NOT APPLE)
@@ -98,7 +96,6 @@ if(APPLE)
     # Add the include directory and library path for ERTbot
     target_include_directories(ERTbot_tests PRIVATE ${CJSON_INCLUDE_DIR})
     target_link_libraries(ERTbot_tests PRIVATE ${CHECK_LIBRARIES} ${CJSON_LIBRARY} curl)
-endif()
 
 # Configure for Linux
 elseif(UNIX AND NOT APPLE)
