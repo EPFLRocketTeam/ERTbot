@@ -380,7 +380,7 @@ command** checkForCommand(command** headOfCommandQueue, PeriodicCommand** headOf
     log_message(LOG_DEBUG, "Entering function checkForCommand");
 
     headOfCommandQueue = lookForCommandOnSlack(headOfCommandQueue);
-    headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);
+    //headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);
     headOfCommandQueue = checkAndEnqueuePeriodicCommands(headOfCommandQueue, headOfPeriodicCommands);
 
     log_message(LOG_DEBUG, "Exiting function checkForCommand");
@@ -636,7 +636,7 @@ command** executeCommand(command** commandQueue){
     }
 
     else{
-        sendMessageToSlack("Uknown Command :rayane_side_eyeing:");
+        sendMessageToSlack("Unknown Command :rayane_side_eyeing:");
     }
 
     removeFirstCommand(commandQueue);
