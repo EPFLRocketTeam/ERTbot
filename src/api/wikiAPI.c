@@ -2,8 +2,6 @@
  * @file wikiAPI.c
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
  * @brief Contains all of the functions which are only used to interact with the wiki APIs.
- *
- * @todo Tidy up how the query templates are stored/defined/decalred use snprintf wiht %s instead of default values...
  */
 
 #include <stdbool.h>
@@ -85,7 +83,7 @@ void wikiApi(char *query){
         if (http_code != 200) {
             log_message(LOG_ERROR, "wikiApi: HTTP request failed with status code %ld", http_code);
             log_message(LOG_ERROR, "chunk.resposnse: %s", chunk.response);
-            exit(-1);;
+            exit(-1);
         }
         // Clean up
         curl_easy_cleanup(curl);

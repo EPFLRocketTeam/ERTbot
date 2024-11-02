@@ -15,14 +15,14 @@ char *template_REQ = "";
 /**
  * @brief Builds a `pageList` entry from a JSON object containing requirements for a specific requirement ID.
  *        Each page's content is a requirement page.
- * 
+ *
  * This function generates a `pageList` entry by extracting details for a specific requirement from a JSON object. It constructs a page content string using a template and appends information such as ID, Title, Description, Source, Author, Justification, Compliance, Criticality, and Verification details. The page content is formatted in a specific markdown-like structure.
- * 
+ *
  * @param requirementList A `cJSON` object containing an array of requirement objects under the "requirements" key.
  * @param requirementId A string representing the ID of the requirement to be processed.
- * 
+ *
  * @return A pointer to a `pageList` structure containing the generated page. If no requirement with the specified ID is found or if an error occurs, the function may return `NULL`.
- * 
+ *
  * @details
  * - The function first retrieves the "requirements" array from the `requirementList` object.
  * - It initializes the page content using a predefined template.
@@ -38,8 +38,6 @@ char *template_REQ = "";
  *   - **Verification**: Adds verification details for multiple reviews and verification methods, including status and deadlines.
  * - After processing, the page content is added to the `pageList` structure and the list is returned.
  * - If any errors are encountered (e.g., missing "requirements" array or incorrect object format), appropriate error messages are printed.
- * 
- * @todo Function is too long it needs to be broken up into smaller functions.
  */
 static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement);
 
@@ -53,63 +51,63 @@ void updateRequirementPage(command cmd){
     path = replaceWord(path, "\\", "");
 
 
-    
+
     if(strstr(cmd.argument_1, "ST")){
         sheetId = "ST!A3:AT300";
         if(strcmp(cmd.argument_1, "ST")==0){
             path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/";
         }
     }
-    
+
     if(strstr(cmd.argument_1, "PR")){
         sheetId = "PR!A3:AT300";
         if(strcmp(cmd.argument_1, "PR")==0){
             path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PR_DRL/";
         }
     }
-    
+
     if(strstr(cmd.argument_1, "FD")){
         sheetId = "FD!A3:AT300";
         if(strcmp(cmd.argument_1, "FD")==0){
             path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_FD_DRL/";
         }
     }
-    
+
     if(strstr(cmd.argument_1, "RE")){
         sheetId = "RE!A3:AT300";
         if(strcmp(cmd.argument_1, "RE")==0){
             path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_RE_DRL/";
         }
     }
-    
+
     if(strstr(cmd.argument_1, "GS")){
         sheetId = "GS!A3:AT300";
         if(strcmp(cmd.argument_1, "GS")==0){
             path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GS_DRL/";
         }
     }
-    
+
     if(strstr(cmd.argument_1, "AV")){
         sheetId = "AV!A3:AT300";
         if(strcmp(cmd.argument_1, "AV")==0){
             path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_AV_DRL/";
         }
     }
-    
+
     if(strstr(cmd.argument_1, "TE")){
         sheetId = "TE!A3:AT300";
         if(strcmp(cmd.argument_1, "TE")==0){
             path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_TE_DRL/";
         }
     }
-    
+
     if(strstr(cmd.argument_1, "PL")){
         sheetId = "PL!A3:AT300";
         if(strcmp(cmd.argument_1, "PL")==0){
             path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PL_DRL/";
         }
     }
-    
+
     if(strstr(cmd.argument_1, "GE")){
         sheetId = "GE!A3:AT300";
         if(strcmp(cmd.argument_1, "GE")==0){
@@ -129,8 +127,7 @@ void updateRequirementPage(command cmd){
 
 
     batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
-    //log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
-    
+
     cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
 
     // Get the requirements array from the requirementList object
@@ -174,13 +171,12 @@ void updateRequirementPage(command cmd){
                 log_message(LOG_DEBUG, "Looking for flag: %s in start+1: %s", flag, start+1);
                 end = strstr(start + 1, flag);
                 end--;
-                
+
                 currentReqPage->content = replaceParagraph(currentReqPage->content, importedRequirementInformation, start, end);
 
                 currentReqPage->content = replaceWord(currentReqPage->content, "\n", "\\\\n");
                 currentReqPage->content = replaceWord(currentReqPage->content, "\"", "\\\\\\\"");
                 log_message(LOG_DEBUG, "About to update page:%s", currentReqPage->path);
-                //getchar();
                 updatePageContentMutation(currentReqPage);
                 renderMutation(&currentReqPage, false);
 
@@ -194,17 +190,17 @@ void updateRequirementPage(command cmd){
 
         currentReqPage = currentReqPage->next;
     }
-    
+
     cJSON_Delete(requirementList);
     freePageList(&requirementPagesHead);
-    
+
     log_message(LOG_DEBUG, "Exiting function updateRequirementPage");
     return;
 }
 
 static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
     log_message(LOG_DEBUG, "Entering function buildRequirementPageFromJSONRequirementList");
-    
+
     char *pageContent = strdup(template_REQ);
 
     // Get and print each item of the requirement object
@@ -221,7 +217,7 @@ static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 
     cJSON *path = cJSON_GetObjectItemCaseSensitive(requirement, "Path");
 
-    
+
 
     //TITLE
     if (cJSON_IsString(id) && id->valuestring) {
@@ -274,7 +270,7 @@ static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 
     //COMPLIANCE
     if (cJSON_IsString(compliance) && compliance->valuestring && strcmp(compliance->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-        
+
         if(strcmp(compliance->valuestring, "Compliant") == 0){
             pageContent = appendToString(pageContent, "\n# Compliance\n");
             pageContent = appendToString(pageContent, ":green_circle: Compliant\n");
@@ -292,7 +288,7 @@ static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 
     //CRITICALITY
     if (cJSON_IsString(criticality) && criticality->valuestring && strcmp(criticality->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-        
+
         if(strcmp(criticality->valuestring, "Low") == 0){
             pageContent = appendToString(pageContent, "\n# Criticality\n");
             pageContent = appendToString(pageContent, ":green_circle: Low\n");
@@ -337,12 +333,12 @@ static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
                 case 5: reviewName = REVIEW_5_NAME; break;
                 case 6: reviewName = REVIEW_6_NAME; break;
             }
-            
+
 
             if(strcmp(verificationMethod->valuestring, REQ_SHEET_EMPTY_VALUE) != 0){
 
                 log_message(LOG_DEBUG, "Verification method found");
-                
+
                 verificationCount++;
 
                 if(isVerification == 0){
@@ -378,7 +374,7 @@ static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 
         }
     }
-    
+
     log_message(LOG_DEBUG, "Exiting function buildRequirementPageFromJSONRequirementList");
 
     return pageContent;

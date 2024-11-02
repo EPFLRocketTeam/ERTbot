@@ -2,8 +2,6 @@
  * @file api.c
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
  * @brief contains helper functions which are used by several api handling functions
- *
- * @todo revamp jsonParserGetStringValue to uses cJSON
  */
 
 #include <stdlib.h>

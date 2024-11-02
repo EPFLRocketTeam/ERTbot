@@ -17,7 +17,7 @@
 
 #define MAX_ARGUMENTS 10
 
-static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands, command* command, int period) {
+static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands_Global, command* command, int period) {
     log_message(LOG_DEBUG, "Entering function addPeriodicCommand");
 
     PeriodicCommand* newCommand = (PeriodicCommand*)malloc(sizeof(PeriodicCommand));
@@ -27,13 +27,13 @@ static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicComma
     newCommand->next = NULL;
 
     // If the list is empty, make the new node the first node
-    if (*headOfPeriodicCommands == NULL) {
-        *headOfPeriodicCommands = newCommand;
-        return *headOfPeriodicCommands;
+    if (*headOfPeriodicCommands_Global == NULL) {
+        *headOfPeriodicCommands_Global = newCommand;
+        return *headOfPeriodicCommands_Global;
     }
 
     // Traverse the list to find the last node
-    PeriodicCommand* lastNode = *headOfPeriodicCommands;
+    PeriodicCommand* lastNode = *headOfPeriodicCommands_Global;
     while (lastNode->next != NULL) {
         lastNode = lastNode->next;
     }
@@ -42,10 +42,10 @@ static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicComma
     lastNode->next = newCommand;
     log_message(LOG_DEBUG, "Exiting function addPeriodicCommand");
 
-    return *headOfPeriodicCommands;
+    return *headOfPeriodicCommands_Global;
 }
 
-static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands, command* command, char* time_str) {
+static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands_Global, command* command, char* time_str) {
     log_message(LOG_DEBUG, "Entering function scheduleDailyCommand");
 
     int hours, minutes;
@@ -75,13 +75,13 @@ static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands
     newCommand->next_time = next_execution_time;  // Set the next execution time
 
     // If the list is empty, make the new node the first node
-    if (*headOfPeriodicCommands == NULL) {
-        *headOfPeriodicCommands = newCommand;
-        return *headOfPeriodicCommands;
+    if (*headOfPeriodicCommands_Global == NULL) {
+        *headOfPeriodicCommands_Global = newCommand;
+        return *headOfPeriodicCommands_Global;
     }
 
     // Traverse the list to find the last node
-    PeriodicCommand* lastNode = *headOfPeriodicCommands;
+    PeriodicCommand* lastNode = *headOfPeriodicCommands_Global;
     while (lastNode->next != NULL) {
         lastNode = lastNode->next;
     }
@@ -91,7 +91,7 @@ static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands
 
     log_message(LOG_DEBUG, "Exiting function scheduleDailyCommand");
 
-    return *headOfPeriodicCommands;
+    return *headOfPeriodicCommands_Global;
 }
 
 static command* addCommandToQueue(command** head,  char *function, char *argument_1, char *argument_2, char *argument_3, char *argument_4, char *argument_5, char *argument_6, char *argument_7, char *argument_8, char *argument_9) {
@@ -270,27 +270,14 @@ void removeFirstCommand(command **head) {
     log_message(LOG_DEBUG, "Exiting function removeFirstCommand");
 }
 
-static command** checkAndEnqueuePeriodicCommands(command** commandQueue, PeriodicCommand** headOfPeriodicCommands) {
+static command** checkAndEnqueuePeriodicCommands(command** commandQueue, PeriodicCommand** headOfPeriodicCommands_Global) {
     log_message(LOG_DEBUG, "Entering function checkAndEnqueuePeriodicCommands");
 
     time_t currentTime = time(NULL);
-    PeriodicCommand* periodicCommand = (*headOfPeriodicCommands);
+    PeriodicCommand* periodicCommand = (*headOfPeriodicCommands_Global);
 
     while (periodicCommand != NULL) {
         log_message(LOG_DEBUG, "checking if it is time to queue:%s", periodicCommand->command->function);
-
-        /*
-        // Allocate space for the time strings
-        char strNextTime[26];
-        char strCurrentTime[26];
-        // Copy the ctime results into separate buffers
-        strncpy(strNextTime, ctime(&(periodicCommand->next_time)), sizeof(strNextTime) - 1);
-        strncpy(strCurrentTime, ctime(&currentTime), sizeof(strCurrentTime) - 1);
-        // Ensure null termination
-        strNextTime[sizeof(strNextTime) - 1] = '\0';
-        strCurrentTime[sizeof(strCurrentTime) - 1] = '\0';
-        log_message(LOG_DEBUG, "Comparing times for periodic commands, next time: %s, current time: %s", strNextTime, strCurrentTime);
-        */
 
         if (periodicCommand->next_time <= currentTime) {
             // Enqueue the command into the commandQueue
@@ -309,11 +296,11 @@ static command** checkAndEnqueuePeriodicCommands(command** commandQueue, Periodi
     return commandQueue;
 }
 
-static command** lookForCommandOnSlack(command** headOfCommandQueue){
+static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
     log_message(LOG_DEBUG, "Entering function lookForCommandonSlack");
 
     command cmd;
-    slackMessage* slackMsg = (slackMessage*)malloc(sizeof(slackMessage));;
+    slackMessage* slackMsg = (slackMessage*)malloc(sizeof(slackMessage));
 
     slackMsg->message = malloc(200);
     if (slackMsg->message == NULL) {
@@ -331,7 +318,7 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
     if(strcmp(slackMsg->sender, "U06RQCAT0H1") != 0){
         breakdownCommand(slackMsg->message, &cmd);
         log_message(LOG_DEBUG, "Command broke down");
-        *headOfCommandQueue = addCommandToQueue(headOfCommandQueue, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
+        *headOfPeriodicCommands_Global = addCommandToQueue(headOfPeriodicCommands_Global, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
         sendMessageToSlack("Command added to queue");
         log_message(LOG_INFO, "Received a %s command on slack", cmd.function);
         log_message(LOG_DEBUG, "Command added to queue");
@@ -350,7 +337,7 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
     free(slackMsg->timestamp);
 
     log_message(LOG_DEBUG, "Exiting function lookForCommandOnSlack");
-    return headOfCommandQueue;
+    return headOfPeriodicCommands_Global;
 
 }
 
@@ -376,18 +363,17 @@ static command** lookForNewlyUpdatedPages(command** commandQueue){
     return commandQueue;
 }
 
-command** checkForCommand(command** headOfCommandQueue, PeriodicCommand** headOfPeriodicCommands){
+command** checkForCommand(command** headOfCommandQueue_Global, PeriodicCommand** headOfPeriodicCommands_Global){
     log_message(LOG_DEBUG, "Entering function checkForCommand");
 
-    headOfCommandQueue = lookForCommandOnSlack(headOfCommandQueue);
-    //headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);
-    headOfCommandQueue = checkAndEnqueuePeriodicCommands(headOfCommandQueue, headOfPeriodicCommands);
+    headOfCommandQueue_Global = lookForCommandOnSlack(headOfCommandQueue_Global);
+    headOfCommandQueue_Global = checkAndEnqueuePeriodicCommands(headOfCommandQueue_Global, headOfPeriodicCommands_Global);
 
     log_message(LOG_DEBUG, "Exiting function checkForCommand");
-    return headOfCommandQueue;
+    return headOfCommandQueue_Global;
 }
 
-PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicCommands){
+PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicCommands_Global){
     log_message(LOG_DEBUG, "Entering function initializePeriodicCommands");
 
     command* getRyansHomePage = (command*)malloc(sizeof(command));
@@ -465,36 +451,36 @@ PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicComm
     command* updateDRL_PL =(command*)malloc(sizeof(command));
     breakdownCommand("updateDRL PL", updateDRL_PL);
 
-    headOfPeriodicCommands = (PeriodicCommand**)malloc(sizeof(PeriodicCommand*));
-    *headOfPeriodicCommands = NULL;
-    *headOfPeriodicCommands = addPeriodicCommand(headOfPeriodicCommands, getRyansHomePage, 3600);
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_ST, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_GE, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_PR, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_FD, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_RE, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_GS, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_AV, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateVCD_PL, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_ST, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_GE, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_PR, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_FD, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_RE, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_GS, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_AV, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateReq_PL, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_ST, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_GE, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_PR, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_FD, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_RE, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_GS, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_AV, "06:00");
-    *headOfPeriodicCommands = addDailyCommand(headOfPeriodicCommands, updateDRL_PL, "06:00");
+    headOfPeriodicCommands_Global = (PeriodicCommand**)malloc(sizeof(PeriodicCommand*));
+    *headOfPeriodicCommands_Global = NULL;
+    *headOfPeriodicCommands_Global = addPeriodicCommand(headOfPeriodicCommands_Global, getRyansHomePage, 3600);
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateVCD_ST, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateVCD_GE, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateVCD_PR, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateVCD_FD, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateVCD_RE, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateVCD_GS, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateVCD_AV, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateVCD_PL, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateReq_ST, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateReq_GE, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateReq_PR, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateReq_FD, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateReq_RE, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateReq_GS, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateReq_AV, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateReq_PL, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateDRL_ST, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateDRL_GE, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateDRL_PR, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateDRL_FD, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateDRL_RE, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateDRL_GS, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateDRL_AV, "06:00");
+    *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateDRL_PL, "06:00");
 
     log_message(LOG_DEBUG, "Exiting function initializePeriodicCommands");
-    return headOfPeriodicCommands;
+    return headOfPeriodicCommands_Global;
 }
 
 void breakdownCommand(char* sentence, command* cmd) {
