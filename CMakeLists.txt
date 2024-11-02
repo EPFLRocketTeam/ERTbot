@@ -80,6 +80,7 @@ set(TEST_SOURCES
     tests/features/test_updateRequirementPages.c
     tests/helpers/test_stringHelpers.c
     tests/test_main.c
+    tests/api/test_wikiAPI.c
 )
 
 # Test executable

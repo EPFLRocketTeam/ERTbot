@@ -1,6 +1,5 @@
 #include <check.h>
 #include "ERTbot_common.h"
-
 #include "test_suites.h"
 
 
@@ -8,7 +7,7 @@ int main(void) {
     log_message(LOG_DEBUG, "\n\nStarting Tests\n\n");
 
     int number_failed;
-    Suite *s1, *s2;
+    Suite *s1, *s2, *s3;
     SRunner *sr;
 
     s1 = stringHelpers_suite();
@@ -16,6 +15,10 @@ int main(void) {
 
     s2 = syncDrlToSheet_suite();
     srunner_add_suite(sr, s2);
+
+    s3 = wikiAPI_suite();
+    srunner_add_suite(sr, s3);
+
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);

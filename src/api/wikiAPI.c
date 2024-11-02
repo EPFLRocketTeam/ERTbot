@@ -17,8 +17,6 @@
 
 
 
-
-
 char *template_pages_singles_query = "{\"query\":\"{pages {single(id: DefaultID){id, path, title, content, description, updatedAt, createdAt, authorId}}}\"}";
 char *template_list_pages_sortByPath_query = "{\"query\":\"{pages {list(orderBy: PATH){path, title, id, updatedAt}}}\"}";
 char *template_list_pages_sortByTime_query = "{\"query\":\"{pages {list(orderBy: UPDATED, orderByDirection: DESC){path, title, id, updatedAt}}}\"}";
@@ -26,8 +24,8 @@ char *template_update_page_mutation = "{\"query\":\"mutation { pages { update(id
 char *template_render_page_mutation = "{\"query\":\"mutation { pages { render(id: DefaultID) { responseResult { succeeded, message } } } }\"}";
 char *template_create_user_mutation = "{\"query\":\"mutation { users { create(email: \\\"DefaultEmail\\\", name: \\\"DefaultName\\\", prodiverKey: DefaultProviderKey, groups: DefaultGroup, mustChangePassword: true, passwordRaw: \\\"DefaultPassword\\\") { responseResult { succeeded, message } } } }";
 char *template_move_page_mutation = "{\"query\":\"mutation { pages { move(id: DefaultID, destinationPath: \\\"DefaultPath\\\", destinationLocale: \\\"en\\\") { responseResult { succeeded, message } } } }\"}";
-char *template_create_page_mutation = "{\"query\":\"mutation { pages { create(content: \\\"DefaultContent\\\", description: \\\"\\\", editor: \\\"markdown\\\", isPublished: true, isPrivate: false, locale: \\\"en\\\", path: \\\"DefaultPath\\\", tags: [], title: \\\"DefaultTitle\\\") { responseResult { succeeded, message } } } }\"}";
-char *template_delete_page_mutation = "{\"query\":\"mutation { pages { delete(id: DefaultID) { responseResult { succeeded, message } } } }";
+char *template_create_page_mutation = "{\"query\":\"mutation { pages { create(content: \\\"DefaultContent\\\", description: \\\"\\\", editor: \\\"markdown\\\", isPublished: true, isPrivate: false, locale: \\\"en\\\", path: \\\"DefaultPath\\\", tags: [], title: \\\"DefaultTitle\\\") { responseResult { succeeded, message, errorCode } } } }\"}";
+char *template_delete_page_mutation = "{\"query\":\"mutation { pages { delete(id: DefaultID) { responseResult { succeeded, message } } } } \"}";
 
 
 
@@ -404,7 +402,11 @@ void createPageMutation(char* path, char* content, char* title){
     temp_query = replaceWord(temp_query, default_page.path, path);
     temp_query = replaceWord(temp_query, default_page.content, content);
     temp_query = replaceWord(temp_query, default_page.title, title);
+    log_message(LOG_DEBUG, "About to call the create page query %s", temp_query);
+
     wikiApi(temp_query);
+
+    log_message(LOG_DEBUG, "chunk.response after calling for a page creation: %s", chunk.response);
 
     log_message(LOG_DEBUG, "Exiting function createPageMutation");
 }

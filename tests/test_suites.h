@@ -9,4 +9,5 @@ Suite *syncDrlToSheet_suite(void);
 
 Suite *updateRequirementPages_suite(void);
 
+Suite *wikiAPI_suite(void);
 #endif
