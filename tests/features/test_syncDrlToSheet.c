@@ -37,7 +37,7 @@ Suite *syncDrlToSheet_suite(void) {
     Suite *s;
     TCase *tc_core;
 
-    s = suite_create("Module");
+    s = suite_create("syncDrlToSheet");
 
     // Core test case
     tc_core = tcase_create("Core");
