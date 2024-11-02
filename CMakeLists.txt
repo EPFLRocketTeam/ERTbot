@@ -81,6 +81,7 @@ set(TEST_SOURCES
     tests/helpers/test_stringHelpers.c
     tests/test_main.c
     tests/api/test_wikiAPI.c
+    tests/features/test_createMissingRequirementPages.c
 )
 
 # Test executable

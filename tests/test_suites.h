@@ -7,6 +7,8 @@ Suite *stringHelpers_suite(void);
 
 Suite *syncDrlToSheet_suite(void);
 
+Suite *createMissingRequirementPages_suite(void);
+
 Suite *updateRequirementPages_suite(void);
 
 Suite *wikiAPI_suite(void);

@@ -9,6 +9,7 @@
 #include "pageListHelpers.h"
 
 void createMissingRequirementPages(command cmd){
+    log_message(LOG_DEBUG, "Entering function createMissingRequirementPages");
     refreshOAuthToken();
     char *sheetId;
     pageList* requirementPagesHead = NULL;
@@ -106,7 +107,7 @@ void createMissingRequirementPages(command cmd){
         if (foundPage == 0){
             char *reqPath = createCombinedString(path, id->valuestring);
             char *reqContent = "<!--";
-            reqContent = appendToString(reqContent, id->valuestring);
+            reqContent = createCombinedString(reqContent, id->valuestring);
             reqContent = appendToString(reqContent, "-->\\\\n");
             reqContent = appendToString(reqContent, reqContent);
             log_message(LOG_DEBUG, "About to create new page path:%s\nTitle:%s", reqPath, id->valuestring);
@@ -122,7 +123,6 @@ void createMissingRequirementPages(command cmd){
     cJSON_Delete(requirementList);
     freePageList(&requirementPagesHead);
 
-    log_message(LOG_DEBUG, "Exiting function updateRequirementPage");
-    sendMessageToSlack("Pages were created");
+    log_message(LOG_DEBUG, "Exiting function createMissingRequirementPages");
     return;
 }
