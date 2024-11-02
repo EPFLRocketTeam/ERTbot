@@ -109,7 +109,9 @@ void createMissingRequirementPages(command cmd){
             char *reqContent = "<!--";
             reqContent = createCombinedString(reqContent, id->valuestring);
             reqContent = appendToString(reqContent, "-->\\\\n");
-            reqContent = appendToString(reqContent, reqContent);
+            reqContent = appendToString(reqContent, "<!--");
+            reqContent = appendToString(reqContent, id->valuestring);
+            reqContent = appendToString(reqContent, "-->");
             log_message(LOG_DEBUG, "About to create new page path:%s\nTitle:%s", reqPath, id->valuestring);
             createPageMutation(reqPath, reqContent, id->valuestring);
 
