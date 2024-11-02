@@ -13,3 +13,6 @@ ERTbot_tests
 .clangd
 compile_commands.json
 .vscode
+
+#Ignore build and run scripts
+build_and_test.sh
