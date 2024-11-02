@@ -2,36 +2,27 @@
  * @file main.c
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
  * @brief Contains the program initalisation and loop functions
- * 
+ *
  * @details Goal of this file is to initalise the program, search for incoming commands (from slack chat,
  *          inline commands on wiki and periodic commands), recognise the command, call the appropriate
  *          function in the features.c file.
- * 
+ *
  * @todo - Add an option to run through terminal commands instead of slack commands
  *       - Add Feature: appendToListOfPages and prependToListOfPages
  *       - Redo replaceWord implementation to fix memory leaks
  *       - Redo replaceParagraph implementation to fix memory leaks
- * 
+ *
  * @warning replaceWord function is still causing memory leaks (responsible for 1/3 of memory leaks)
  */
 
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include <stdio.h>
+#include <unistd.h>
+#include "ERTbot_common.h"
+#include "ERTbot_command.h"
+#include "apiHelpers.h"
+#include "timeHelpers.h"
+#include "slackAPI.h"
 
-
-//gcc -o wikiToolbox src/main.c src/api.c src/features.c src/githubAPI.c src/helperFunctions.c src/markdownToPDF.c src/slackAPI.c src/stringTools.c src/wikiAPI.c src/sheetAPI.c src/command.c src/log.c src/requirements.c -I../include -lcurl -lcjson
 
 memory chunk;
 
@@ -43,37 +34,37 @@ PeriodicCommand** headOfPeriodicCommands;
 
 command** headOfCommandQueue;
 
-
+#ifndef TESTING
 int main(){
-    log_message(LOG_DEBUG, "\n\n\n\n\n\nStarting program\n\n");
-    
+    log_message(LOG_DEBUG, "\n\nStarting program\n\n");
+
+    //initalise
     initializeApiTokenVariables();
     lastPageRefreshCheck = getCurrentEDTTimeString();
     headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
-    
-
+    //declare command queue variable
     headOfCommandQueue = (command**)malloc(sizeof(command*));
     *headOfCommandQueue = NULL;
-
-    sendMessageToSlack("Wiki-Toolbox is Online");
-    
     int cyclesSinceLastCommand = 0; //reduce number of API calls when "Idling"
 
+    sendMessageToSlack("Wiki-Toolbox is Online");
+
+    //Start main loop
     while(1){
-        
+
         headOfCommandQueue = checkForCommand(headOfCommandQueue, headOfPeriodicCommands);
-        
+
         if(*headOfCommandQueue){
             cyclesSinceLastCommand = 0;
             log_message(LOG_DEBUG, "command received");
             headOfCommandQueue = executeCommand(headOfCommandQueue);
-        } 
+        }
 
         else{
             cyclesSinceLastCommand ++;
             log_message(LOG_DEBUG, "No command received.");
         }
-        
+
         if(cyclesSinceLastCommand>20){
             sleep(2);
         }
@@ -86,6 +77,7 @@ int main(){
     sendMessageToSlack("Shutting Down");
     fprintf(stderr, "Shutting Down");
     return 0;
-    
+
     log_message(LOG_DEBUG, "Exiting function main");
 }
+#endif

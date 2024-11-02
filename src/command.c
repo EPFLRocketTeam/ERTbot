@@ -3,22 +3,19 @@
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
  * @brief Contains functions used to handle commands.
  */
-#include "../include/struct.h"
-#include "../include/api.h"
-#include "../include/config.h"
-#include "../include/features.h"
-#include "../include/githubAPI.h"
-#include "../include/helperFunctions.h"
-#include "../include/markdownToPDF.h"
-#include "../include/slackAPI.h"
-#include "../include/stringTools.h"
-#include "../include/wikiAPI.h"
-#include "../include/sheetAPI.h"
-#include "../include/command.h"
-#include "../include/log.h"
-#include "../include/requirements.h"
+#include <stdio.h>
+#include <string.h>
 #include <sys/socket.h>
+#include "slackAPI.h"
+#include "wikiAPI.h"
+#include "sheetAPI.h"
+#include "ERTbot_common.h"
+#include "ERTbot_features.h"
+#include "pageListHelpers.h"
+#include "timeHelpers.h"
+#include "ERTbot_command.h"
 
+#define MAX_ARGUMENTS 10
 
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands, command* command, int period) {
     log_message(LOG_DEBUG, "Entering function addPeriodicCommand");
@@ -281,7 +278,7 @@ static command** checkAndEnqueuePeriodicCommands(command** commandQueue, Periodi
 
     while (periodicCommand != NULL) {
         log_message(LOG_DEBUG, "checking if it is time to queue:%s", periodicCommand->command->function);
-        
+
         /*
         // Allocate space for the time strings
         char strNextTime[26];
@@ -294,7 +291,7 @@ static command** checkAndEnqueuePeriodicCommands(command** commandQueue, Periodi
         strCurrentTime[sizeof(strCurrentTime) - 1] = '\0';
         log_message(LOG_DEBUG, "Comparing times for periodic commands, next time: %s, current time: %s", strNextTime, strCurrentTime);
         */
-       
+
         if (periodicCommand->next_time <= currentTime) {
             // Enqueue the command into the commandQueue
             command cmd = *periodicCommand->command;
@@ -323,6 +320,10 @@ static command** lookForCommandOnSlack(command** headOfCommandQueue){
         log_message(LOG_ERROR, "Memory allocation failed");
     }
 
+    if (chunk.response) {
+        chunk.response = NULL;
+        chunk.size = 0;
+    }
 
     slackMsg = getSlackMessage(slackMsg);
 
@@ -379,7 +380,7 @@ command** checkForCommand(command** headOfCommandQueue, PeriodicCommand** headOf
     log_message(LOG_DEBUG, "Entering function checkForCommand");
 
     headOfCommandQueue = lookForCommandOnSlack(headOfCommandQueue);
-    headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);
+    //headOfCommandQueue = lookForNewlyUpdatedPages(headOfCommandQueue);
     headOfCommandQueue = checkAndEnqueuePeriodicCommands(headOfCommandQueue, headOfPeriodicCommands);
 
     log_message(LOG_DEBUG, "Exiting function checkForCommand");
@@ -496,15 +497,89 @@ PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicComm
     return headOfPeriodicCommands;
 }
 
+void breakdownCommand(char* sentence, command* cmd) {
+    log_message(LOG_DEBUG, "Entering function breakdownCommand");
+
+    char* words[MAX_ARGUMENTS];
+    char* token;
+    int word_count = 0;
+
+    // Copy the sentence to avoid modifying the original string
+    char* sentence_copy = strdup(sentence);
+
+    // Tokenize the sentence
+    token = strtok(sentence_copy, " ");
+    while (token != NULL && word_count < MAX_ARGUMENTS) {
+        words[word_count++] = token;
+        token = strtok(NULL, " ");
+    }
+
+    // Check if the sentence has more than ten words
+    if (word_count > MAX_ARGUMENTS) {
+        log_message(LOG_ERROR, "Error: Sentence contains more than ten words.");
+        free(sentence_copy);
+        return;
+    }
+
+    // Initialize the command struct fields to NULL
+    cmd->function = NULL;
+    cmd->argument_1 = NULL;
+    cmd->argument_2 = NULL;
+    cmd->argument_3 = NULL;
+    cmd->argument_4 = NULL;
+    cmd->argument_5 = NULL;
+    cmd->argument_6 = NULL;
+    cmd->argument_7 = NULL;
+    cmd->argument_8 = NULL;
+    cmd->argument_9 = NULL;
+
+    // Copy words into struct fields
+    for (int i = 0; i < word_count; i++) {
+        switch (i) {
+            case 0:
+                cmd->function = strdup(words[i]);
+                break;
+            case 1:
+                cmd->argument_1 = strdup(words[i]);
+                break;
+            case 2:
+                cmd->argument_2 = strdup(words[i]);
+                break;
+            case 3:
+                cmd->argument_3 = strdup(words[i]);
+                break;
+            case 4:
+                cmd->argument_4 = strdup(words[i]);
+                break;
+            case 5:
+                cmd->argument_5 = strdup(words[i]);
+                break;
+            case 6:
+                cmd->argument_6 = strdup(words[i]);
+                break;
+            case 7:
+                cmd->argument_7 = strdup(words[i]);
+                break;
+            case 8:
+                cmd->argument_8 = strdup(words[i]);
+                break;
+            case 9:
+                cmd->argument_9 = strdup(words[i]);
+                break;
+            default:
+                break;
+        }
+    }
+
+    free(sentence_copy);
+
+    log_message(LOG_DEBUG, "Exiting function breakdownCommand");
+}
+
 command** executeCommand(command** commandQueue){
     log_message(LOG_DEBUG, "Entering function executeCommand");
 
-    //TerminalCommandFeatures
-    if((*commandQueue)->function && strcmp((*commandQueue)->function, "getPages") == 0){ //works
-        getPages(**commandQueue);
-    }
-
-    else if((*commandQueue)->function && strcmp((*commandQueue)->function, "shutdown") == 0){ //works
+    if((*commandQueue)->function && strcmp((*commandQueue)->function, "shutdown") == 0){ //works
         sendMessageToSlack("Shutting down");
 
         if(chunk.response){
@@ -512,26 +587,6 @@ command** executeCommand(command** commandQueue){
         }
 
         exit(0);
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildLinksTracker") == 0){ //Works
-        buildLinksTracker();
-        sendMessageToSlack("Link tracker page created");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateLinksTracker") == 0){ //Works
-        updateLinksTracker();
-        sendMessageToSlack("Link tracker page updated");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "movePage") == 0){ //Works
-        movePage(**commandQueue);
-        sendMessageToSlack("Page has been moved and links have been updated");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "syncSheetToDRL") == 0){
-        syncSheetToDrl(**commandQueue);
-        sendMessageToSlack("Finished parsing.");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateDRL") == 0){
@@ -554,88 +609,10 @@ command** executeCommand(command** commandQueue){
         sendMessageToSlack("Token Refreshed");
     }
 
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "onPageUpdate") == 0){
-        onPageUpdate(**commandQueue);
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildMap") == 0){ //works
-        char* map = buildMap(**commandQueue);
-        
-        sendMessageToSlack(map);
-
-        free(map);
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildLocalGraph") == 0){ //Works
-        char* localGraph = buildLocalGraph(**commandQueue);
-
-        sendMessageToSlack(localGraph);
-
-        free(localGraph);
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateStatsPage") == 0){
-        updateStatsPage(**commandQueue);
-    }
-
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "createMissingRequirementPages") == 0){
         createMissingRequirementPages(**commandQueue);
+        sendMessageToSlack("Pages were created");
     }
-
-/*
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "getPDF") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    if((*commandQueue)->function && strcmp((*commandQueue)->function, "getZip") == 0){
-        getZip(**commandQueue);
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "buildImageTracker") == 0){
-        //buildImageTracker(**commandQueue);
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateImageTracker") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "notifyMe") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "stopNotifyMe") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateAccronymTracker") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateBrokenLinksTracker") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateSync") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "spellCheckAI") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "summariesAI") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "suggestionsAI") == 0){
-        sendMessageToSlack("I'm sorry but this function is not ready yet :le_svobovs:");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "replaceText") == 0){
-        replaceText(**commandQueue);
-    }
-    */
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "help") == 0){
         sendMessageToSlack("Here is a list of commands: ");
@@ -656,16 +633,10 @@ command** executeCommand(command** commandQueue){
         sendMessageToSlack("updateDRL");
         sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
         sendMessageToSlack("-> example: updateDRL ST");
-        //sendMessageToSlack("-----------------");
-        //sendMessageToSlack("movePage");
-        //sendMessageToSlack("-> :alert: WARNING :alert: : This feature is still partially broken. Please run buildLinksTracker before moving a page.");
-        //sendMessageToSlack("-> Description: moves a page and updates all of the links on the wiki");
-        //sendMessageToSlack("-> Argument (2) (obligatory): the current path of the page and the new path of the page.");
-        //sendMessageToSlack("-> Example: movePage competition/current_path competition/new_path");
     }
 
     else{
-        sendMessageToSlack("Uknown Command :rayane_side_eyeing:");
+        sendMessageToSlack("Unknown Command :rayane_side_eyeing:");
     }
 
     removeFirstCommand(commandQueue);

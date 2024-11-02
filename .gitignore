@@ -1,7 +1,18 @@
 # Ignore logs directory
 /logs/
-
 /memcheck_log/
 
 #ignore executable
 ERTbot
+ERTbot_tests
+
+#Ignore build directory
+/build/
+
+#Ignore clangd setting for zed
+.clangd
+compile_commands.json
+.vscode
+
+#Ignore build and run scripts
+build_and_test.sh
