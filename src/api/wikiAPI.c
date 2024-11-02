@@ -412,9 +412,10 @@ void createPageMutation(char* path, char* content, char* title){
 }
 
 char *fetchAndModifyPageContent(char* pageId, char* newPageContent, char* outputString){
+    log_message(LOG_DEBUG, "Entering function fetchAndModifyPageContent");
 
     pageList* page = NULL;
-    page = addPageToList(&page, pageId, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    page = addPageToList(&page, pageId, "", "", "", "", "", "", "");
     page = getPage(&page);
 
     outputString = malloc(strlen(page->content) + 1);
@@ -429,6 +430,8 @@ char *fetchAndModifyPageContent(char* pageId, char* newPageContent, char* output
     updatePageContentMutation(page);
 
     freePageList(&page);
+
+    log_message(LOG_DEBUG, "Exiting function fetchAndModifyPageContent");
 
     return outputString;
 }
