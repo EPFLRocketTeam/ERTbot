@@ -22,8 +22,8 @@ START_TEST(test_syncDrlToSheet) {
     syncDrlToSheet(cmd);
 
     pageList* drlPage = NULL;
-    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-    
+    drlPage = addPageToList(&drlPage, "1995", "", "", "", "", "", "", "");
+
     getPage(&drlPage);
 
     ck_assert_str_eq(drlPage->content, UT_DRL);

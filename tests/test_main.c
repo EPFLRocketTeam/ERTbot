@@ -8,11 +8,14 @@ int main(void) {
     log_message(LOG_DEBUG, "\n\nStarting Tests\n\n");
 
     int number_failed;
-    Suite *s;
+    Suite *s1, *s2;
     SRunner *sr;
 
-    s = stringHelpers_suite();
-    sr = srunner_create(s);
+    s1 = stringHelpers_suite();
+    sr = srunner_create(s1);
+
+    s2 = syncDrlToSheet_suite();
+    srunner_add_suite(sr, s2);
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);
