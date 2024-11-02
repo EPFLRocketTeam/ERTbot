@@ -1,8 +1,8 @@
 # ERTbot
-The ERTbot is a program which can automate certain tasks across several platforms. It is mainly used for syncing requirements from a google sheet into different forms on our wiki.js instance.
+A cross-platform automation tool for Slack, Google Sheets, Wiki.js, and GitHub.
 
 # Installing
-## Requiremets
+## Requirements
 To set up the project, ensure you have the following dependencies installed:
 
 ### libcurl
@@ -65,19 +65,20 @@ cp script_template.sh build_and_run.sh
 2. Add you API tokens
 Replace all of the ```YOUR API TOKEN``` place holder text with your API tokens.
 
-3. Make the script
+3. Make the script executable.
 ```bash
 chmod +x build_and_run.sh
 ```
 
-4. Run the program with your new script
+# Running
+Run the program with the script.
 
 ```bash
 ./build_and_run
 ```
 
 # Running Tests
-1. Uncomment Run test section in script
+1. Uncomment the run test section in script
 
 ```
 echo "Running tests..."
