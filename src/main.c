@@ -7,11 +7,6 @@
  *          inline commands on wiki and periodic commands), recognise the command, call the appropriate
  *          function in the features.c file.
  *
- * @todo - Add an option to run through terminal commands instead of slack commands
- *       - Add Feature: appendToListOfPages and prependToListOfPages
- *       - Redo replaceWord implementation to fix memory leaks
- *       - Redo replaceParagraph implementation to fix memory leaks
- *
  * @warning replaceWord function is still causing memory leaks (responsible for 1/3 of memory leaks)
  */
 
@@ -74,10 +69,6 @@ int main(){
         }
     }
 
-    sendMessageToSlack("Shutting Down");
-    fprintf(stderr, "Shutting Down");
     return 0;
-
-    log_message(LOG_DEBUG, "Exiting function main");
 }
 #endif

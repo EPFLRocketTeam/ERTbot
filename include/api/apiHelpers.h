@@ -80,7 +80,7 @@ void initializeApiTokenVariables();
  *          The received data is appended to the buffer, and the buffer is null-terminated to ensure it
  *          remains a valid C-string.
  */
-size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp);
+size_t writeCallback(const void *data, size_t size, size_t nmemb, void *clientp);
 
 /**
  * @brief Parses a JSON string to extract the value associated with a given key.
@@ -99,7 +99,7 @@ size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp);
  *  "key": "value" add the colon to the key
  *  "key":"value" do not add the colon to the key
  */
-char *jsonParserGetStringValue(char *json, char *key);
+char *jsonParserGetStringValue(const char *json, char *key);
 
-char *jsonParserGetIntValue(char *json, char *key);
+char *jsonParserGetIntValue(const char *json, char *key);
 #endif

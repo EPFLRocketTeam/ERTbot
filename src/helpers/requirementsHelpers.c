@@ -8,9 +8,6 @@
 
 cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
     log_message(LOG_DEBUG, "Entering function parseArrayIntoJSONRequirementList");
-    
-
-    //log_message(LOG_DEBUG, "input_str: %s\n", input_str);
 
     // Parse the input string as JSON
     cJSON *input_json = cJSON_Parse(input_str);
@@ -52,10 +49,10 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
     // Iterate over the input array of arrays and create JSON objects for each requirement
     int num_reqs = cJSON_GetArraySize(values_array);
     for (int i = 0; i < num_reqs; i++) {
-        
+
         cJSON *req_array = cJSON_GetArrayItem(values_array, i);
-        
-    
+
+
         // Create a JSON object for the current requirement
         cJSON *req = cJSON_CreateObject();
         if (!req) {
@@ -80,7 +77,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
             continue;
         }
 
-        
+
         cJSON_AddStringToObject(req, "Title", cJSON_GetArrayItem(req_array, REQ_TITLE_COL) ?
             cJSON_GetArrayItem(req_array, REQ_TITLE_COL)->valuestring :
             "");
@@ -108,7 +105,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
         cJSON_AddStringToObject(req, "Assignee", cJSON_GetArrayItem(req_array, REQ_ASSIGNEE_COL) ?
             cJSON_GetArrayItem(req_array, REQ_ASSIGNEE_COL)->valuestring :
             "");
-        
+
         cJSON_AddStringToObject(req, "Review 1 Verification 1 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_1_METHOD_COL) ?
             cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_1_METHOD_COL)->valuestring :
             "N/A");
@@ -127,7 +124,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
         cJSON_AddStringToObject(req, "Review 1 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_3_STATUS_COL) ?
             cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_3_STATUS_COL)->valuestring :
             "N/A");
-        
+
         cJSON_AddStringToObject(req, "Review 2 Verification 1 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_1_METHOD_COL) ?
             cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_1_METHOD_COL)->valuestring :
             "N/A");
@@ -146,7 +143,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
         cJSON_AddStringToObject(req, "Review 2 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_3_STATUS_COL) ?
             cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_3_STATUS_COL)->valuestring :
             "N/A");
-        
+
         cJSON_AddStringToObject(req, "Review 3 Verification 1 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_1_METHOD_COL) ?
             cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_1_METHOD_COL)->valuestring :
             "N/A");
@@ -223,16 +220,13 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
             cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_3_STATUS_COL)->valuestring :
             "N/A");
 
-        //cJSON_AddStringToObject(req, "Path", cJSON_GetArrayItem(req_array, REQ_PATH_COL)->valuestring);
-        
-
         // Add the requirement object to the requirements array
         cJSON_AddItemToArray(requirements, req);
 
         log_message(LOG_DEBUG, "Finished parsing array");
     }
 
-    
+
     log_message(LOG_DEBUG, "Exiting function parseArrayIntoJSONRequirementList");
 
 

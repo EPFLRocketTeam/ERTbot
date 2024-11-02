@@ -2,8 +2,6 @@
  * @file wikiAPI.c
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
  * @brief Contains all of the functions which are only used to interact with the wiki APIs.
- *
- * @todo Tidy up how the query templates are stored/defined/decalred use snprintf wiht %s instead of default values...
  */
 
 #include <stdbool.h>
@@ -85,7 +83,7 @@ void wikiApi(char *query){
         if (http_code != 200) {
             log_message(LOG_ERROR, "wikiApi: HTTP request failed with status code %ld", http_code);
             log_message(LOG_ERROR, "chunk.resposnse: %s", chunk.response);
-            exit(-1);;
+            exit(-1);
         }
         // Clean up
         curl_easy_cleanup(curl);
@@ -136,7 +134,7 @@ void getPageContentQuery(char* id){
  * @warning Ensure that `template_list_pages_sortByPath_query` and `template_list_pages_sortByTime_query` are correctly
  *          defined, and that the `wikiApi` function is properly set up to handle the API request.
  */
-void getListQuery(char *sort){
+static void getListQuery(const char *sort){
     log_message(LOG_DEBUG, "Entering function getListQuery");
 
     if(strcmp(sort, "path") == 0 || strcmp(sort, "exact path") == 0){
@@ -178,7 +176,7 @@ pageList* getPage(pageList** head){
 }
 
 // Function to filter and parse the JSON string into a Node linked list
-pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* filterCondition) {
+static pageList* parseJSON(pageList** head, const char* jsonString, const char* filterType, char* filterCondition) {
     log_message(LOG_DEBUG, "Entering function parseJSON");
 
 
@@ -411,7 +409,7 @@ void createPageMutation(char* path, char* content, char* title){
     log_message(LOG_DEBUG, "Exiting function createPageMutation");
 }
 
-char *fetchAndModifyPageContent(char* pageId, char* newPageContent, char* outputString){
+char *fetchAndModifyPageContent(char* pageId, const char* newPageContent, char* outputString){
     log_message(LOG_DEBUG, "Entering function fetchAndModifyPageContent");
 
     pageList* page = NULL;

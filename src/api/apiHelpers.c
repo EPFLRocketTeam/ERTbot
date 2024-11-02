@@ -2,8 +2,6 @@
  * @file api.c
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
  * @brief contains helper functions which are used by several api handling functions
- *
- * @todo revamp jsonParserGetStringValue to uses cJSON
  */
 
 #include <stdlib.h>
@@ -36,7 +34,7 @@ void initializeApiTokenVariables() {
 }
 
 
-size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp) {
+size_t writeCallback(const void *data, size_t size, size_t nmemb, void *clientp) {
     log_message(LOG_DEBUG, "Entering function writeCallback");
 
     size_t realsize = size * nmemb; // set the size of the chunk of memory
@@ -57,7 +55,7 @@ size_t writeCallback(void *data, size_t size, size_t nmemb, void *clientp) {
     return realsize;
 }
 
-char *jsonParserGetStringValue(char *json, char *key) {
+char *jsonParserGetStringValue(const char *json, char *key) {
     log_message(LOG_DEBUG, "Entering function jsonParserGetStringValue");
 
     char *start = strstr(json, key);
@@ -93,7 +91,7 @@ char *jsonParserGetStringValue(char *json, char *key) {
     return value;
 }
 
-char *jsonParserGetIntValue(char *json, char *key) {
+char *jsonParserGetIntValue(const char *json, char *key) {
     log_message(LOG_DEBUG, "Entering function jsonParserGetIntValue");
 
     // Find the key in the JSON string

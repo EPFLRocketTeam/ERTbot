@@ -12,41 +12,41 @@
 
 /**
  * @brief Creates a Vega chart configuration for a pie chart depicting verification statuses.
- * 
+ *
  * This function generates a Vega chart specification for a pie chart that visualizes the distribution of three categories: unverified, partially verified, and verified populations. The chart is formatted using Vega's schema and is designed to be displayed with the `kroki` tool.
- * 
+ *
  * @param unverifiedPopulation A string representing the population of unverified items. This value is inserted into the Vega chart configuration.
  * @param partiallyVerifiedPopulation A string representing the population of partially verified items. This value is inserted into the Vega chart configuration.
  * @param verifiedPopulation A string representing the population of verified items. This value is inserted into the Vega chart configuration.
- * 
+ *
  * @return A dynamically allocated string containing the Vega chart specification. The returned string includes the provided population values substituted into the template.
- * 
+ *
  * @details
  * - The function starts with a predefined Vega chart template in string format.
  * - It replaces placeholder values (`DefaultUnverifiedPopulation`, `DefaultPartiallyVerifiedPopulation`, `DefaultVerifiedPopulation`) in the template with the provided arguments.
  * - The final Vega chart specification is returned, ready to be used for rendering a pie chart.
  */
-static char *createVcdPieChart(int* verificationStatusCount);
+static char *createVcdPieChart(const int* verificationStatusCount);
 
 /**
  * @brief Updates a JSON string representing a stacked area chart with new weekly data.
- * 
+ *
  * This function updates a JSON string that contains data for a stacked area chart by adding new data points for the specified week. The new data points include verified, partially verified, and unverified values.
- * 
+ *
  * @param json_str A string containing the JSON data of the existing chart. This JSON is expected to have a "data" object with a "values" array where new entries will be added.
  * @param week A string representing the week for which the data is being added. This value will be included in each new data entry.
  * @param verifiedValue An integer representing the value for the "Verified" status for the given week.
  * @param partiallyVerifiedValue An integer representing the value for the "Partially Verified" status for the given week.
  * @param unverifiedValue An integer representing the value for the "Unverified" status for the given week.
- * 
+ *
  * @return A dynamically allocated string containing the updated JSON data, with new data points added to the "values" array. The caller is responsible for freeing this string.
- * 
+ *
  * @details
  * - The function parses the input JSON string and retrieves the "values" array from the "data" object.
  * - Three new JSON objects are created, each representing one of the statuses ("Verified", "Partially Verified", "Unverified") with their corresponding values and the specified week.
  * - These new JSON objects are added to the "values" array.
  * - The updated JSON structure is converted back to a string and returned.
- * - If any error occurs during parsing or updating, the function returns `NULL`. 
+ * - If any error occurs during parsing or updating, the function returns `NULL`.
  */
 static char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue);
 
@@ -58,7 +58,7 @@ static char *buildVcdList(cJSON *requirementList, char* subSystem);
 
 void updateVcdPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateVcdPage");
-    
+
     refreshOAuthToken();
 
     char *sheetId;
@@ -89,7 +89,7 @@ void updateVcdPage(command cmd){
         sheetId = "AV!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "TE")==0){
-        vcdPageId = 
+        vcdPageId =
         sheetId = "TE!A3:AT300";
     }
     if(strcmp(cmd.argument_1, "PL")==0){
@@ -112,7 +112,7 @@ void updateVcdPage(command cmd){
     char *VCD = pieChart;
     char *listOfRequirements = buildVcdList(requirementList, cmd.argument_1);
     VCD = appendToString(VCD, listOfRequirements);
-    
+
     free(listOfRequirements);
 
     pageList* vcdPage = NULL;
@@ -124,19 +124,6 @@ void updateVcdPage(command cmd){
     updatePageContentMutation(vcdPage);
     renderMutation(&vcdPage, false);
 
-    /* Stacked Area chart
-    char *extractedText = extractText(vcdPage->content, "<!-- Status history -->\\n```kroki\\nvegalite\\n", "\\n```\\n", false, false);
-    extractedText = replaceWord(extractedText, "\\n", "\n");
-    extractedText = replaceWord(extractedText, "\\\"", "\"");
-    char *stackedAreaChart = updateVcdStackedAreaChart(extractedText, "20/24", 33, 33, 34);    
-    stackedAreaChart = createCombinedString("<!-- Status history -->\n```kroki\nvegalite\n", stackedAreaChart);
-    stackedAreaChart = appendToString(stackedAreaChart, "\n```\n");
-    fprintf(stderr, "\n\n%s\n\n", stackedAreaChart);
-    free(stackedAreaChart);
-    //free(extractedText);
-    */
-    
-    
     cJSON_Delete(requirementList);
     freePageList(&vcdPage);
 
@@ -148,7 +135,7 @@ void updateVcdPage(command cmd){
 
 static char *buildVcdList(cJSON *requirementList, char* subSystem){
     log_message(LOG_DEBUG, "Entering function buildVcdList");
-    
+
     // Get the requirements array from the requirementList object
     cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
@@ -172,7 +159,7 @@ static char *buildVcdList(cJSON *requirementList, char* subSystem){
     const char *UVAN_header = "\n### Analysis\n";
     const char *IPVAN_header = "\n### Analysis\n";
     const char *VAN_header  = "\n### Analysis\n";
-    
+
 
     char *VCD = (char *)malloc(strlen(VCD_header) + 1);
     char *UVROD = (char *)malloc(strlen(UVROD_header) + 1);
@@ -224,7 +211,7 @@ static char *buildVcdList(cJSON *requirementList, char* subSystem){
             log_message(LOG_DEBUG, "ID is smaller than one, breaking");
             break;
         }
-        
+
         if(title == NULL|| strstr(id->valuestring, "2024_") == NULL){
             log_message(LOG_DEBUG, "Found a new group: %s", id->valuestring);
             continue;
@@ -240,7 +227,7 @@ static char *buildVcdList(cJSON *requirementList, char* subSystem){
 
         char **targetList = NULL;
 
-        
+
         for(int i = 0; i < 3; i++){
             cJSON *tempStatus = NULL;
             cJSON *tempMethod = NULL;
@@ -254,21 +241,21 @@ static char *buildVcdList(cJSON *requirementList, char* subSystem){
                 log_message(LOG_DEBUG, "tempStatus string values: %s", tempStatus->valuestring);
                 log_message(LOG_DEBUG, "tempMethod string values: %s", tempMethod->valuestring);
                 break;
-            
+
             case 1:
                 tempStatus = R1V2S;
                 tempMethod = R1V2M;
                 log_message(LOG_DEBUG, "tempStatus string values: %s", tempStatus->valuestring);
                 log_message(LOG_DEBUG, "tempMethod string values: %s", tempMethod->valuestring);
                 break;
-            
+
             case 2:
                 tempStatus = R1V3S;
                 tempMethod = R1V3M;
                 log_message(LOG_DEBUG, "tempStatus string values: %s", tempStatus->valuestring);
                 log_message(LOG_DEBUG, "tempMethod string values: %s", tempMethod->valuestring);
                 break;
-            
+
             default:
                 break;
             }
@@ -336,7 +323,7 @@ static char *buildVcdList(cJSON *requirementList, char* subSystem){
                 *targetList = appendToString(*targetList, id->valuestring);
                 *targetList = appendToString(*targetList, ") **");
             }
-        
+
             if (cJSON_IsString(title) && title->valuestring) {
                 log_message(LOG_DEBUG, "title: %s", title->valuestring);
                 *targetList = appendToString(*targetList, title->valuestring);
@@ -426,14 +413,14 @@ static char *buildVcdList(cJSON *requirementList, char* subSystem){
     if(VAN){
         free(VAN);
     }
-    
+
     log_message(LOG_DEBUG, "Exiting function buildVcdList");
     return VCD;
 }
 
 void countVerificationStatus(cJSON *requirementList, int* verificationStatusCount){
     log_message(LOG_DEBUG, "Entering function countVerificationStatus");
-    
+
     // Get the requirements array from the requirementList object
     cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
@@ -468,25 +455,25 @@ void countVerificationStatus(cJSON *requirementList, int* verificationStatusCoun
             continue;
         }
 
-        for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++){
 
             cJSON *tempStatus = NULL;
-            
 
-            switch (i)
+
+            switch (j)
             {
             case 0:
                 tempStatus = R1V1S;
                 break;
-            
+
             case 1:
                 tempStatus = R1V2S;
                 break;
-            
+
             case 2:
                 tempStatus = R1V3S;
                 break;
-            
+
             default:
                 break;
             }
@@ -532,13 +519,13 @@ void countVerificationStatus(cJSON *requirementList, int* verificationStatusCoun
     verificationStatusCount[0] = uncompleteCount;
     verificationStatusCount[1] = partiallyCount;
     verificationStatusCount[2] = verifiedCount;
-    
+
     return;
 }
 
-static char *createVcdPieChart(int* verificationStatusCount){
+static char *createVcdPieChart(const int* verificationStatusCount){
     log_message(LOG_DEBUG, "Entering function createVcdPieChart");
-    
+
 
     char *pieChart = "```kroki\nvega\n\n{\n  \"$schema\": \"https://vega.github.io/schema/vega/v5.0.json\",\n  \"width\": 350,\n  \"height\": 350,\n  \"autosize\": \"pad\",\n  \"signals\": [\n    {\"name\": \"startAngle\", \"value\": 0},\n    {\"name\": \"endAngle\", \"value\": 6.29},\n    {\"name\": \"padAngle\", \"value\": 0},\n    {\"name\": \"sort\", \"value\": true},\n    {\"name\": \"strokeWidth\", \"value\": 2},\n    {\n      \"name\": \"selected\",\n      \"value\": \"\",\n      \"on\": [{\"events\": \"mouseover\", \"update\": \"datum\"}]\n    }\n  ],\n  \"data\": [\n    {\n      \"name\": \"table\",\n      \"values\": [\n        {\"continent\": \"Unverified\", \"population\": DefaultUnverifiedPopulation},\n        {\"continent\": \"Partially Verified\", \"population\": DefaultPartiallyVerifiedPopulation},\n        {\"continent\": \"Verified\", \"population\": DefaultVerifiedPopulation}\n      ],\n      \"transform\": [\n        {\n          \"type\": \"pie\",\n          \"field\": \"population\",\n          \"startAngle\": {\"signal\": \"startAngle\"},\n          \"endAngle\": {\"signal\": \"endAngle\"},\n          \"sort\": {\"signal\": \"sort\"}\n        }\n      ]\n    },\n    {\n      \"name\": \"fieldSum\",\n      \"source\": \"table\",\n      \"transform\": [\n        {\n          \"type\": \"aggregate\",\n          \"fields\": [\"population\"],\n          \"ops\": [\"sum\"],\n          \"as\": [\"sum\"]\n        }\n      ]\n    }\n  ],\n  \"legends\": [\n    {\n      \"fill\": \"color\",\n      \"title\": \"Legends\",\n      \"orient\": \"none\",\n      \"padding\": {\"value\": 10},\n      \"encode\": {\n        \"symbols\": {\"enter\": {\"fillOpacity\": {\"value\": 1}}},\n        \"legend\": {\n          \"update\": {\n            \"x\": {\n              \"signal\": \"(width / 2) + if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.1 * 0.8, if(width >= height, height, width) / 2 * 0.8)\",\n              \"offset\": 20\n            },\n            \"y\": {\"signal\": \"(height / 2)\", \"offset\": -50}\n          }\n        }\n      }\n    }\n  ],\n  \"scales\": [\n    {\"name\": \"color\", \"type\": \"ordinal\", \"range\": [\"#cf2608\", \"#ff9900\", \"#67b505\"]}\n  ],\n  \"marks\": [\n    {\n      \"type\": \"arc\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"fill\": {\"scale\": \"color\", \"field\": \"continent\"},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"}\n        },\n        \"update\": {\n          \"startAngle\": {\"field\": \"startAngle\"},\n          \"endAngle\": {\"field\": \"endAngle\"},\n          \"cornerRadius\": {\"value\": 15},\n          \"padAngle\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.015, 0.015)\"\n          },\n          \"innerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 0.45, if(width >= height, height, width) / 2 * 0.5)\"\n          },\n          \"outerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.8, if(width >= height, height, width) / 2 * 0.8)\"\n          },\n          \"opacity\": {\n            \"signal\": \"if(selected && selected.continent !== datum.continent, 1, 1)\"\n          },\n          \"stroke\": {\"signal\": \"scale('color', datum.continent)\"},\n          \"strokeWidth\": {\"signal\": \"strokeWidth\"},\n          \"fillOpacity\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.8, 0.8)\"\n          }\n        }\n      }\n    },\n    {\n      \"type\": \"text\",\n      \"encode\": {\n        \"enter\": {\"fill\": {\"value\": \"#525252\"}, \"text\": {\"value\": \"\"}},\n        \"update\": {\n          \"opacity\": {\"value\": 1},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"},\n          \"fontSize\": {\"signal\": \"if(width >= height, height, width) * 0.05\"},\n          \"text\": {\"value\": \"Verification Status\"}\n        }\n      }\n    },\n    {\n      \"name\": \"mark_population\",\n      \"type\": \"text\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"text\": {\n            \"signal\": \"if(datum['endAngle'] - datum['startAngle'] < 0.3, '', format(datum['population'] / 1, '.0f'))\"\n          },\n          \"x\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"y\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"radius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.65, if(width >= height, height, width) / 2 * 0.65)\"\n          },\n          \"theta\": {\"signal\": \"(datum['startAngle'] + datum['endAngle'])/2\"},\n          \"fill\": {\"value\": \"#FFFFFF\"},\n          \"fontSize\": {\"value\": 12},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"}\n        }\n      }\n    }\n  ]\n}\n\n```";
 
@@ -562,10 +549,10 @@ static char *createVcdPieChart(int* verificationStatusCount){
 
 static char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue) {
     log_message(LOG_DEBUG, "Entering function updateVcdStackedAreaChart");
-    
+
 
     log_message(LOG_DEBUG, "JSON string: %s", json_str);
-    
+
     // Parse the input JSON string
     cJSON *root = cJSON_Parse(json_str);
     if (root == NULL) {
@@ -615,7 +602,7 @@ static char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedV
     // Clean up
     cJSON_Delete(root);
 
-    
+
     log_message(LOG_DEBUG, "Exiting function updateVcdStackedAreaChart");
     return updated_json_str;
 }

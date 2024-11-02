@@ -1,13 +1,12 @@
 #ifndef ERTBOT_CONFIG_H
 #define ERTBOT_CONFIG_H
+
 //Github
-//#define GITHUB_API_TOKEN getenv("GITHUB_API_TOKEN")
 #define USER_AGENT "My-CURL-Program-ZUGMA" //User-Agent header required by GitHub API
 #define REPO_URL "https://api.github.com/repos/EPFLRocketTeam/ert_wiki/contents" //GitHub repository URL and image path
 
 
 //Wiki
-//#define WIKI_API_TOKEN getenv("WIKI_API_TOKEN")
 #define LINK_TRACKER_PAGE_ID "896"
 #define IMAGE_TRACKER_PAGE_ID "898"
 #define SYNC_TRACKER_PAGE_ID "899"
@@ -18,13 +17,7 @@
 #define TEST_REQ_PAGE_ID "1132"
 
 //Slack
-//Define your Slack API token and the channel where you want to upload the file
-//#define SLACK_API_TOKEN getenv("SLACK_API_TOKEN")
 #define SLACK_WIKI_TOOLBOX_CHANNEL "C06RQGVRKPU"
-
-//Sheet
-//#define SHEET_API_TOKEN getenv("SHEET_API_TOKEN")
-
 
 
 //Local
@@ -79,13 +72,9 @@
 #define REQ_REVIEW_6_VERIFICATION_3_METHOD_COL 44
 #define REQ_REVIEW_6_VERIFICATION_3_STATUS_COL 45
 
-
-
-
 #define REQ_SHEET_EMPTY_VALUE "N/A"
 #define MAXIMUM_NUMBER_OF_VERIFICATIONS_PER_REVIEW 3
 #define MAXIMUM_NUMBER_OF_REVIEWS 6
-
 
 #define REVIEW_1_NAME "TRR"
 #define REVIEW_2_NAME "CDR"
@@ -93,7 +82,6 @@
 #define REVIEW_4_NAME "SAR"
 #define REVIEW_5_NAME "ORR"
 #define REVIEW_6_NAME "FRR"
-
 
 #define CURRENT_REVIEW 1
 #endif

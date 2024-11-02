@@ -5,7 +5,7 @@
 
 char* createList(char *list, pageList** sectionTitle, pageList* links){
     log_message(LOG_DEBUG, "Entering function createList");
-    
+
     char *tempList = list;
     tempList = appendToString(tempList, "\\\\n\\\\n");
     tempList = appendToString(tempList, "## [");
@@ -13,7 +13,6 @@ char* createList(char *list, pageList** sectionTitle, pageList* links){
     tempList = appendToString(tempList, "](/");
     tempList = appendToString(tempList, (*sectionTitle)->path);
     tempList = appendToString(tempList, ")");
-    //tempList = appendToString(tempList, "\\\\n");
     while (links != NULL) {
         tempList = appendToString(tempList, "\\\\n");
         tempList = appendToString(tempList, links->path);
@@ -27,13 +26,13 @@ char* createList(char *list, pageList** sectionTitle, pageList* links){
     return tempList;
 }
 
-pageList* findPageLinks(char *content, pageList **links) {
+pageList* findPageLinks(const char *content, pageList **links) {
     log_message(LOG_DEBUG, "Entering function findPageLinks");
-    
+
     char *startFlag1 = "[";
     char *startFlag2 = "](";
     char *endFlag = ")";
-    char *ptr = content;
+    const char *ptr = content;
 
     while (*ptr) {
         // Find the closest "]("
@@ -90,20 +89,20 @@ pageList* findPageLinks(char *content, pageList **links) {
         ptr = linkEnd + strlen(endFlag);
     }
 
-    
+
     log_message(LOG_DEBUG, "Exiting function findPageLinks");
     return *links;
 }
 
-pageList* findImageLinks(char *input, pageList** head) {
+pageList* findImageLinks(const char *input, pageList** head) {
     log_message(LOG_DEBUG, "Entering function findImageLinks");
-    
+
     pageList* imageLinks = *head;
     int count = 0;
     char *startFlag1 = "![";
     char *startFlag2 = "](";
     char *endFlag = ")";
-    char *ptr = input;
+    const char *ptr = input;
 
     while (*ptr) {
         ptr = strstr(ptr, startFlag1);
@@ -142,14 +141,14 @@ pageList* findImageLinks(char *input, pageList** head) {
 
         ptr = linkEnd + strlen(endFlag);
     }
-    
+
     log_message(LOG_DEBUG, "Exiting function findImageLinks");
     return imageLinks;
 }
 
-pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *subjectPagePath) {
+pageList* findIncomingLinks(pageList** head, const char *linkTrackerContent, const char *subjectPagePath) {
     log_message(LOG_DEBUG, "Entering function findIncomingLinks");
-    
+
     pageList *incomingLinks = *head;
     char *contentCopy = strdup(linkTrackerContent);
     if (contentCopy == NULL) {
@@ -168,13 +167,13 @@ pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *sub
         if (titleEnd == NULL) break;
 
         char *pathStart = titleEnd + 3;
-        
+
         char *pathEnd = strstr(pathStart, ")");
         if (pathEnd == NULL) break;
 
         char *linksStart = pathEnd;
         char *link = strstr(linksStart, "\\n/");
-        
+
         while (linksStart != NULL && link != NULL && link <= nextSectionStart) {
             link += 3;
             char *linkEnd = strstr(link, "\\n");
@@ -195,7 +194,7 @@ pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *sub
             linksStart = strstr(linksStart, "\\n/");
 
         }
-        
+
         sectionStart = nextSectionStart;
 
         if(nextSectionStart != NULL){
@@ -205,12 +204,12 @@ pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *sub
         else{
             break;
         }
-        
-        
+
+
     }
 
     free(contentCopy);
-    
+
     log_message(LOG_DEBUG, "Exiting function findIncomingLinks");
     return incomingLinks;
 }

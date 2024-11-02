@@ -21,7 +21,7 @@ char *template_batch_update_query = "{\"valueInputOption\": \"USER_ENTERED\",\"d
 
 void sheetAPI(char *query, char *url, char *requestType) {
     log_message(LOG_DEBUG, "Entering function sheetAPI");
-    
+
     CURL *curl;
     CURLcode res;
     struct curl_slist *headers = NULL;
@@ -63,33 +63,31 @@ void sheetAPI(char *query, char *url, char *requestType) {
 
     curl_global_cleanup();
 
-    //log_message(LOG_DEBUG, "chunk.response after sheet API:%s", chunk.response);
-    
     log_message(LOG_DEBUG, "Exiting function sheetAPI");
 }
 
 void batchUpdateSheet(char *sheetId, char *range, char *values){
     log_message(LOG_DEBUG, "Entering function batchUpdateSheet");
-    
+
     char *requestType = "POST";
     char *temp_url = strdup(template_batch_update_url); // Make a copy to modify
     char *modified_url = replaceWord(temp_url, "DefaultSheetID", sheetId);
     char *temp_query = strdup(template_batch_update_query); // Make a copy to modify
     char *modified_query = replaceWord(temp_query, "DefaultRange", range);
     modified_query = replaceWord(modified_query, "DefaultValues", values);
-    
+
 
     sheetAPI(modified_query, modified_url, requestType);
 
     free(modified_query);
     free(modified_url);
-    
+
     log_message(LOG_DEBUG, "Exiting function batchUpdateSheet");
 }
 
 void batchGetSheet(char *sheetId, char *range){
     log_message(LOG_DEBUG, "Entering function batchGetSheet");
-    
+
     char *requestType = "GET";
     char *query = "";
     char *temp_url = strdup(template_batch_get_url); // Make a copy to modify
@@ -100,13 +98,13 @@ void batchGetSheet(char *sheetId, char *range){
 
     free(temp_url);
     free(modified_url);
-    
+
     log_message(LOG_DEBUG, "Exiting function batchGetSheet");
 }
 
 void refreshOAuthToken() {
     log_message(LOG_DEBUG, "Entering function refreshOAuthToken");
-    
+
     CURL *curl;
     CURLcode res;
 
@@ -156,7 +154,7 @@ void refreshOAuthToken() {
             SHEET_API_TOKEN = jsonParserGetStringValue(chunk.response, "\"access_token\":");
 
             log_message(LOG_DEBUG, "SHEET_API_TOKEN after refresh: %s", SHEET_API_TOKEN);
-            
+
             // Here you would parse the JSON response to extract the access token.
             // The response would look something like this:
             // {

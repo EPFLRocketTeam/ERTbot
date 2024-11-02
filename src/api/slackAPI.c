@@ -1,10 +1,9 @@
 /**
  * @file slackAPI.c
  * @author Ryan Svoboda (ryan.svoboda@epfl.ch)
- * @brief 
- * 
+ * @brief
+ *
  * @details Contains all of the functions which are only used to interact with the Slack APIs.
- * @todo add redundancy in case of slack message failure
  */
 
 #include <curl/curl.h>
@@ -16,7 +15,7 @@
 
 #define MAX_MESSAGE_LENGTH 100000
 
-static size_t muteCallback(void *ptr, size_t size, size_t nmemb, void *userdata) {
+static size_t muteCallback(const void *ptr, size_t size, size_t nmemb, const void *userdata) {
     // Do nothing with the data
     return size * nmemb;
 }
@@ -24,7 +23,7 @@ static size_t muteCallback(void *ptr, size_t size, size_t nmemb, void *userdata)
 
 int sendMessageToSlack( char *message) {
     log_message(LOG_DEBUG, "Entering function sendMessageToSlack");
-    
+
     CURL *curl;
     CURLcode res;
     struct curl_slist *headerlist = NULL;
@@ -76,14 +75,14 @@ int sendMessageToSlack( char *message) {
     }
 
     curl_global_cleanup();
-    
+
     log_message(LOG_DEBUG, "Exiting function sendMessageToSlack");
     return 0;
 }
 
 void checkLastSlackMessage() {
     log_message(LOG_DEBUG, "Entering function checkLastSlackMessage");
-    
+
     CURL *curl;
     CURLcode res;
     struct curl_slist *headers = NULL;
@@ -139,13 +138,13 @@ void checkLastSlackMessage() {
     }
 
     curl_global_cleanup();
-    
+
     log_message(LOG_DEBUG, "Exiting function checkLastSlackMessage");
 }
 
 slackMessage* getSlackMessage(slackMessage* slackMsg) {
     log_message(LOG_DEBUG, "Entering function getSlackMessage");
-    
+
     checkLastSlackMessage();
 
     slackMsg->message = jsonParserGetStringValue(chunk.response, "\"text\"");
@@ -154,7 +153,7 @@ slackMessage* getSlackMessage(slackMessage* slackMsg) {
 
     free(chunk.response);
 
-    
+
     log_message(LOG_DEBUG, "Exiting function getSlackMessage");
 
     return slackMsg;
@@ -162,7 +161,7 @@ slackMessage* getSlackMessage(slackMessage* slackMsg) {
 
 int addSlackMember(char *channels, char *email) {
     log_message(LOG_DEBUG, "Entering function addSlackMember");
-    
+
     CURL *curl;
     CURLcode res;
     struct curl_slist *headerlist = NULL;
@@ -201,7 +200,7 @@ int addSlackMember(char *channels, char *email) {
     }
     curl_global_cleanup();
 
-    
+
     log_message(LOG_DEBUG, "Exiting function addSlackMember");
     return 0;
 }
