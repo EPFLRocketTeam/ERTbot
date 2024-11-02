@@ -1,9 +1,9 @@
 #include <string.h>
 #include "ERTbot_common.h"
 
-pageList* addPageToList(pageList** head,  char *id, char *title, char *path, char *description, char *content, char *updatedAt, char *createdAt, char *authorId) {
+pageList* addPageToList(pageList** head, const char *id, const char *title, const char *path, const char *description, const char *content, const char *updatedAt, const char *createdAt, const char *authorId) {
     log_message(LOG_DEBUG, "Entering function addPageToList");
-    
+
     pageList* newNode = (pageList *)malloc(sizeof(pageList));
     if (!newNode) {
         log_message(LOG_ERROR, "Memory allocation error");
@@ -52,18 +52,18 @@ pageList* addPageToList(pageList** head,  char *id, char *title, char *path, cha
     // Link the new node after the last node
     lastNode->next = newNode;
 
-    
+
     log_message(LOG_DEBUG, "Exiting function addPageToList");
     return *head;
 }
 
 void freePageList(pageList** head) {
     log_message(LOG_DEBUG, "Entering function freePageList");
-    
+
     while (*head) {
         pageList* temp = *head;
         *head = (*head)->next;
-        
+
         // Debugging prints
         if (temp->id){
             log_message(LOG_DEBUG, "Freeing page struct variable id: %p", (void*)temp->id);
@@ -89,20 +89,20 @@ void freePageList(pageList** head) {
             log_message(LOG_DEBUG, "Freeing page struct variable updatedAt: %p", (void*)temp->updatedAt);
             free(temp->updatedAt);
         }
-        if (temp->createdAt){ 
+        if (temp->createdAt){
             log_message(LOG_DEBUG, "Freeing page struct variable createdAt: %p", (void*)temp->createdAt);
             free(temp->createdAt);
         }
-        if (temp->authorId){ 
+        if (temp->authorId){
             log_message(LOG_DEBUG, "Freeing page struct variable authorId: %p", (void*)temp->authorId);
             free(temp->authorId);
         }
-        
+
         log_message(LOG_DEBUG, "about to free page struct");
         free(temp);
         log_message(LOG_DEBUG, "freed page struct");
     }
 
-    
+
     log_message(LOG_DEBUG, "Exiting function freePageList");
 }

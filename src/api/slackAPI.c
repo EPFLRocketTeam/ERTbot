@@ -15,7 +15,7 @@
 
 #define MAX_MESSAGE_LENGTH 100000
 
-static size_t muteCallback(void *ptr, size_t size, size_t nmemb, void *userdata) {
+static size_t muteCallback(const void *ptr, size_t size, size_t nmemb, const void *userdata) {
     // Do nothing with the data
     return size * nmemb;
 }

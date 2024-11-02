@@ -134,7 +134,7 @@ void getPageContentQuery(char* id){
  * @warning Ensure that `template_list_pages_sortByPath_query` and `template_list_pages_sortByTime_query` are correctly
  *          defined, and that the `wikiApi` function is properly set up to handle the API request.
  */
-void getListQuery(char *sort){
+static void getListQuery(const char *sort){
     log_message(LOG_DEBUG, "Entering function getListQuery");
 
     if(strcmp(sort, "path") == 0 || strcmp(sort, "exact path") == 0){
@@ -176,7 +176,7 @@ pageList* getPage(pageList** head){
 }
 
 // Function to filter and parse the JSON string into a Node linked list
-pageList* parseJSON(pageList** head, char* jsonString, char* filterType, char* filterCondition) {
+static pageList* parseJSON(pageList** head, const char* jsonString, const char* filterType, char* filterCondition) {
     log_message(LOG_DEBUG, "Entering function parseJSON");
 
 
@@ -409,7 +409,7 @@ void createPageMutation(char* path, char* content, char* title){
     log_message(LOG_DEBUG, "Exiting function createPageMutation");
 }
 
-char *fetchAndModifyPageContent(char* pageId, char* newPageContent, char* outputString){
+char *fetchAndModifyPageContent(char* pageId, const char* newPageContent, char* outputString){
     log_message(LOG_DEBUG, "Entering function fetchAndModifyPageContent");
 
     pageList* page = NULL;

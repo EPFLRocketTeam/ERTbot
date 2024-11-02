@@ -26,7 +26,7 @@
  * - It replaces placeholder values (`DefaultUnverifiedPopulation`, `DefaultPartiallyVerifiedPopulation`, `DefaultVerifiedPopulation`) in the template with the provided arguments.
  * - The final Vega chart specification is returned, ready to be used for rendering a pie chart.
  */
-static char *createVcdPieChart(int* verificationStatusCount);
+static char *createVcdPieChart(const int* verificationStatusCount);
 
 /**
  * @brief Updates a JSON string representing a stacked area chart with new weekly data.
@@ -523,7 +523,7 @@ void countVerificationStatus(cJSON *requirementList, int* verificationStatusCoun
     return;
 }
 
-static char *createVcdPieChart(int* verificationStatusCount){
+static char *createVcdPieChart(const int* verificationStatusCount){
     log_message(LOG_DEBUG, "Entering function createVcdPieChart");
 
 

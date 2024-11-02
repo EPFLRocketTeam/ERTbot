@@ -87,7 +87,7 @@ pageList* populatePageList(pageList** head, char *filterType, char *filterCondit
 void createPageMutation(char* path, char* content, char* title);
 
 
-char *fetchAndModifyPageContent(char* pageId, char* newPageContent, char* outputString);
+char *fetchAndModifyPageContent(char* pageId, const char* newPageContent, char* outputString);
 
 void deletePageMutation(char* id);
 #endif

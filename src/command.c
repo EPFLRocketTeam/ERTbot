@@ -45,7 +45,7 @@ static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicComma
     return *headOfPeriodicCommands_Global;
 }
 
-static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands_Global, command* command, char* time_str) {
+static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands_Global, command* command, const char* time_str) {
     log_message(LOG_DEBUG, "Entering function scheduleDailyCommand");
 
     int hours, minutes;
@@ -94,7 +94,7 @@ static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands
     return *headOfPeriodicCommands_Global;
 }
 
-static command* addCommandToQueue(command** head,  char *function, char *argument_1, char *argument_2, char *argument_3, char *argument_4, char *argument_5, char *argument_6, char *argument_7, char *argument_8, char *argument_9) {
+static command* addCommandToQueue(command** head, const char *function, const char *argument_1, const char *argument_2, const char *argument_3, const char *argument_4, const char *argument_5, const char *argument_6, const char *argument_7, const char *argument_8, const char *argument_9) {
     log_message(LOG_DEBUG, "Entering function addCommandToQueue");
 
     command* newNode = (command *)malloc(sizeof(command));
@@ -483,7 +483,7 @@ PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicComm
     return headOfPeriodicCommands_Global;
 }
 
-void breakdownCommand(char* sentence, command* cmd) {
+void breakdownCommand(const char* sentence, command* cmd) {
     log_message(LOG_DEBUG, "Entering function breakdownCommand");
 
     char* words[MAX_ARGUMENTS];

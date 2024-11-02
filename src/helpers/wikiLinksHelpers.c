@@ -26,13 +26,13 @@ char* createList(char *list, pageList** sectionTitle, pageList* links){
     return tempList;
 }
 
-pageList* findPageLinks(char *content, pageList **links) {
+pageList* findPageLinks(const char *content, pageList **links) {
     log_message(LOG_DEBUG, "Entering function findPageLinks");
 
     char *startFlag1 = "[";
     char *startFlag2 = "](";
     char *endFlag = ")";
-    char *ptr = content;
+    const char *ptr = content;
 
     while (*ptr) {
         // Find the closest "]("
@@ -94,7 +94,7 @@ pageList* findPageLinks(char *content, pageList **links) {
     return *links;
 }
 
-pageList* findImageLinks(char *input, pageList** head) {
+pageList* findImageLinks(const char *input, pageList** head) {
     log_message(LOG_DEBUG, "Entering function findImageLinks");
 
     pageList* imageLinks = *head;
@@ -102,7 +102,7 @@ pageList* findImageLinks(char *input, pageList** head) {
     char *startFlag1 = "![";
     char *startFlag2 = "](";
     char *endFlag = ")";
-    char *ptr = input;
+    const char *ptr = input;
 
     while (*ptr) {
         ptr = strstr(ptr, startFlag1);
@@ -146,7 +146,7 @@ pageList* findImageLinks(char *input, pageList** head) {
     return imageLinks;
 }
 
-pageList* findIncomingLinks(pageList** head, char *linkTrackerContent, char *subjectPagePath) {
+pageList* findIncomingLinks(pageList** head, const char *linkTrackerContent, const char *subjectPagePath) {
     log_message(LOG_DEBUG, "Entering function findIncomingLinks");
 
     pageList *incomingLinks = *head;
