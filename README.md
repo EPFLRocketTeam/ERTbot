@@ -7,6 +7,7 @@ To set up the project, ensure you have the following dependencies installed:
 
 ### libcurl
 For calling the Slack, Google Sheets, Wiki.js, and GitHub APIs.
+
 **Linux**
 ```bash
 sudo apt-get update
@@ -19,6 +20,7 @@ brew install curl
 
 ### cJSON
 For handling cJSON formatted data.
+
 **Linux**
 ```bash
 sudo apt-get install libcjson-dev
@@ -30,6 +32,7 @@ brew install cjson
 
 ### Check
 For unit testing.
+
 **Linux**
 ```bash
 sudo apt-get install check
@@ -43,6 +46,7 @@ brew install check
 
 ### CMake
 For building the project.
+
 **Linux**
 ```bash
 sudo apt-get install cmake
