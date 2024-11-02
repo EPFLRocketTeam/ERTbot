@@ -111,7 +111,6 @@ void createMissingRequirementPages(command cmd){
             reqContent = appendToString(reqContent, "-->\\\\n");
             reqContent = appendToString(reqContent, reqContent);
             log_message(LOG_DEBUG, "About to create new page path:%s\nTitle:%s", reqPath, id->valuestring);
-            //getchar();
             createPageMutation(reqPath, reqContent, id->valuestring);
 
             free(reqPath);
