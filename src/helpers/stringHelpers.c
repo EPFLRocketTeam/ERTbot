@@ -14,7 +14,8 @@ char* replaceWord(const char* inputString, const char* wordToReplace, const char
     log_message(LOG_DEBUG, "Entering function replaceWord");
 
     char* result;
-    int i, cnt = 0;
+    int i;
+    int cnt = 0;
     int newWordLength = strlen(newWord);
     int wordToReplaceLength = strlen(wordToReplace);
 
@@ -36,12 +37,13 @@ char* replaceWord(const char* inputString, const char* wordToReplace, const char
     while (*inputString) {
         // compare the substring with the result
         if (strstr(inputString, wordToReplace) == inputString) {
-        strcpy(&result[i], newWord);
-        i += newWordLength;
-        inputString += wordToReplaceLength;
+            strcpy(&result[i], newWord);
+            i += newWordLength;
+            inputString += wordToReplaceLength;
         }
-        else
-        result[i++] = *inputString++;
+        else{
+            result[i++] = *inputString++;
+        }
     }
 
   result[i] = '\0';
@@ -53,12 +55,12 @@ char* replaceWord(const char* inputString, const char* wordToReplace, const char
 char* reformatNewLineCharacter(char *inputString) {
     log_message(LOG_DEBUG, "Entering function reformatNewLineCharacter");
 
-    int i, j;
+    int j;
     char *tempstr = inputString;
     int len = strlen(tempstr);
 
     // Loop through the string
-    for (i = 0; i < len - 1; i++) {
+    for (int i = 0; i < len - 1; i++) {
         // Check for "\n"
         if (tempstr[i] == '\\' && tempstr[i + 1] == 'n') {
             // Replace "\\n" with "\n"
@@ -191,7 +193,7 @@ char* getDocId(const char* str) {
     }
 }
 
-char* getParentFolder(char* str) {
+char* getParentFolder(const char* str) {
     log_message(LOG_DEBUG, "Entering function getParentFolder");
 
     // Find the last occurrence of '/'
@@ -207,7 +209,7 @@ char* getParentFolder(char* str) {
         *lastSlash = '\0';
 
         // Find the second last occurrence of '/'
-        char* secondLastSlash = strrchr(str, '/');
+        const char* secondLastSlash = strrchr(str, '/');
 
         // Restore the last slash in the original string
         *lastSlash = '/';
@@ -240,7 +242,7 @@ char* getParentFolder(char* str) {
 
 char* getDirPath(const char* str) {
     // Find the last occurrence of '/'
-    char* lastSlash = strrchr(str, '/');
+    const char* lastSlash = strrchr(str, '/');
 
     if (lastSlash == NULL) {
         // If no '/' is found, return NULL or an empty string
@@ -348,7 +350,7 @@ char* returnTextUntil(const char* str, const char* delimiter) {
     log_message(LOG_DEBUG, "Entering function returnTextUntil");
 
     // Find the position of the first newline character
-     char* newline_pos = strstr(str, delimiter);
+    const char* newline_pos = strstr(str, delimiter);
 
     // If newline character not found, return the entire string
     if (newline_pos == NULL) {

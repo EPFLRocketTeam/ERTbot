@@ -35,6 +35,7 @@ void sheetAPI(char *query, char *url, char *requestType) {
     if (curl) {
         // Set the URL for the request
         curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
         // Set the HTTP headers
         headers = curl_slist_append(headers, "Content-Type: application/json");
         char auth_header[1024];
@@ -66,7 +67,7 @@ void sheetAPI(char *query, char *url, char *requestType) {
     log_message(LOG_DEBUG, "Exiting function sheetAPI");
 }
 
-void batchUpdateSheet(char *sheetId, char *range, char *values){
+void batchUpdateSheet(const char *sheetId, const char *range, const char *values){
     log_message(LOG_DEBUG, "Entering function batchUpdateSheet");
 
     char *requestType = "POST";
@@ -81,11 +82,13 @@ void batchUpdateSheet(char *sheetId, char *range, char *values){
 
     free(modified_query);
     free(modified_url);
+    free(temp_url);
+    free(temp_query);
 
     log_message(LOG_DEBUG, "Exiting function batchUpdateSheet");
 }
 
-void batchGetSheet(char *sheetId, char *range){
+void batchGetSheet(const char *sheetId, const char *range){
     log_message(LOG_DEBUG, "Entering function batchGetSheet");
 
     char *requestType = "GET";
@@ -126,7 +129,7 @@ void refreshOAuthToken() {
     if(curl) {
         // Set the URL for the token request
         curl_easy_setopt(curl, CURLOPT_URL, "https://oauth2.googleapis.com/token");
-
+        curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
         // Specify that we want to send a POST request
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
@@ -146,25 +149,9 @@ void refreshOAuthToken() {
         if(res != CURLE_OK) {
             log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         } else {
-
-            log_message(LOG_DEBUG, "response when calling for token refresh: %s", chunk.response);
-
             //Yes the key value has an extra : compared to when the same function is called in wikiAPI functions
             //see the note on the jsonParserGetStringValue function
             SHEET_API_TOKEN = jsonParserGetStringValue(chunk.response, "\"access_token\":");
-
-            log_message(LOG_DEBUG, "SHEET_API_TOKEN after refresh: %s", SHEET_API_TOKEN);
-
-            // Here you would parse the JSON response to extract the access token.
-            // The response would look something like this:
-            // {
-            //   "access_token": "ya29.a0AfH6SM...",
-            //   "expires_in": 3599,
-            //   "scope": "https://www.googleapis.com/auth/spreadsheets",
-            //   "token_type": "Bearer"
-            // }
-            //
-            // You can use a JSON parser to extract the "access_token" from this response.
         }
 
         // Clean up

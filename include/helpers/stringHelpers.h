@@ -143,7 +143,7 @@ char* getDocId(const char* str);
  *
  * @warning Ensure that `str` is not `NULL` and contains at least one '/' character for meaningful results.
  */
-char* getParentFolder(char* str);
+char* getParentFolder(const char* str);
 
 /**
  * @brief Extracts the directory path from a given string by removing the filename or last segment after the last '/'.

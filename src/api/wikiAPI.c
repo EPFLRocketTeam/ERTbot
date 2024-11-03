@@ -55,6 +55,7 @@ void wikiApi(char *query){
     if (curl) {
         // Set the API URL
         curl_easy_setopt(curl, CURLOPT_URL, "https://rocket-team.epfl.ch/graphql");
+        curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
         // Set the HTTP method to POST
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
         // Set the Content-Type header
@@ -106,7 +107,7 @@ void wikiApi(char *query){
  * @note Ensure that `template_pages_singles_query` and `default_page.id` are correctly defined and that the `wikiApi`
  *       function is properly set up to handle the API request.
  */
-void getPageContentQuery(char* id){
+static void getPageContentQuery(const char* id){
     log_message(LOG_DEBUG, "Entering function getPageContentQuery");
 
     char *temp_query = strdup(template_pages_singles_query); // Make a copy to modify
@@ -176,7 +177,7 @@ pageList* getPage(pageList** head){
 }
 
 // Function to filter and parse the JSON string into a Node linked list
-static pageList* parseJSON(pageList** head, const char* jsonString, const char* filterType, char* filterCondition) {
+static pageList* parseJSON(pageList** head, const char* jsonString, const char* filterType, const char* filterCondition) {
     log_message(LOG_DEBUG, "Entering function parseJSON");
 
 
@@ -184,14 +185,14 @@ static pageList* parseJSON(pageList** head, const char* jsonString, const char* 
         filterCondition = replaceWord(filterCondition, "\\", "");
     }
 
-    char* start = strstr(jsonString, "\"list\":");
+    const char* start = strstr(jsonString, "\"list\":");
     if (start == NULL) {
         log_message(LOG_ERROR, "Invalid JSON format.");
         return *head;
     }
 
     // Start parsing from "list"
-    char* current = start;
+    const char* current = start;
     const char* pathKey = "\"path\":\"";
     size_t lengthPathKey = strlen(pathKey);
     const char* titleKey = "\"title\":\"";
@@ -202,10 +203,10 @@ static pageList* parseJSON(pageList** head, const char* jsonString, const char* 
     size_t lengthUpdatedAtKey = strlen(updatedAtKey);
     while (1) {
         // Find "path"
-        char* pathStart = strstr(current, pathKey);
+        const char* pathStart = strstr(current, pathKey);
         if (pathStart == NULL) break;
         pathStart += lengthPathKey;
-        char* pathValueEnd = strchr(pathStart, '\"');
+        const char* pathValueEnd = strchr(pathStart, '\"');
         if (pathValueEnd == NULL) break;
         size_t pathLength = pathValueEnd - pathStart;
         char* path = (char*)malloc(pathLength + 1);
@@ -213,13 +214,13 @@ static pageList* parseJSON(pageList** head, const char* jsonString, const char* 
         path[pathLength] = '\0';
 
         // Find "title"
-        char* titleStart = strstr(current, titleKey);
+        const char* titleStart = strstr(current, titleKey);
         if (titleStart == NULL) {
             free(path);
             break;
         }
         titleStart += lengthTitleKey;
-        char* titleValueEnd = strchr(titleStart, '\"');
+        const char* titleValueEnd = strchr(titleStart, '\"');
         if (titleValueEnd == NULL) {
             free(path);
             break;
@@ -230,14 +231,14 @@ static pageList* parseJSON(pageList** head, const char* jsonString, const char* 
         title[titleLength] = '\0';
 
         // Find "id"
-        char* idStart = strstr(current, idKey);
+        const char* idStart = strstr(current, idKey);
         if (idStart == NULL) {
             free(path);
             free(title);
             break;
         }
         idStart += lengthIdKey;
-        char* idValueEnd = strchr(idStart, ',');
+        const char* idValueEnd = strchr(idStart, ',');
         if (idValueEnd == NULL) {
             free(path);
             free(title);
@@ -249,7 +250,7 @@ static pageList* parseJSON(pageList** head, const char* jsonString, const char* 
         id[idLength] = '\0';
 
         // Find "updatedAt"
-        char* updatedAtStart = strstr(current, updatedAtKey);
+        const char* updatedAtStart = strstr(current, updatedAtKey);
         if (updatedAtStart == NULL) {
             free(path);
             free(title);
@@ -257,7 +258,7 @@ static pageList* parseJSON(pageList** head, const char* jsonString, const char* 
             break;
         }
         updatedAtStart += lengthUpdatedAtKey + 1;
-        char* updatedAtValueEnd = strchr(updatedAtStart, '\"');
+        const char* updatedAtValueEnd = strchr(updatedAtStart, '\"');
         if (updatedAtValueEnd == NULL) {
             free(path);
             free(title);
@@ -302,14 +303,15 @@ static pageList* parseJSON(pageList** head, const char* jsonString, const char* 
             break;
         }
 
-        // Move to next page in received JSON
-        current = strchr(pathValueEnd, '}');
-        if (current == NULL) break;
-        current++;
         free(id);
         free(title);
         free(path);
         free(updatedAt);
+
+        // Move to next page in received JSON
+        current = strchr(pathValueEnd, '}');
+        if (current == NULL) break;
+        current++;
     }
 
     log_message(LOG_DEBUG, "Finished searching for pages");
@@ -378,7 +380,7 @@ void movePageMutation(pageList** head){
     log_message(LOG_DEBUG, "Exiting function movePageMutation");
 }
 
-pageList* populatePageList(pageList** head, char *filterType, char *filterCondition){
+pageList* populatePageList(pageList** head, const char *filterType, char *filterCondition){
     log_message(LOG_DEBUG, "Entering function populatePageList");
 
     pageList* temp = *head;
@@ -393,7 +395,7 @@ pageList* populatePageList(pageList** head, char *filterType, char *filterCondit
     return temp;
 }
 
-void createPageMutation(char* path, char* content, char* title){
+void createPageMutation(const char* path, const char* content, const char* title){
     log_message(LOG_DEBUG, "Entering function createPageMutation");
 
     char *temp_query = template_create_page_mutation;
@@ -409,7 +411,7 @@ void createPageMutation(char* path, char* content, char* title){
     log_message(LOG_DEBUG, "Exiting function createPageMutation");
 }
 
-char *fetchAndModifyPageContent(char* pageId, const char* newPageContent, char* outputString){
+char *fetchAndModifyPageContent(const char* pageId, const char* newPageContent, char* outputString){
     log_message(LOG_DEBUG, "Entering function fetchAndModifyPageContent");
 
     pageList* page = NULL;
@@ -434,7 +436,7 @@ char *fetchAndModifyPageContent(char* pageId, const char* newPageContent, char* 
     return outputString;
 }
 
-void deletePageMutation(char* id){
+void deletePageMutation(const char* id){
     log_message(LOG_DEBUG, "Entering function deletePageMutation");
 
     char *temp_query = template_delete_page_mutation;

@@ -58,7 +58,7 @@ size_t writeCallback(const void *data, size_t size, size_t nmemb, void *clientp)
 char *jsonParserGetStringValue(const char *json, char *key) {
     log_message(LOG_DEBUG, "Entering function jsonParserGetStringValue");
 
-    char *start = strstr(json, key);
+    const char *start = strstr(json, key);
     if (start == NULL) {
         log_message(LOG_ERROR, "Error: Key '%s' not found in JSON", key);
         return NULL;
@@ -67,7 +67,7 @@ char *jsonParserGetStringValue(const char *json, char *key) {
     // Move to the value part of the key-value pair
     start += strlen(key) + 2;  // Skip key and the quote + colon
 
-    char *end;
+    const char *end;
 
     // Find the end of the string (closing quote)
     if(!strcmp(key, "\"content\"")){
@@ -95,7 +95,7 @@ char *jsonParserGetIntValue(const char *json, char *key) {
     log_message(LOG_DEBUG, "Entering function jsonParserGetIntValue");
 
     // Find the key in the JSON string
-    char *start = strstr(json, key);
+    const char *start = strstr(json, key);
     if (start == NULL) {
         log_message(LOG_ERROR, "Error: Key '%s' not found in JSON", key);
         return NULL;  // Return error code
@@ -105,7 +105,7 @@ char *jsonParserGetIntValue(const char *json, char *key) {
     start += strlen(key) + 1;  // Skip key and the colon (assumes no spaces, formatted JSON might require handling)
 
     // Find the end of the integer value (assume it ends at a comma or closing brace)
-    char *end = strpbrk(start, ",}");
+    const char *end = strpbrk(start, ",}");
     if (end == NULL) {
         log_message(LOG_ERROR, "Error: Malformed JSON");
         return NULL;  // Return error code

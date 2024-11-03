@@ -40,6 +40,7 @@ int sendMessageToSlack( char *message) {
 
         // Set the URL for Slack message posting
         curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
 
         // Set the POST data (JSON payload)
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
@@ -101,6 +102,7 @@ void checkLastSlackMessage() {
         char url[256];
         snprintf(url, sizeof(url), "https://slack.com/api/conversations.history?channel=%s&limit=1", SLACK_WIKI_TOOLBOX_CHANNEL);
         curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
 
         // Add headers
         headers = curl_slist_append(headers, buf);
@@ -175,6 +177,7 @@ int addSlackMember(char *channels, char *email) {
         snprintf(json, sizeof(json), "{\"channel_ids\":\"%s\",\"email\":\"%s\",\"team_id\":\"T9NJWLTU6\"}", channels, email);
         // Set the URL for Slack message posting
         curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
         // Set the POST data (JSON payload)
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
         // Add headers
