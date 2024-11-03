@@ -81,7 +81,7 @@ void movePageMutation(pageList** head);
  * @note Ensure that `getListQuery`, `parseJSON`, and `chunk.response` are correctly handled. The `filterType` should match
  *       the expected types used in `getListQuery`, and `filterCondition` should be relevant to the filter criteria.
  */
-pageList* populatePageList(pageList** head, const char *filterType, char *filterCondition);
+pageList* populatePageList(pageList** head, const char *filterType, const char *filterCondition);
 
 
 void createPageMutation(const char* path, const char* content, const char* title);

@@ -380,7 +380,7 @@ void movePageMutation(pageList** head){
     log_message(LOG_DEBUG, "Exiting function movePageMutation");
 }
 
-pageList* populatePageList(pageList** head, const char *filterType, char *filterCondition){
+pageList* populatePageList(pageList** head, const char *filterType, const char *filterCondition){
     log_message(LOG_DEBUG, "Entering function populatePageList");
 
     pageList* temp = *head;
