@@ -22,46 +22,6 @@
 char* createList(char *list, pageList** sectionTitle, pageList* links);
 
 /**
- * @brief Extracts page links from the given content and adds them to a linked list.
- *
- * This function parses the provided content to find all page links formatted as `[title](link)`. It extracts the title
- * and link for each found page link, allocates memory for them, and adds them to a linked list of `pageList` structures.
- *
- * @param content The text content from which page links are to be extracted. The content should contain links in the
- *                format `[title](link)`.
- * @param links A pointer to a pointer to a `pageList` structure. This is used to build the linked list of found page links.
- *
- * @return A pointer to the updated linked list of `pageList` structures containing the extracted links and titles.
- *
- * @details The function performs the following steps:
- *          - Searches for the start and end of each page link using delimiters `](` and `)`.
- *          - Extracts the title and link from each page link and allocates memory for them.
- *          - Adds the extracted page link and title to the linked list of `pageList` structures.
- *          - Handles potential memory allocation errors by freeing previously allocated memory and calling `freePageList`.
- */
-pageList* findPageLinks(const char *content, pageList** links);
-
-/**
- * @brief Extracts image links from the given input and adds them to a linked list.
- *
- * This function scans the provided text input to find all image links formatted as `![alt_text](link)`. It extracts the
- * link for each found image link, allocates memory for it, and adds it to a linked list of `pageList` structures.
- *
- * @param input The text content from which image links are to be extracted. The content should contain links in the
- *              format `![alt_text](link)`.
- * @param head A pointer to a pointer to a `pageList` structure. This is used to build the linked list of found image links.
- *
- * @return A pointer to the updated linked list of `pageList` structures containing the extracted image links.
- *
- * @details The function performs the following steps:
- *          - Searches for image link patterns using delimiters `![` and `](`.
- *          - Extracts the link from each image link and allocates memory for it.
- *          - Adds the extracted link to the linked list of `pageList` structures.
- *          - Handles potential memory allocation errors by freeing previously allocated memory and calling `freePageList`.
- */
-pageList* findImageLinks(const char *input, pageList** head);
-
-/**
  * @brief Filters and cleans up the paths in the linked list of page links. Used to remove sizing and positioning options
  *        from images on the wiki.
  *

@@ -18,7 +18,7 @@ char* getCurrentEDTTimeString() {
     time_t now = time(NULL);
 
     // Convert to local time (in EDT)
-    struct tm *edtTime = localtime(&now);
+    const struct tm *edtTime = localtime(&now);
 
     // Check if we are in Daylight Saving Time (EDT)
     if (edtTime->tm_isdst > 0) {
@@ -37,7 +37,8 @@ char* getCurrentEDTTimeString() {
 int compareTimes(const char* time1, const char* time2) {
     log_message(LOG_DEBUG, "Entering function compareTimes");
 
-    struct tm tm1, tm2;
+    struct tm tm1;
+    struct tm tm2;
     memset(&tm1, 0, sizeof(struct tm));
     memset(&tm2, 0, sizeof(struct tm));
 

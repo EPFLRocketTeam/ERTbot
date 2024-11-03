@@ -48,7 +48,8 @@ static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicComma
 static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands_Global, command* command, const char* time_str) {
     log_message(LOG_DEBUG, "Entering function scheduleDailyCommand");
 
-    int hours, minutes;
+    int hours;
+    int minutes;
     sscanf(time_str, "%d:%d", &hours, &minutes); // Parse the time string
 
 
@@ -58,7 +59,7 @@ static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands
     newCommand->next = NULL;
 
     time_t now = time(NULL);
-    struct tm* now_tm = localtime(&now);
+    const struct tm* now_tm = localtime(&now);
 
     struct tm next_execution = *now_tm;
     next_execution.tm_hour = hours;
@@ -335,6 +336,7 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
     free(slackMsg->message);
     free(slackMsg->sender);
     free(slackMsg->timestamp);
+    free(slackMsg);
 
     log_message(LOG_DEBUG, "Exiting function lookForCommandOnSlack");
     return headOfPeriodicCommands_Global;
