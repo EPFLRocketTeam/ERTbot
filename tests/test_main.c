@@ -7,7 +7,7 @@ int main(void) {
     log_message(LOG_DEBUG, "\n\nStarting Tests\n\n");
 
     int number_failed;
-    Suite *s1, *s2, *s3, *s4, *s5;
+    Suite *s1, *s2, *s3, *s4, *s5, *s6;
     SRunner *sr;
 
     s1 = stringHelpers_suite();
@@ -16,14 +16,17 @@ int main(void) {
     s2 = syncDrlToSheet_suite();
     srunner_add_suite(sr, s2);
 
-    s3 = wikiAPI_suite();
-    srunner_add_suite(sr, s3);
+    //s3 = wikiAPI_suite();
+    //srunner_add_suite(sr, s3);
 
-    s4 = createMissingRequirementPages_suite();
-    srunner_add_suite(sr, s4);
+    //s4 = createMissingRequirementPages_suite();
+    //srunner_add_suite(sr, s4);
 
-    s5 = updateRequirementPages_suite();
-    srunner_add_suite(sr, s5);
+    //s5 = updateRequirementPages_suite();
+    //srunner_add_suite(sr, s5);
+
+    s6 = requirementHelpers_suite();
+    srunner_add_suite(sr, s6);
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);

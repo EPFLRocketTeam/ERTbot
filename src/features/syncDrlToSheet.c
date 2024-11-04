@@ -14,15 +14,15 @@ char *template_DRL = "# $SubSystem$ Design Requirements List\n# table {.tabset}"
 
 /**
  * @brief Builds a DRL (Design Requirements List) string from a JSON object containing requirements.
- * 
+ *
  * This function constructs a DRL string by iterating over a JSON array of requirement objects. Each requirement
  * object is expected to contain specific fields such as "ID", "Path", "Title", and "Description". The resulting
  * DRL string is built by appending formatted information from each requirement to a template DRL string.
- * 
+ *
  * @param requirementList A `cJSON` object containing an array of requirement objects under the "requirements" key.
- * 
+ *
  * @return A dynamically allocated string containing the formatted DRL. The caller is responsible for freeing this memory. If the input JSON is not properly formatted or if memory allocation fails, the function may return an incorrect or partially filled string.
- * 
+ *
  * @details
  * - The function first retrieves the "requirements" array from the `requirementList` object.
  * - It initializes the DRL string using a predefined template.
@@ -40,54 +40,16 @@ void syncDrlToSheet(command cmd){
 
     refreshOAuthToken();
 
-    char *sheetId;
-    char *drlPageId;
+    cJSON* subsystem = getSubsystemInfo(cmd.argument_1);
 
-    if(strcmp(cmd.argument_1, "ST")==0){
-        drlPageId = "420";
-        sheetId = "ST!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "PR")==0){
-        drlPageId = "414";
-        sheetId = "PR!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "FD")==0){
-        drlPageId = "416";
-        sheetId = "FD!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "RE")==0){
-        drlPageId = "419";
-        sheetId = "RE!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "GS")==0){
-        drlPageId = "417";
-        sheetId = "GS!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "AV")==0){
-        drlPageId = "421";
-        sheetId = "AV!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "TE")==0){
-        drlPageId = "1883";
-        sheetId = "TE!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "PL")==0){
-        drlPageId = "418";
-        sheetId = "PL!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "GE")==0){
-        drlPageId = "415";
-        sheetId = "GE!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "UT")==0){
-        drlPageId = "1995";
-        sheetId = "UT!A3:AT300";
-    }
-    
-    batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
+    char *drlPageId = cJSON_GetObjectItem(subsystem, "DRL Page ID")->valuestring;
+    char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
+    char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
 
-    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response); 
-    char *DRL = buildDrlFromJSONRequirementList(requirementList, cmd.argument_1);
+    batchGetSheet(reqDbId, sheetId);
+
+    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
+    char *DRL = buildDrlFromJSONRequirementList(requirementList, subsystem);
 
     pageList* drlPage = NULL;
     drlPage = addPageToList(&drlPage, drlPageId, "", "", "", "", "", "", "");
@@ -102,15 +64,16 @@ void syncDrlToSheet(command cmd){
 
     freePageList(&drlPage);
     cJSON_Delete(requirementList);
+    cJSON_Delete(subsystem);
     free(DRL);
-    
+
     log_message(LOG_DEBUG, "Exiting function syncDrlToSheet");
     return;
 }
 
-static char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem){
+static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subsystem){
     log_message(LOG_DEBUG, "Entering function buildDrlFromJSONRequirementList");
-    
+
     // Get the requirements array from the requirementList object
     cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
@@ -119,37 +82,7 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSy
 
     char *DRL = strdup(template_DRL);
 
-    if(strcmp(subSystem, "GE") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "General");
-    }
-    if(strcmp(subSystem, "ST") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Structure");
-    }
-    if(strcmp(subSystem, "PR") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Propulsion");
-    }
-    if(strcmp(subSystem, "FD") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Flight Dynamics");
-    }
-    if(strcmp(subSystem, "RE") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Recovery");
-    }
-    if(strcmp(subSystem, "GS") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Ground Segment");
-    }
-    if(strcmp(subSystem, "AV") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Avionics");
-    }
-    if(strcmp(subSystem, "PL") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Payload");
-    }
-    if(strcmp(subSystem, "TE") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Test");
-    }
-    if(strcmp(subSystem, "UT") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Propulsion");
-        subSystem = "PR";
-    }
+    DRL = replaceWord(DRL, "$SubSystem$", cJSON_GetObjectItem(subsystem, "Name")->valuestring);
 
     int isFirstGroup = 1;
 
@@ -171,7 +104,7 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSy
             log_message(LOG_DEBUG, "ID is smaller than one, breaking");
             break;
         }
-        
+
         if(title == NULL || strstr(id->valuestring, "2024_") == NULL){
             log_message(LOG_DEBUG, "Found a new group");
 
@@ -189,19 +122,15 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSy
 
         if (cJSON_IsString(id) && id->valuestring) {
             log_message(LOG_DEBUG, "ID: %s", id->valuestring);
-            log_message(LOG_DEBUG, "title: %s", title->valuestring);
             DRL = appendToString(DRL, "- [");
             DRL = appendToString(DRL, id->valuestring);
             DRL = appendToString(DRL, "](/");
-            DRL = appendToString(DRL, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_");
-            DRL = appendToString(DRL, subSystem);
-            DRL = appendToString(DRL, "_DRL/");
+            DRL = appendToString(DRL, cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring);
             DRL = appendToString(DRL, id->valuestring);
             DRL = appendToString(DRL, ") **");
         }
-        
-        
-        
+
+
         if (cJSON_IsString(title) && title->valuestring) {
             log_message(LOG_DEBUG, "title: %s", title->valuestring);
             DRL = appendToString(DRL, title->valuestring);
@@ -216,7 +145,7 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSy
     }
 
     DRL = appendToString(DRL, "{.links-list}");
-    
+
     log_message(LOG_DEBUG, "Exiting function buildDrlFromJSONRequirementList");
 
     return DRL;

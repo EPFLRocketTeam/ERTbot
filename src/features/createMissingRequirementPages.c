@@ -11,55 +11,16 @@
 void createMissingRequirementPages(command cmd){
     log_message(LOG_DEBUG, "Entering function createMissingRequirementPages");
     refreshOAuthToken();
-    char *sheetId;
+
     pageList* requirementPagesHead = NULL;
-    char *path;
 
-    path = cmd.argument_1;
-
-    if(strcmp(cmd.argument_1, "ST")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/";
-        sheetId = "ST!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "PR")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PR_DRL/";
-        sheetId = "PR!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "FD")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_FD_DRL/";
-        sheetId = "FD!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "RE")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_RE_DRL/";
-        sheetId = "RE!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "GS")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GS_DRL/";
-        sheetId = "GS!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "AV")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_AV_DRL/";
-        sheetId = "AV!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "TE")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_TE_DRL/";
-        sheetId = "TE!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "PL")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PL_DRL/";
-        sheetId = "PL!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "GE")==0){
-        path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GE_DRL/";
-        sheetId = "GE!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "UT")==0){
-        path = "management/it/ERTbot_Test_Pages/";
-        sheetId = "UT2!A3:AT300";
-    }
+    cJSON* subsystem = getSubsystemInfo(cmd.argument_1);
+    char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
+    char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
+    char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
 
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
-    batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
+    batchGetSheet(reqDbId, sheetId);
 
     cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
 
@@ -122,6 +83,7 @@ void createMissingRequirementPages(command cmd){
     }
 
     cJSON_Delete(requirementList);
+    cJSON_Delete(subsystem);
     freePageList(&requirementPagesHead);
 
     log_message(LOG_DEBUG, "Exiting function createMissingRequirementPages");

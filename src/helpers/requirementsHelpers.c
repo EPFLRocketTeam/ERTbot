@@ -2,11 +2,12 @@
 #include <cjson/cJSON.h>
 #include "ERTbot_config.h"
 #include "ERTbot_common.h"
+#include "sheetAPI.h"
+#include "apiHelpers.h"
 
+static cJSON* parseSheet(const cJSON* values_array, cJSON* parsedSheet);
 
-
-
-cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
+cJSON* parseArrayIntoJSONRequirementList(char *input_str) {
     log_message(LOG_DEBUG, "Entering function parseArrayIntoJSONRequirementList");
 
     // Parse the input string as JSON
@@ -34,6 +35,7 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
 
     // Create a JSON array to hold the requirement objects
     cJSON *requirements = cJSON_CreateArray();
+    requirements = parseSheet(values_array, requirements);
     if (!requirements) {
         log_message(LOG_ERROR, "Error creating JSON array");
         cJSON_Delete(json);
@@ -41,194 +43,9 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
         return NULL;
     }
 
-    // Add the requirements array to the JSON object
     cJSON_AddItemToObject(json, "requirements", requirements);
 
-    log_message(LOG_DEBUG, "about to parse requirements from value array into cJSON object");
-
-    // Iterate over the input array of arrays and create JSON objects for each requirement
-    int num_reqs = cJSON_GetArraySize(values_array);
-    for (int i = 0; i < num_reqs; i++) {
-
-        cJSON *req_array = cJSON_GetArrayItem(values_array, i);
-
-
-        // Create a JSON object for the current requirement
-        cJSON *req = cJSON_CreateObject();
-        if (!req) {
-            log_message(LOG_ERROR, "Error creating JSON object for requirement");
-            cJSON_Delete(json);
-            cJSON_Delete(input_json);
-            return NULL;
-        }
-
-        if(cJSON_GetArrayItem(req_array, REQ_ID_COL) == NULL || strcmp(cJSON_GetArrayItem(req_array, REQ_ID_COL)->valuestring, "")==0){
-            log_message(LOG_DEBUG, "ID is empty");
-            break;
-        }
-
-        // Add the fields to the requirement JSON object
-        cJSON_AddStringToObject(req, "ID", cJSON_GetArrayItem(req_array, REQ_ID_COL)->valuestring);
-        log_message(LOG_DEBUG, "About to parse the rest of %s", cJSON_GetArrayItem(req_array, REQ_ID_COL)->valuestring);
-
-        if(cJSON_GetArrayItem(req_array, REQ_TITLE_COL) == NULL){
-            log_message(LOG_DEBUG, "Title is empty");
-            cJSON_AddItemToArray(requirements, req);
-            continue;
-        }
-
-
-        cJSON_AddStringToObject(req, "Title", cJSON_GetArrayItem(req_array, REQ_TITLE_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_TITLE_COL)->valuestring :
-            "");
-        cJSON_AddStringToObject(req, "Description", cJSON_GetArrayItem(req_array, REQ_DESCRIPTION_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_DESCRIPTION_COL)->valuestring :
-            "");
-        cJSON_AddStringToObject(req, "Source", cJSON_GetArrayItem(req_array, REQ_SOURCE_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_SOURCE_COL)->valuestring :
-            "");
-        cJSON_AddStringToObject(req, "Author", cJSON_GetArrayItem(req_array, REQ_AUTHOR_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_AUTHOR_COL)->valuestring :
-            "");
-        cJSON_AddStringToObject(req, "Justification", cJSON_GetArrayItem(req_array, REQ_JUSTIFICATION_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_JUSTIFICATION_COL)->valuestring :
-            "");
-        cJSON_AddStringToObject(req, "Criticality", cJSON_GetArrayItem(req_array, REQ_CRITICALITY_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_CRITICALITY_COL)->valuestring :
-            "TBD");
-        cJSON_AddStringToObject(req, "Compliance", cJSON_GetArrayItem(req_array, REQ_COMPLIANCE_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_COMPLIANCE_COL)->valuestring :
-            "TBD");
-        cJSON_AddStringToObject(req, "Verification Status", cJSON_GetArrayItem(req_array, REQ_VERIFICATION_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_VERIFICATION_STATUS_COL)->valuestring :
-            "");
-        cJSON_AddStringToObject(req, "Assignee", cJSON_GetArrayItem(req_array, REQ_ASSIGNEE_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_ASSIGNEE_COL)->valuestring :
-            "");
-
-        cJSON_AddStringToObject(req, "Review 1 Verification 1 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_1_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_1_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 1 Verification 1 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_1_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_1_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 1 Verification 2 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_2_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_2_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 1 Verification 2 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_2_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_2_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 1 Verification 3 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_3_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_3_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 1 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_3_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_1_VERIFICATION_3_STATUS_COL)->valuestring :
-            "N/A");
-
-        cJSON_AddStringToObject(req, "Review 2 Verification 1 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_1_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_1_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 2 Verification 1 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_1_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_1_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 2 Verification 2 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_2_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_2_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 2 Verification 2 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_2_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_2_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 2 Verification 3 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_3_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_3_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 2 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_3_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_2_VERIFICATION_3_STATUS_COL)->valuestring :
-            "N/A");
-
-        cJSON_AddStringToObject(req, "Review 3 Verification 1 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_1_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_1_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 3 Verification 1 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_1_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_1_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 3 Verification 2 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_2_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_2_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 3 Verification 2 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_2_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_2_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 3 Verification 3 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_3_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_3_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 3 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_3_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_3_VERIFICATION_3_STATUS_COL)->valuestring :
-            "N/A");
-
-        cJSON_AddStringToObject(req, "Review 4 Verification 1 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_1_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_1_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 4 Verification 1 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_1_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_1_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 4 Verification 2 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_2_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_2_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 4 Verification 2 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_2_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_2_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 4 Verification 3 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_3_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_3_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 4 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_3_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_4_VERIFICATION_3_STATUS_COL)->valuestring :
-            "N/A");
-
-        cJSON_AddStringToObject(req, "Review 5 Verification 1 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_1_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_1_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 5 Verification 1 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_1_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_1_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 5 Verification 2 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_2_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_2_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 5 Verification 2 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_2_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_2_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 5 Verification 3 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_3_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_3_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 5 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_3_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_5_VERIFICATION_3_STATUS_COL)->valuestring :
-            "N/A");
-
-        cJSON_AddStringToObject(req, "Review 6 Verification 1 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_1_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_1_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 6 Verification 1 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_1_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_1_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 6 Verification 2 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_2_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_2_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 6 Verification 2 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_2_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_2_STATUS_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 6 Verification 3 Method", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_3_METHOD_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_3_METHOD_COL)->valuestring :
-            "N/A");
-        cJSON_AddStringToObject(req, "Review 6 Verification 3 Status", cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_3_STATUS_COL) ?
-            cJSON_GetArrayItem(req_array, REQ_REVIEW_6_VERIFICATION_3_STATUS_COL)->valuestring :
-            "N/A");
-
-        // Add the requirement object to the requirements array
-        cJSON_AddItemToArray(requirements, req);
-
-        log_message(LOG_DEBUG, "Finished parsing array");
-    }
-
-
     log_message(LOG_DEBUG, "Exiting function parseArrayIntoJSONRequirementList");
-
 
     if(chunk.response){
         free(chunk.response);
@@ -237,4 +54,83 @@ cJSON *parseArrayIntoJSONRequirementList(char *input_str) {
     cJSON_Delete(input_json);
 
     return json;
+}
+
+cJSON* getSubsystemInfo(char* acronym){
+    log_message(LOG_DEBUG, "Entering function getSubsystemInfo");
+
+    batchGetSheet("1iB1yl2Nre95kD1g6TFDYvvLe0g5QzghtAHdnxNTD4tg", "INFO!A2:G20");
+
+    log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
+
+    cJSON *input_json = cJSON_Parse(chunk.response);
+    if (!input_json) {
+        log_message(LOG_ERROR, "Error parsing input string as JSON object");
+        return NULL;
+    }
+
+    // Extract the "values" array from the JSON object
+    cJSON *values_array = cJSON_GetObjectItemCaseSensitive(input_json, "values");
+    if (!cJSON_IsArray(values_array)) {
+        log_message(LOG_ERROR, "Error: values is not a JSON array");
+        cJSON_Delete(input_json);
+        return NULL;
+    }
+
+    // Create a JSON object to hold the requirements
+    cJSON *json = cJSON_CreateObject();
+    if (!json) {
+        log_message(LOG_ERROR, "Error creating JSON object");
+        cJSON_Delete(input_json);
+        return NULL;
+    }
+
+    // Create a JSON array to hold the requirement objects
+    cJSON *subsystemsInfo = cJSON_CreateArray();
+    subsystemsInfo = parseSheet(values_array, subsystemsInfo);
+
+    int numberOfSubsystens = cJSON_GetArraySize(subsystemsInfo);
+
+    for(int i = 0; i< numberOfSubsystens; i++){
+        cJSON *subsystem = cJSON_GetArrayItem(subsystemsInfo, i);
+
+        if(strcmp(cJSON_GetObjectItem(subsystem, "Acronym")->valuestring, acronym) == 0){
+            cJSON* result = cJSON_DetachItemFromArray(subsystemsInfo, i);
+            cJSON_Delete(input_json);
+            cJSON_Delete(subsystemsInfo);
+
+            log_message(LOG_DEBUG, "Exiting function getSubsystemInfo");
+            return result;
+        }
+    }
+
+    log_message(LOG_ERROR, "Subsystem was not found");
+    exit(1);
+}
+
+static cJSON* parseSheet(const cJSON* values_array, cJSON* parsedSheet){
+    log_message(LOG_DEBUG, "Entering function parseSheet");
+
+    int numberOfRows = cJSON_GetArraySize(values_array);
+    cJSON *headerRow = cJSON_GetArrayItem(values_array, 0);
+    int numberOfColumnsInHeader = cJSON_GetArraySize(headerRow);
+
+
+    for(int i = 1; i<numberOfRows; i++){
+        cJSON *row = cJSON_GetArrayItem(values_array, i);
+
+        int numberOfColumnsInRow = cJSON_GetArraySize(row);
+        cJSON* parsedSheetRow = cJSON_CreateObject();
+
+        for(int j = 0; j < numberOfColumnsInRow; j++){
+            cJSON *headerItem = cJSON_GetArrayItem(headerRow, j);
+            cJSON *cellItem = cJSON_GetArrayItem(row, j);
+            cJSON_AddStringToObject(parsedSheetRow, headerItem->valuestring, cellItem->valuestring);
+        }
+
+        cJSON_AddItemToArray(parsedSheet, parsedSheetRow);
+    }
+
+    log_message(LOG_DEBUG, "Exiting function parseSheet");
+    return parsedSheet;
 }

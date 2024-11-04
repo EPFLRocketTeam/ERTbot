@@ -45,88 +45,17 @@ void updateRequirementPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateRequirementPages");
 
     refreshOAuthToken();
-    char *sheetId;
     pageList* requirementPagesHead = NULL;
-    char *path = cmd.argument_1;
-    path = replaceWord(path, "\\", "");
 
 
-
-    if(strstr(cmd.argument_1, "ST")){
-        sheetId = "ST!A3:AT300";
-        if(strcmp(cmd.argument_1, "ST")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "PR")){
-        sheetId = "PR!A3:AT300";
-        if(strcmp(cmd.argument_1, "PR")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PR_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "FD")){
-        sheetId = "FD!A3:AT300";
-        if(strcmp(cmd.argument_1, "FD")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_FD_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "RE")){
-        sheetId = "RE!A3:AT300";
-        if(strcmp(cmd.argument_1, "RE")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_RE_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "GS")){
-        sheetId = "GS!A3:AT300";
-        if(strcmp(cmd.argument_1, "GS")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GS_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "AV")){
-        sheetId = "AV!A3:AT300";
-        if(strcmp(cmd.argument_1, "AV")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_AV_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "TE")){
-        sheetId = "TE!A3:AT300";
-        if(strcmp(cmd.argument_1, "TE")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_TE_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "PL")){
-        sheetId = "PL!A3:AT300";
-        if(strcmp(cmd.argument_1, "PL")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PL_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "GE")){
-        sheetId = "GE!A3:AT300";
-        if(strcmp(cmd.argument_1, "GE")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GE_DRL/";
-        }
-    }
-
-    if(strcmp(cmd.argument_1, "UT")==0){
-        sheetId = "UT!A3:AT300";
-
-        if(strcmp(cmd.argument_1, "UT")==0){
-            path = "management/it/ERTbot_Test_Pages/";
-        }
-    }
+    cJSON* subsystem = getSubsystemInfo(cmd.argument_1);
+    char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
+    char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
+    char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
 
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
 
-
-    batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
+    batchGetSheet(reqDbId, sheetId);
 
     cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
 
