@@ -32,41 +32,29 @@ char *template_DRL = "# $SubSystem$ Design Requirements List\n# table {.tabset}"
  * - If any errors are encountered (e.g., missing "requirements" array or incorrect object format), appropriate error messages are printed.
  * - The function returns the final DRL string.
  */
-static char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem);
+static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subsystem);
 
 
 void syncDrlToSheet(command cmd){
     log_message(LOG_DEBUG, "Entering function syncDrlToSheet");
 
-    refreshOAuthToken();
-
     cJSON* subsystem = getSubsystemInfo(cmd.argument_1);
+    cJSON *requirementList = getRequirements(subsystem);
 
-    char *drlPageId = cJSON_GetObjectItem(subsystem, "DRL Page ID")->valuestring;
-    char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
-    char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
-
-    batchGetSheet(reqDbId, sheetId);
-
-    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
     char *DRL = buildDrlFromJSONRequirementList(requirementList, subsystem);
 
     pageList* drlPage = NULL;
-    drlPage = addPageToList(&drlPage, drlPageId, "", "", "", "", "", "", "");
-    drlPage->content = DRL;
-
-
-    drlPage->content = replaceWord(drlPage->content, "\n", "\\\\n");
-    drlPage->content = replaceWord(drlPage->content, "\"", "\\\\\\\"");
+    char *drlPageId = cJSON_GetObjectItem(subsystem, "DRL Page ID")->valuestring;
+    drlPage = addPageToList(&drlPage, drlPageId, "", "", "", DRL, "", "", "");
 
     updatePageContentMutation(drlPage);
     renderMutation(&drlPage, false);
-
     freePageList(&drlPage);
+
     cJSON_Delete(requirementList);
     cJSON_Delete(subsystem);
-    free(DRL);
 
+    free(DRL);
     log_message(LOG_DEBUG, "Exiting function syncDrlToSheet");
     return;
 }
@@ -95,7 +83,6 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
             continue;
         }
 
-        // Get and print each item of the requirement object
         cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
         cJSON *title = cJSON_GetObjectItemCaseSensitive(requirement, "Title");
         cJSON *description = cJSON_GetObjectItemCaseSensitive(requirement, "Description");
@@ -106,7 +93,6 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
         }
 
         if(title == NULL || strstr(id->valuestring, "2024_") == NULL){
-            log_message(LOG_DEBUG, "Found a new group");
 
             if(!isFirstGroup){
                 DRL = appendToString(DRL, "{.links-list}");
@@ -130,7 +116,6 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
             DRL = appendToString(DRL, ") **");
         }
 
-
         if (cJSON_IsString(title) && title->valuestring) {
             log_message(LOG_DEBUG, "title: %s", title->valuestring);
             DRL = appendToString(DRL, title->valuestring);
@@ -141,10 +126,11 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
             DRL = appendToString(DRL, description->valuestring);
             DRL = appendToString(DRL, "\n");
         }
-
     }
 
     DRL = appendToString(DRL, "{.links-list}");
+    DRL = replaceWord(DRL, "\n", "\\\\n");
+    DRL = replaceWord(DRL, "\"", "\\\\\\\"");
 
     log_message(LOG_DEBUG, "Exiting function buildDrlFromJSONRequirementList");
 

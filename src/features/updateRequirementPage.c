@@ -41,35 +41,25 @@ char *template_REQ = "";
  */
 static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement);
 
+static void updateRequirementPageContent(pageList* reqPage, cJSON *requirement);
+
 void updateRequirementPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateRequirementPages");
 
-    refreshOAuthToken();
-    pageList* requirementPagesHead = NULL;
-
-
     cJSON* subsystem = getSubsystemInfo(cmd.argument_1);
     char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
-    char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
-    char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
+    cJSON *requirementList = getRequirements(subsystem);
 
+    pageList* requirementPagesHead = NULL;
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
+    pageList* currentReqPage = requirementPagesHead;
 
-    batchGetSheet(reqDbId, sheetId);
-
-    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
-
-    // Get the requirements array from the requirementList object
     cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
     }
 
-    pageList* currentReqPage = requirementPagesHead;
-
-    // Iterate over each requirement object in the requirements array
     int num_reqs = cJSON_GetArraySize(requirements);
-
     while (currentReqPage){
         for (int i = 0; i < num_reqs; i++) {
             cJSON *requirement = cJSON_GetArrayItem(requirements, i);
@@ -79,41 +69,16 @@ void updateRequirementPage(command cmd){
                 continue;
             }
 
-            // Get and print each item of the requirement object
             cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
 
-            if (cJSON_IsString(id) && id->valuestring && strcmp(id->valuestring, currentReqPage->title) == 0){
-                currentReqPage = getPage(&currentReqPage);
-                currentReqPage->content = replaceWord(currentReqPage->content, "\\n", "\n");
-                char* importedRequirementInformation = buildRequirementPageFromJSONRequirementList(requirement);
-                char* flag = createCombinedString("<!--", id->valuestring);
-                flag = appendToString(flag, "-->");
-
-                log_message(LOG_DEBUG, "initialising pointer to flags");
-                char* start = currentReqPage->content;
-                char* end;
-
-                log_message(LOG_DEBUG, "Looking for flag: %s in currentReqPage->content: %s", flag, currentReqPage->content);
-                start = strstr(start, flag);
-                start = start + strlen(flag);
-
-                log_message(LOG_DEBUG, "Looking for flag: %s in start+1: %s", flag, start+1);
-                end = strstr(start + 1, flag);
-                end--;
-
-                currentReqPage->content = replaceParagraph(currentReqPage->content, importedRequirementInformation, start, end);
-
-                currentReqPage->content = replaceWord(currentReqPage->content, "\n", "\\\\n");
-                currentReqPage->content = replaceWord(currentReqPage->content, "\"", "\\\\\\\"");
-                log_message(LOG_DEBUG, "About to update page:%s", currentReqPage->path);
-                updatePageContentMutation(currentReqPage);
-                renderMutation(&currentReqPage, false);
-
-                free(flag);
-
-                break;
+            if (!cJSON_IsString(id) || strcmp(id->valuestring, currentReqPage->title) != 0){
+                //found a requirement group/category
+                continue;
             }
 
+            updateRequirementPageContent(currentReqPage, requirement);
+
+            break;
         }
 
 
@@ -124,6 +89,36 @@ void updateRequirementPage(command cmd){
     freePageList(&requirementPagesHead);
 
     log_message(LOG_DEBUG, "Exiting function updateRequirementPage");
+    return;
+}
+
+static void updateRequirementPageContent(pageList* reqPage, cJSON *requirement){
+    reqPage = getPage(&reqPage);
+    reqPage->content = replaceWord(reqPage->content, "\\n", "\n");
+
+    cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
+
+    char* importedRequirementInformation = buildRequirementPageFromJSONRequirementList(requirement);
+    char* flag = createCombinedString("<!--", id->valuestring);
+    flag = appendToString(flag, "-->");
+
+    char* start = reqPage->content;
+    start = strstr(start, flag);
+    start = start + strlen(flag);
+
+    char* end;
+    end = strstr(start + 1, flag);
+    end--;
+
+    reqPage->content = replaceParagraph(reqPage->content, importedRequirementInformation, start, end);
+    reqPage->content = replaceWord(reqPage->content, "\n", "\\\\n");
+    reqPage->content = replaceWord(reqPage->content, "\"", "\\\\\\\"");
+
+    updatePageContentMutation(reqPage);
+    renderMutation(&reqPage, false);
+
+    free(flag);
+
     return;
 }
 

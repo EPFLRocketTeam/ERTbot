@@ -23,4 +23,6 @@
 cJSON *parseArrayIntoJSONRequirementList(char *input_str);
 
 cJSON* getSubsystemInfo(char* acronym);
+
+cJSON* getRequirements(cJSON* subsystem);
 #endif

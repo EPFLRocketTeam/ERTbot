@@ -59,8 +59,6 @@ static char *buildVcdList(cJSON *requirementList, char* subSystem);
 void updateVcdPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateVcdPage");
 
-    refreshOAuthToken();
-
     char *sheetId;
     char *vcdPageId;
 
@@ -123,9 +121,10 @@ void updateVcdPage(command cmd){
 
     updatePageContentMutation(vcdPage);
     renderMutation(&vcdPage, false);
+    freePageList(&vcdPage);
 
     cJSON_Delete(requirementList);
-    freePageList(&vcdPage);
+
 
     free(VCD);
 

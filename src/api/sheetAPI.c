@@ -67,44 +67,6 @@ void sheetAPI(char *query, char *url, char *requestType) {
     log_message(LOG_DEBUG, "Exiting function sheetAPI");
 }
 
-void batchUpdateSheet(const char *sheetId, const char *range, const char *values){
-    log_message(LOG_DEBUG, "Entering function batchUpdateSheet");
-
-    char *requestType = "POST";
-    char *temp_url = strdup(template_batch_update_url); // Make a copy to modify
-    char *modified_url = replaceWord(temp_url, "DefaultSheetID", sheetId);
-    char *temp_query = strdup(template_batch_update_query); // Make a copy to modify
-    char *modified_query = replaceWord(temp_query, "DefaultRange", range);
-    modified_query = replaceWord(modified_query, "DefaultValues", values);
-
-
-    sheetAPI(modified_query, modified_url, requestType);
-
-    free(modified_query);
-    free(modified_url);
-    free(temp_url);
-    free(temp_query);
-
-    log_message(LOG_DEBUG, "Exiting function batchUpdateSheet");
-}
-
-void batchGetSheet(const char *sheetId, const char *range){
-    log_message(LOG_DEBUG, "Entering function batchGetSheet");
-
-    char *requestType = "GET";
-    char *query = "";
-    char *temp_url = strdup(template_batch_get_url); // Make a copy to modify
-    char *modified_url = replaceWord(temp_url, "DefaultSheetID", sheetId);
-    modified_url = replaceWord(modified_url, "DefaultRange", range);
-
-    sheetAPI(query, modified_url, requestType);
-
-    free(temp_url);
-    free(modified_url);
-
-    log_message(LOG_DEBUG, "Exiting function batchGetSheet");
-}
-
 void refreshOAuthToken() {
     log_message(LOG_DEBUG, "Entering function refreshOAuthToken");
 
@@ -163,4 +125,44 @@ void refreshOAuthToken() {
 
     log_message(LOG_DEBUG, "Exiting function refreshOAuthToken");
     return;
+}
+
+void batchUpdateSheet(const char *sheetId, const char *range, const char *values){
+    log_message(LOG_DEBUG, "Entering function batchUpdateSheet");
+
+    char *requestType = "POST";
+    char *temp_url = strdup(template_batch_update_url); // Make a copy to modify
+    char *modified_url = replaceWord(temp_url, "DefaultSheetID", sheetId);
+    char *temp_query = strdup(template_batch_update_query); // Make a copy to modify
+    char *modified_query = replaceWord(temp_query, "DefaultRange", range);
+    modified_query = replaceWord(modified_query, "DefaultValues", values);
+
+
+    sheetAPI(modified_query, modified_url, requestType);
+
+    free(modified_query);
+    free(modified_url);
+    free(temp_url);
+    free(temp_query);
+
+    log_message(LOG_DEBUG, "Exiting function batchUpdateSheet");
+}
+
+void batchGetSheet(const char *sheetId, const char *range){
+    log_message(LOG_DEBUG, "Entering function batchGetSheet");
+
+    refreshOAuthToken();
+
+    char *requestType = "GET";
+    char *query = "";
+    char *temp_url = strdup(template_batch_get_url); // Make a copy to modify
+    char *modified_url = replaceWord(temp_url, "DefaultSheetID", sheetId);
+    modified_url = replaceWord(modified_url, "DefaultRange", range);
+
+    sheetAPI(query, modified_url, requestType);
+
+    free(temp_url);
+    free(modified_url);
+
+    log_message(LOG_DEBUG, "Exiting function batchGetSheet");
 }

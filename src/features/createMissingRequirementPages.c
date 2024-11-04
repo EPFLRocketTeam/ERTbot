@@ -10,7 +10,6 @@
 
 void createMissingRequirementPages(command cmd){
     log_message(LOG_DEBUG, "Entering function createMissingRequirementPages");
-    refreshOAuthToken();
 
     pageList* requirementPagesHead = NULL;
 

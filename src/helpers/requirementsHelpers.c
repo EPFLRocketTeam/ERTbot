@@ -61,8 +61,6 @@ cJSON* getSubsystemInfo(char* acronym){
 
     batchGetSheet("1iB1yl2Nre95kD1g6TFDYvvLe0g5QzghtAHdnxNTD4tg", "INFO!A2:G20");
 
-    log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
-
     cJSON *input_json = cJSON_Parse(chunk.response);
     if (!input_json) {
         log_message(LOG_ERROR, "Error parsing input string as JSON object");
@@ -133,4 +131,13 @@ static cJSON* parseSheet(const cJSON* values_array, cJSON* parsedSheet){
 
     log_message(LOG_DEBUG, "Exiting function parseSheet");
     return parsedSheet;
+}
+
+cJSON* getRequirements(cJSON* subsystem){
+    char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
+    char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
+
+    batchGetSheet(reqDbId, sheetId);
+
+    return parseArrayIntoJSONRequirementList(chunk.response);
 }
