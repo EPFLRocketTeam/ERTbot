@@ -93,6 +93,9 @@ set(TEST_SOURCES
 add_executable(ERTbot_tests ${SOURCES} ${TEST_SOURCES})
 target_compile_definitions(ERTbot_tests PRIVATE TESTING)
 
+# Add debugging symbols for the test executable
+target_compile_options(ERTbot_tests PRIVATE -g)
+
 if(APPLE)
     # Add the include directory and library path for ERTbot
     target_include_directories(ERTbot_tests PRIVATE ${CJSON_INCLUDE_DIR})
