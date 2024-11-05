@@ -10,8 +10,10 @@
 
 
 
-char* replaceWord(const char* inputString, const char* wordToReplace, const char* newWord) {
-    log_message(LOG_DEBUG, "Entering function replaceWord");
+char* replaceWord_Malloc(const char* inputString, const char* wordToReplace, const char* newWord) {
+    log_message(LOG_DEBUG, "Entering function replaceWord_Malloc");
+
+    if (!inputString || !wordToReplace || !newWord) return NULL;
 
     char* result;
     int i;
@@ -32,6 +34,7 @@ char* replaceWord(const char* inputString, const char* wordToReplace, const char
 
     // Making new string of enough length
     result = (char*)malloc(i + cnt * (newWordLength - wordToReplaceLength) + 1);
+    if (!result) return NULL;  // Check malloc success
 
     i = 0;
     while (*inputString) {
@@ -48,9 +51,53 @@ char* replaceWord(const char* inputString, const char* wordToReplace, const char
 
   result[i] = '\0';
 
-  log_message(LOG_DEBUG, "Exiting function replaceWord");
+  log_message(LOG_DEBUG, "Exiting function replaceWord_Malloc");
   return result;
 }
+
+char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const char* newWord) {
+    log_message(LOG_DEBUG, "Entering function replaceWord_Realloc");
+
+    if (!inputString || !wordToReplace || !newWord) return NULL;
+
+    int cnt = 0;
+    int newWordLength = strlen(newWord);
+    int wordToReplaceLength = strlen(wordToReplace);
+
+    // Count occurrences of wordToReplace in inputString
+    for (char* temp = inputString; (temp = strstr(temp, wordToReplace)); temp += wordToReplaceLength) {
+        cnt++;
+    }
+
+    // Calculate new length needed
+    int newLength = strlen(inputString) + cnt * (newWordLength - wordToReplaceLength) + 1;
+
+    // Reallocate inputString to new size
+    char* resizedString = realloc(inputString, newLength);
+    if (!resizedString) return NULL;  // Check if realloc succeeded
+    inputString = resizedString;
+
+    // Replace occurrences of wordToReplace with newWord in place
+    char* result = inputString;
+    char* pos = strstr(result, wordToReplace);
+    while (pos) {
+        int remainingLength = strlen(pos + wordToReplaceLength);
+
+        // Shift the remaining part of the string to make room for newWord, if needed
+        memmove(pos + newWordLength, pos + wordToReplaceLength, remainingLength + 1);  // Include '\0'
+
+        // Copy newWord into the position
+        memcpy(pos, newWord, newWordLength);
+
+        // Move result pointer to next potential position
+        result = pos + newWordLength;
+        pos = strstr(result, wordToReplace);
+    }
+
+    log_message(LOG_DEBUG, "Exiting function replaceWord_Realloc");
+    return inputString;
+}
+
 
 char* reformatNewLineCharacter(char *inputString) {
     log_message(LOG_DEBUG, "Entering function reformatNewLineCharacter");

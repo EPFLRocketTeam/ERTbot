@@ -22,7 +22,9 @@
  * @note The function assumes that the input strings (`inputString`, `wordToReplace`, and `newWord`) are valid and
  *       null-terminated. Memory allocated for the result string should be freed by the caller when it is no longer needed.
  */
-char* replaceWord(const char* inputString, const char* wordToReplace, const char* newWord);
+char* replaceWord_Malloc(const char* inputString, const char* wordToReplace, const char* newWord);
+
+char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const char* newWord);
 
 /**
  * @brief Replaces occurrences of the string literal "\\n" with actual newline characters ('\n') in a string.
