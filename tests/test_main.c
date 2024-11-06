@@ -13,8 +13,8 @@ int main(void) {
     s1 = stringHelpers_suite();
     sr = srunner_create(s1);
 
-    //s2 = syncDrlToSheet_suite();
-    //srunner_add_suite(sr, s2);
+    s2 = syncDrlToSheet_suite();
+    srunner_add_suite(sr, s2);
 
     s3 = wikiAPI_suite();
     srunner_add_suite(sr, s3);

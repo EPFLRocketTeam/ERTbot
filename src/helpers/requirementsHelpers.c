@@ -73,14 +73,6 @@ cJSON* getSubsystemInfo(char* acronym){
         return NULL;
     }
 
-    // Create a JSON object to hold the requirements
-    cJSON *json = cJSON_CreateObject();
-    if (!json) {
-        log_message(LOG_ERROR, "Error creating JSON object");
-        cJSON_Delete(input_json);
-        return NULL;
-    }
-
     // Create a JSON array to hold the requirement objects
     cJSON *subsystemsInfo = cJSON_CreateArray();
     subsystemsInfo = parseSheet(values_array, subsystemsInfo);

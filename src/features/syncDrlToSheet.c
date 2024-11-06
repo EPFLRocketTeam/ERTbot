@@ -45,7 +45,7 @@ void syncDrlToSheet(command cmd){
 
     pageList* drlPage = NULL;
     char *drlPageId = cJSON_GetObjectItem(subsystem, "DRL Page ID")->valuestring;
-    drlPage = addPageToList(&drlPage, drlPageId, "", "", "", DRL, "", "", "");
+    drlPage = addPageToList(&drlPage, drlPageId, NULL, NULL, NULL, DRL, NULL, NULL, NULL);
 
     updatePageContentMutation(drlPage);
     renderMutation(&drlPage, false);
@@ -70,7 +70,7 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
 
     char *DRL = strdup(template_DRL);
 
-    DRL = replaceWord(DRL, "$SubSystem$", cJSON_GetObjectItem(subsystem, "Name")->valuestring);
+    DRL = replaceWord_Realloc(DRL, "$SubSystem$", cJSON_GetObjectItem(subsystem, "Name")->valuestring);
 
     int isFirstGroup = 1;
 
@@ -129,8 +129,8 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
     }
 
     DRL = appendToString(DRL, "{.links-list}");
-    DRL = replaceWord(DRL, "\n", "\\\\n");
-    DRL = replaceWord(DRL, "\"", "\\\\\\\"");
+    DRL = replaceWord_Realloc(DRL, "\n", "\\\\n");
+    DRL = replaceWord_Realloc(DRL, "\"", "\\\\\\\"");
 
     log_message(LOG_DEBUG, "Exiting function buildDrlFromJSONRequirementList");
 

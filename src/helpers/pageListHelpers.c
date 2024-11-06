@@ -11,7 +11,16 @@ pageList* addPageToList(pageList** head, const char *id, const char *title, cons
     }
 
     // Allocate memory and copy the path and id
-    
+    newNode->id = NULL;
+    newNode->title = NULL;
+    newNode->path = NULL;
+    newNode->description = NULL;
+    newNode->content = NULL;
+    newNode->updatedAt = NULL;
+    newNode->createdAt = NULL;
+    newNode->authorId = NULL;
+
+
     if(id!=NULL){
         newNode->id = malloc(strlen(id) + 1);
         strcpy(newNode->id, id);
@@ -81,7 +90,6 @@ void freePageList(pageList** head) {
         pageList* temp = *head;
         *head = (*head)->next;
 
-        // Debugging prints
         if (temp->id && temp->id != NULL){
             log_message(LOG_DEBUG, "Freeing page struct variable id: %p", (void*)temp->id);
             free(temp->id);

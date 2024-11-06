@@ -108,9 +108,15 @@ void refreshOAuthToken() {
         // Check for errors
         if(res != CURLE_OK) {
             log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        } else {
+        } 
+        else {
             //Yes the key value has an extra : compared to when the same function is called in wikiAPI functions
             //see the note on the jsonParserGetStringValue function
+            if(SHEET_API_TOKEN!=NULL){
+                free(SHEET_API_TOKEN);
+                SHEET_API_TOKEN = NULL;
+            }
+
             SHEET_API_TOKEN = jsonParserGetStringValue(chunk.response, "\"access_token\":");
         }
 
