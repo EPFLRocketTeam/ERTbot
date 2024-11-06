@@ -110,8 +110,20 @@ static cJSON* parseSheet(const cJSON* values_array, cJSON* parsedSheet){
         int numberOfColumnsInRow = cJSON_GetArraySize(row);
         cJSON* parsedSheetRow = cJSON_CreateObject();
 
+        if (numberOfColumnsInHeader < numberOfColumnsInRow){
+            log_message(LOG_ERROR, "parseSheet: You have are missing header values in your sheet");
+            return NULL;
+        }
+
         for(int j = 0; j < numberOfColumnsInRow; j++){
             cJSON *headerItem = cJSON_GetArrayItem(headerRow, j);
+            if(strcmp(headerItem->valuestring,"")==0){
+                log_message(LOG_ERROR, "parseSheet: You have are missing header values in your sheet");
+                cJSON_Delete(parsedSheet);
+                cJSON_Delete(parsedSheetRow);
+                return NULL;
+            }
+
             cJSON *cellItem = cJSON_GetArrayItem(row, j);
             cJSON_AddStringToObject(parsedSheetRow, headerItem->valuestring, cellItem->valuestring);
         }

@@ -66,6 +66,9 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
     cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
+        char *DRL = strdup("There was an error when parsing the requirements, you might be missing a header value.");
+
+        return DRL;
     }
 
     char *DRL = strdup(template_DRL);
@@ -83,9 +86,10 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
             continue;
         }
 
-        cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
-        cJSON *title = cJSON_GetObjectItemCaseSensitive(requirement, "Title");
-        cJSON *description = cJSON_GetObjectItemCaseSensitive(requirement, "Description");
+        cJSON *id = cJSON_GetObjectItem(requirement, "ID");
+        cJSON *title = cJSON_GetObjectItem(requirement, "Title");
+        cJSON *description = cJSON_GetObjectItem(requirement, "Description");
+        
 
         if(strlen(id->valuestring) < 2){
             log_message(LOG_DEBUG, "ID is smaller than one, breaking");
@@ -105,7 +109,6 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
             DRL = appendToString(DRL, "\n");
             continue;
         }
-
         if (cJSON_IsString(id) && id->valuestring) {
             log_message(LOG_DEBUG, "ID: %s", id->valuestring);
             DRL = appendToString(DRL, "- [");
@@ -115,7 +118,6 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
             DRL = appendToString(DRL, id->valuestring);
             DRL = appendToString(DRL, ") **");
         }
-
         if (cJSON_IsString(title) && title->valuestring) {
             log_message(LOG_DEBUG, "title: %s", title->valuestring);
             DRL = appendToString(DRL, title->valuestring);
@@ -126,6 +128,11 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
             DRL = appendToString(DRL, description->valuestring);
             DRL = appendToString(DRL, "\n");
         }
+        if(strlen(id->valuestring)<2||strlen(title->valuestring)<2||strlen(description->valuestring)<2){
+            free(DRL);
+            DRL = strdup("You are missing an, id, description or title value.");
+            break;
+        }
     }
 
     DRL = appendToString(DRL, "{.links-list}");
@@ -135,5 +142,4 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
     log_message(LOG_DEBUG, "Exiting function buildDrlFromJSONRequirementList");
 
     return DRL;
-
 }
