@@ -89,9 +89,7 @@ void checkLastSlackMessage() {
     struct curl_slist *headers = NULL;
     static  char buf[] = "Expect:";
 
-    chunk.response = malloc(1);  /* grown as needed by the realloc above */
-    chunk.size = 0;    /* no data at this point */
-
+    resetChunkResponse();
 
     // Initialize libcurl
     curl_global_init(CURL_GLOBAL_ALL);
@@ -153,8 +151,7 @@ slackMessage* getSlackMessage(slackMessage* slackMsg) {
     slackMsg->sender = jsonParserGetStringValue(chunk.response, "\"user\"");
     slackMsg->timestamp = jsonParserGetStringValue(chunk.response, "\"ts\"");
 
-    free(chunk.response);
-
+    freeChunkResponse();
 
     log_message(LOG_DEBUG, "Exiting function getSlackMessage");
 

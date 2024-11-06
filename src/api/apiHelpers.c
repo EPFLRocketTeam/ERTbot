@@ -127,3 +127,21 @@ char *jsonParserGetIntValue(const char *json, char *key) {
     log_message(LOG_DEBUG, "Exiting function jsonParserGetIntValue");
     return valueStr;  // Return success
 }
+
+void freeChunkResponse(){
+    if(chunk.response){
+        free(chunk.response);
+
+        chunk.response = NULL;
+        chunk.size = 0;
+    }
+}
+
+void resetChunkResponse(){
+    if (chunk.response != NULL){
+        free(chunk.response);
+    }
+
+    chunk.response = malloc(1);
+    chunk.size = 0;
+}

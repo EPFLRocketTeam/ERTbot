@@ -36,6 +36,7 @@ START_TEST(test_delete_page) {
     ck_assert_ptr_null(searchForDeletedTestPage);
 
     freePageList(&searchForDeletedTestPage);
+    freeChunkResponse();
 }
 END_TEST
 
@@ -44,7 +45,7 @@ START_TEST(test_fetchAndModifyPageContent) {
     initializeApiTokenVariables();
 
     pageList* testPage = NULL;
-    testPage = addPageToList(&testPage, "2015", "", "", "", "", "", "", "");
+    testPage = addPageToList(&testPage, "2015", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     testPage = getPage(&testPage);
 
     ck_assert_str_eq(testPage->content, "foo");
@@ -52,18 +53,22 @@ START_TEST(test_fetchAndModifyPageContent) {
     char *outputString;
     outputString = fetchAndModifyPageContent(testPage->id, "bar", outputString);
     ck_assert_str_eq(outputString, "foo");
+    freePageList(&testPage);
 
     free(outputString);
 
-    testPage = getPage(&testPage);
-    ck_assert_str_eq(testPage->content, "bar");
+    pageList* testPage2 = NULL;
+    testPage2 = addPageToList(&testPage2, "2015", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    testPage2 = getPage(&testPage2);
+    ck_assert_str_eq(testPage2->content, "bar");
 
     char* outputString2;
-    outputString2 = fetchAndModifyPageContent(testPage->id, "foo", outputString2);
+    outputString2 = fetchAndModifyPageContent(testPage2->id, "foo", outputString2);
     ck_assert_str_eq(outputString2, "bar");
 
     free(outputString2);
-    freePageList(&testPage);
+    freePageList(&testPage2);
+    freeChunkResponse();
 }
 END_TEST
 

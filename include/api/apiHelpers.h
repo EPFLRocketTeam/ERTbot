@@ -102,4 +102,8 @@ size_t writeCallback(const void *data, size_t size, size_t nmemb, void *clientp)
 char *jsonParserGetStringValue(const char *json, char *key);
 
 char *jsonParserGetIntValue(const char *json, char *key);
+
+void freeChunkResponse();
+
+void resetChunkResponse();
 #endif

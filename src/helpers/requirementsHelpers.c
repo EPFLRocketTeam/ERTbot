@@ -47,9 +47,7 @@ cJSON* parseArrayIntoJSONRequirementList(char *input_str) {
 
     log_message(LOG_DEBUG, "Exiting function parseArrayIntoJSONRequirementList");
 
-    if(chunk.response){
-        free(chunk.response);
-    }
+    freeChunkResponse();
 
     cJSON_Delete(input_json);
 
