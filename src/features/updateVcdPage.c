@@ -116,8 +116,8 @@ void updateVcdPage(command cmd){
     pageList* vcdPage = NULL;
     vcdPage = addPageToList(&vcdPage, vcdPageId, "", "", "", VCD, "", "", "");
 
-    vcdPage->content = replaceWord(vcdPage->content, "\n", "\\\\n");
-    vcdPage->content = replaceWord(vcdPage->content, "\"", "\\\\\\\"");
+    vcdPage->content = replaceWord_Realloc(vcdPage->content, "\n", "\\\\n");
+    vcdPage->content = replaceWord_Realloc(vcdPage->content, "\"", "\\\\\\\"");
 
     updatePageContentMutation(vcdPage);
     renderMutation(&vcdPage, false);
@@ -537,9 +537,9 @@ static char *createVcdPieChart(const int* verificationStatusCount){
     char verifiedPopulation[10];
     sprintf(verifiedPopulation, "%d", verificationStatusCount[2]);
 
-    pieChart = replaceWord(pieChart, "DefaultUnverifiedPopulation", unverifiedPopulation);
-    pieChart = replaceWord(pieChart, "DefaultPartiallyVerifiedPopulation", partiallyVerifiedPopulation);
-    pieChart = replaceWord(pieChart, "DefaultVerifiedPopulation", verifiedPopulation);
+    pieChart = replaceWord_Malloc(pieChart, "DefaultUnverifiedPopulation", unverifiedPopulation);
+    pieChart = replaceWord_Realloc(pieChart, "DefaultPartiallyVerifiedPopulation", partiallyVerifiedPopulation);
+    pieChart = replaceWord_Realloc(pieChart, "DefaultVerifiedPopulation", verifiedPopulation);
 
     log_message(LOG_DEBUG, "Exiting function createVcdPieChart");
 

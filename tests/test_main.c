@@ -13,17 +13,17 @@ int main(void) {
     s1 = stringHelpers_suite();
     sr = srunner_create(s1);
 
-    s2 = syncDrlToSheet_suite();
-    srunner_add_suite(sr, s2);
+    //s2 = syncDrlToSheet_suite();
+    //srunner_add_suite(sr, s2);
 
-    s3 = wikiAPI_suite();
-    srunner_add_suite(sr, s3);
+    //s3 = wikiAPI_suite();
+    //srunner_add_suite(sr, s3);
 
     //s4 = createMissingRequirementPages_suite();
     //srunner_add_suite(sr, s4);
 
-    //s5 = updateRequirementPages_suite();
-    //srunner_add_suite(sr, s5);
+    s5 = updateRequirementPages_suite();
+    srunner_add_suite(sr, s5);
 
     //s6 = requirementHelpers_suite();
     //srunner_add_suite(sr, s6);

@@ -114,7 +114,6 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
     return inputString;
 }
 
-
 char* reformatNewLineCharacter(char *inputString) {
     log_message(LOG_DEBUG, "Entering function reformatNewLineCharacter");
 

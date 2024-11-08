@@ -25,6 +25,7 @@ cJSON* parseArrayIntoJSONRequirementList(char *input_str) {
         return NULL;
     }
 
+
     // Create a JSON object to hold the requirements
     cJSON *json = cJSON_CreateObject();
     if (!json) {
@@ -57,7 +58,7 @@ cJSON* parseArrayIntoJSONRequirementList(char *input_str) {
 cJSON* getSubsystemInfo(char* acronym){
     log_message(LOG_DEBUG, "Entering function getSubsystemInfo");
 
-    batchGetSheet("1iB1yl2Nre95kD1g6TFDYvvLe0g5QzghtAHdnxNTD4tg", "INFO!A2:G20");
+    batchGetSheet("1iB1yl2Nre95kD1g6TFDYvvLe0g5QzghtAHdnxNTD4tg", "INFO!A2:H20");
 
     cJSON *input_json = cJSON_Parse(chunk.response);
     if (!input_json) {
@@ -77,9 +78,9 @@ cJSON* getSubsystemInfo(char* acronym){
     cJSON *subsystemsInfo = cJSON_CreateArray();
     subsystemsInfo = parseSheet(values_array, subsystemsInfo);
 
-    int numberOfSubsystens = cJSON_GetArraySize(subsystemsInfo);
+    int numberOfSubsystems = cJSON_GetArraySize(subsystemsInfo);
 
-    for(int i = 0; i< numberOfSubsystens; i++){
+    for(int i = 0; i< numberOfSubsystems; i++){
         cJSON *subsystem = cJSON_GetArrayItem(subsystemsInfo, i);
 
         if(strcmp(cJSON_GetObjectItem(subsystem, "Acronym")->valuestring, acronym) == 0){
@@ -99,12 +100,15 @@ cJSON* getSubsystemInfo(char* acronym){
 static cJSON* parseSheet(const cJSON* values_array, cJSON* parsedSheet){
     log_message(LOG_DEBUG, "Entering function parseSheet");
 
+    char* values_array_print = cJSON_Print(values_array);
+    log_message(LOG_DEBUG, "values_array_print: %s", values_array_print);
+    free(values_array_print);
+
     int numberOfRows = cJSON_GetArraySize(values_array);
     cJSON *headerRow = cJSON_GetArrayItem(values_array, 0);
     int numberOfColumnsInHeader = cJSON_GetArraySize(headerRow);
 
-
-    for(int i = 1; i<numberOfRows; i++){
+    for(int i = 1; i<=numberOfRows; i++){
         cJSON *row = cJSON_GetArrayItem(values_array, i);
 
         int numberOfColumnsInRow = cJSON_GetArraySize(row);
@@ -118,8 +122,7 @@ static cJSON* parseSheet(const cJSON* values_array, cJSON* parsedSheet){
         for(int j = 0; j < numberOfColumnsInRow; j++){
             cJSON *headerItem = cJSON_GetArrayItem(headerRow, j);
             if(strcmp(headerItem->valuestring,"")==0){
-                log_message(LOG_ERROR, "parseSheet: You have are missing header values in your sheet");
-                cJSON_Delete(parsedSheet);
+                log_message(LOG_ERROR, "parseSheet: One of your header values is empty");
                 cJSON_Delete(parsedSheetRow);
                 return NULL;
             }
@@ -131,15 +134,22 @@ static cJSON* parseSheet(const cJSON* values_array, cJSON* parsedSheet){
         cJSON_AddItemToArray(parsedSheet, parsedSheetRow);
     }
 
+    char* parsedSheet_print = cJSON_Print(parsedSheet);
+    log_message(LOG_DEBUG, "parsedSheet_print: %s", parsedSheet_print);
+    free(parsedSheet_print);
+
     log_message(LOG_DEBUG, "Exiting function parseSheet");
     return parsedSheet;
 }
 
 cJSON* getRequirements(cJSON* subsystem){
+    log_message(LOG_DEBUG, "Entering function getRequirements");
+
     char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
     char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
 
     batchGetSheet(reqDbId, sheetId);
 
+    log_message(LOG_DEBUG, "Exiting function getRequirements");
     return parseArrayIntoJSONRequirementList(chunk.response);
 }

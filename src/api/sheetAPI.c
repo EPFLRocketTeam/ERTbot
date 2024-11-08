@@ -166,4 +166,5 @@ void batchGetSheet(const char *sheetId, const char *range){
     free(modified_url);
 
     log_message(LOG_DEBUG, "Exiting function batchGetSheet");
+    return;
 }
