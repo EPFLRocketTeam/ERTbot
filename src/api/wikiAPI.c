@@ -180,11 +180,8 @@ pageList* getPage(pageList** head){
 static pageList* parseJSON(pageList** head, const char* jsonString, const char* filterType, const char* filterCondition) {
     log_message(LOG_DEBUG, "Entering function parseJSON");
 
-    bool freeFilterCondition;
-
     if (strstr(filterCondition, "\\") != NULL) {
         filterCondition = replaceWord_Malloc(filterCondition, "\\", "");
-        freeFilterCondition = true;
     }
 
     const char* start = strstr(jsonString, "\"list\":");

@@ -23,7 +23,6 @@ void initializeApiTokenVariables() {
     GITHUB_API_TOKEN = getenv("GITHUB_API_TOKEN");
     WIKI_API_TOKEN = getenv("WIKI_API_TOKEN");
     SLACK_API_TOKEN = getenv("SLACK_API_TOKEN");
-    //SHEET_API_TOKEN = getenv("SHEET_API_TOKEN");
     GOOGLE_CLIENT_ID = getenv("GOOGLE_CLIENT_ID");
     GOOGLE_CLIENT_SECRET = getenv("GOOGLE_CLIENT_SECRET");
     GOOGLE_REFRESH_TOKEN = getenv("GOOGLE_REFRESH_TOKEN");

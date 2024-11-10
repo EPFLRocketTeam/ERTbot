@@ -18,8 +18,8 @@ char* replaceWord_Malloc(const char* inputString, const char* wordToReplace, con
     char* result;
     int i;
     int cnt = 0;
-    int newWordLength = strlen(newWord);
-    int wordToReplaceLength = strlen(wordToReplace);
+    size_t newWordLength = strlen(newWord);
+    size_t wordToReplaceLength = strlen(wordToReplace);
 
     // Counting the number of times old word
     // occur in the string
@@ -58,8 +58,6 @@ char* replaceWord_Malloc(const char* inputString, const char* wordToReplace, con
 char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const char* newWord) {
     log_message(LOG_DEBUG, "Entering function replaceWord_Realloc");
 
-    //log_message(LOG_DEBUG, "replaceWord_Realloc: inputString: %s, wordToReplace: %s, newWord: %s", inputString, wordToReplace, newWord);
-
     if (!inputString || !wordToReplace || !newWord){ 
         return NULL;
     }
@@ -68,23 +66,14 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
     size_t newWordLength = strlen(newWord);
     size_t wordToReplaceLength = strlen(wordToReplace);
 
-    //log_message(LOG_DEBUG, "replaceWord_Realloc: newWordLength: %zu, wordToReplaceLength: %zu", newWordLength, wordToReplaceLength);
 
     // Count occurrences of wordToReplace in inputString
     for (char* temp = inputString; (temp = strstr(temp, wordToReplace)); temp += wordToReplaceLength) {
         cnt++;
     }
 
-    size_t l1 = strlen(inputString);
-    size_t l2 = cnt * newWordLength ; 
-    size_t l3 = cnt * wordToReplaceLength;
-    size_t l4 = (size_t)1;
-
     // Calculate new length needed
     size_t newLength = 1 + strlen(inputString) + cnt * (newWordLength - wordToReplaceLength);
-    //log_message(LOG_DEBUG, "replaceWord_Realloc: oldLength: %zu, newLength: %zu", l1, newLength);
-    //log_message(LOG_DEBUG, "replaceWord_Realloc: cnt * newWordLength: %zu, cnt * wordToReplaceLength: %zu", l2, l3);
-    //newLength = l1 + l2 + l3 + 1;
 
     // Reallocate inputString to new size
     char* resizedString = realloc(inputString, sizeof(char*) * newLength);
@@ -256,4 +245,19 @@ char* appendToString(char *original, const char *strToAppend) {
 
     log_message(LOG_DEBUG, "Exiting function appendToString");
     return combined; // Return the reallocated and combined string
+}
+
+char* duplicate_Malloc(const char *src) {
+
+    size_t len = strlen(src) + 1;    
+
+    char *dst = malloc(len);     
+
+    if (dst == NULL){
+        return NULL;
+    }
+
+    memcpy (dst, src, len);           
+      
+    return dst;                         
 }

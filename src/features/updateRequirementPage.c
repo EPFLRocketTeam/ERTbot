@@ -142,7 +142,6 @@ static void updateRequirementPageContent(pageList* reqPage, cJSON *requirement){
         reqPage->content = newContent;  // Update to point to the new content
     }
 
-    //reqPage->content = replaceParagraph(reqPage->content, importedRequirementInformation, start, end);
     reqPage->content = replaceWord_Realloc(reqPage->content, "\n", "\\\\n");
     reqPage->content = replaceWord_Realloc(reqPage->content, "\"", "\\\\\\\"");
 
@@ -171,9 +170,9 @@ static char* buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 
     log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: starting to append standard block");
 
-    int hasID = addSectionToPageContent(&pageContent, ID_BLOCK_TEMPLATE, requirement, "ID");
-    int hasTitle = addSectionToPageContent(&pageContent, TITLE_BLOCK_TEMPLATE, requirement, "Title");
-    int hasDescription = addSectionToPageContent(&pageContent, DESCRIPTION_BLOCK_TEMPLATE, requirement, "Description");
+    (void)addSectionToPageContent(&pageContent, ID_BLOCK_TEMPLATE, requirement, "ID");
+    (void)addSectionToPageContent(&pageContent, TITLE_BLOCK_TEMPLATE, requirement, "Title");
+    (void)addSectionToPageContent(&pageContent, DESCRIPTION_BLOCK_TEMPLATE, requirement, "Description");
 
     log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: Description finished");
 
@@ -187,9 +186,9 @@ static char* buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 
     log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: Assignee finished");
 
-    int hasJustification = addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Justification");
-    int hasCompliance = addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Compliance");
-    int hasCriticality = addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Criticality");
+    (void)addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Justification");
+    (void)addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Compliance");
+    (void)addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Criticality");
 
     log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: Criticality finished");
 
@@ -264,7 +263,6 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
 
         cJSON *verificationMethod = cJSON_GetObjectItem(requirement, JsonItemNameMethod);
         if(strcmp(verificationMethod->valuestring, "N/A") == 0 || strcmp(verificationMethod->valuestring, "") == 0){
-            //cJSON_Delete(verificationMethod);
             continue;
         }
 
@@ -298,7 +296,6 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
                 *pageContent = appendToString(*pageContent, verificationDeadline->valuestring);
             }
 
-            //cJSON_Delete(verificationDeadline);
         }
         
         char JsonItemNameStatus[1024];
@@ -318,11 +315,9 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
                 *pageContent = appendToString(*pageContent, "\n");
 
             }
-            //cJSON_Delete(verificationStatus);
         }
 
         log_message(LOG_DEBUG, "Page content: %s",  pageContent);
-        //cJSON_Delete(verificationMethod);
     }
 
     log_message(LOG_DEBUG, "Exiting function addVerificationInformationToPageContent");
