@@ -36,7 +36,6 @@ set(SOURCES
     src/helpers/requirementsHelpers.c
     src/helpers/stringHelpers.c
     src/helpers/timeHelpers.c
-    src/helpers/wikiLinksHelpers.c
 )
 
 # Set the output directory for executables
