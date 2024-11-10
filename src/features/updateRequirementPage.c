@@ -247,32 +247,19 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
     
     for (int verificationNumber = 1; verificationNumber <= MAXIMUM_NUMBER_OF_VERIFICATIONS; verificationNumber++){
 
-        log_message(LOG_DEBUG, "addVerificationInformationToPageContent: starting for loop");
-
-        char JsonItemNameMethod[1024];
+        char JsonItemNameMethod[50];
         snprintf(JsonItemNameMethod, sizeof(JsonItemNameMethod), "Verification Method %d", verificationNumber);
 
-        log_message(LOG_DEBUG, "addVerificationInformationToPageContent: JsonItemNameMethod initialised: %s", JsonItemNameMethod);
-
-        
         if(!cJSON_HasObjectItem(requirement, JsonItemNameMethod)){
             continue;
         }
 
-        log_message(LOG_DEBUG, "addVerificationInformationToPageContent: passed HasObjectItem check");
-
-        cJSON *verificationMethod = cJSON_GetObjectItem(requirement, JsonItemNameMethod);
+        const cJSON *verificationMethod = cJSON_GetObjectItem(requirement, JsonItemNameMethod);
         if(strcmp(verificationMethod->valuestring, "N/A") == 0 || strcmp(verificationMethod->valuestring, "") == 0){
             continue;
         }
 
-        log_message(LOG_DEBUG, "addVerificationInformationToPageContent: passed empty value check");
-
         verificationCount++;
-
-        log_message(LOG_DEBUG, "Verification method found: verification count: %d", verificationCount);
-        log_message(LOG_DEBUG, "Verification method found: JsonItemNameMethod: %s, verificationMethod: %s", JsonItemNameMethod, verificationMethod->valuestring);
-
         if(!verificationTitleAdded){
             *pageContent = appendToString(*pageContent, "\n# Verification");
             verificationTitleAdded = true;
@@ -295,7 +282,6 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
                 *pageContent = appendToString(*pageContent, "\n**Deadline**: ");
                 *pageContent = appendToString(*pageContent, verificationDeadline->valuestring);
             }
-
         }
         
         char JsonItemNameStatus[1024];

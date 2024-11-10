@@ -3,6 +3,8 @@
 
 static size_t strlcpy(char *dst, const char *src, size_t dstsize);
 
+static void allocateAndCopy(char **destination, const char *source, const char *field_name);
+
 pageList* addPageToList(pageList** head, const char *id, const char *title, const char *path, const char *description, const char *content, const char *updatedAt, const char *createdAt, const char *authorId) {
     log_message(LOG_DEBUG, "Entering function addPageToList");
 
@@ -22,94 +24,14 @@ pageList* addPageToList(pageList** head, const char *id, const char *title, cons
     newNode->createdAt = NULL;
     newNode->authorId = NULL;
 
-
-    if(id!=NULL){
-        size_t len = strlen(id) + 1;
-        newNode->id = malloc(len);
-        if(newNode->id){
-            strlcpy(newNode->id, id, len);
-        }
-        else{
-            log_message(LOG_ERROR, "Memory allocation failed for newNode->id");
-        }
-    }
-
-    if(title!=NULL){
-        size_t len = strlen(title) + 1;
-        newNode->title = malloc(len);
-        if(newNode->title){
-            strlcpy(newNode->title, title, len);
-        }
-        else{
-            log_message(LOG_ERROR, "Memory allocation failed for newNode->title");
-        }
-    }
-
-    if(path!=NULL){
-        size_t len = strlen(path) + 1;
-        newNode->path = malloc(len);
-        if(newNode->path){
-            strlcpy(newNode->path, path, len);
-        }
-        else{
-            log_message(LOG_ERROR, "Memory allocation failed for newNode->path");
-        }
-    }
-
-    if(description!=NULL){
-        size_t len = strlen(description) + 1;
-        newNode->description = malloc(len);
-        if(newNode->description){
-            strlcpy(newNode->description, description, len);
-        }
-        else{
-            log_message(LOG_ERROR, "Memory allocation failed for newNode->description");
-        }
-    }
-
-    if(content!=NULL){
-        size_t len = strlen(content) + 1;
-        newNode->content = malloc(len);
-        if(newNode->content){
-            strlcpy(newNode->content, content, len);
-        }
-        else{
-            log_message(LOG_ERROR, "Memory allocation failed for newNode->content");
-        }
-    }
-
-    if(updatedAt!=NULL){
-        size_t len = strlen(updatedAt) + 1;
-        newNode->updatedAt = malloc(len);
-        if(newNode->updatedAt){
-            strlcpy(newNode->updatedAt, updatedAt, len);
-        }
-        else{
-            log_message(LOG_ERROR, "Memory allocation failed for newNode->updatedAt");
-        }
-    }
-
-    if(createdAt!=NULL){
-        size_t len = strlen(createdAt) + 1;
-        newNode->createdAt = malloc(len);
-        if(newNode->createdAt){
-            strlcpy(newNode->createdAt, createdAt, len);
-        }
-        else{
-            log_message(LOG_ERROR, "Memory allocation failed for newNode->createdAt");
-        }
-    }
-
-    if(authorId!=NULL){
-        size_t len = strlen(authorId) + 1;
-        newNode->authorId = malloc(len);
-        if(newNode->authorId){
-            strlcpy(newNode->authorId, authorId, len);
-        }
-        else{
-            log_message(LOG_ERROR, "Memory allocation failed for newNode->authorId");
-        }
-    }
+    allocateAndCopy(&newNode->id, id, "newNode->id");
+    allocateAndCopy(&newNode->title, title, "newNode->title");
+    allocateAndCopy(&newNode->path, path, "newNode->path");
+    allocateAndCopy(&newNode->description, description, "newNode->description");
+    allocateAndCopy(&newNode->content, content, "newNode->content");
+    allocateAndCopy(&newNode->updatedAt, updatedAt, "newNode->updatedAt");
+    allocateAndCopy(&newNode->createdAt, createdAt, "newNode->createdAt");
+    allocateAndCopy(&newNode->authorId, authorId, "newNode->authorId");
 
     newNode->next = NULL;  // New node will be the last node
 
@@ -127,7 +49,6 @@ pageList* addPageToList(pageList** head, const char *id, const char *title, cons
 
     // Link the new node after the last node
     lastNode->next = newNode;
-
 
     log_message(LOG_DEBUG, "Exiting function addPageToList");
     return *head;
@@ -195,4 +116,16 @@ static size_t strlcpy(char *dst, const char *src, size_t dstsize) {
     }
 
     return src_len;
+}
+
+static void allocateAndCopy(char **destination, const char *source, const char *field_name) {
+    if (source != NULL) {
+        size_t len = strlen(source) + 1;
+        *destination = malloc(len);
+        if (*destination) {
+            strlcpy(*destination, source, len);
+        } else {
+            log_message(LOG_ERROR, "Memory allocation failed for %s", field_name);
+        }
+    }
 }
