@@ -135,9 +135,9 @@ void batchUpdateSheet(const char *sheetId, const char *range, const char *values
     log_message(LOG_DEBUG, "Entering function batchUpdateSheet");
 
     char *requestType = "POST";
-    char *modified_url = strdup(template_batch_update_url); // Make a copy to modify
+    char *modified_url = duplicate_Malloc(template_batch_update_url); // Make a copy to modify
     modified_url = replaceWord_Realloc(modified_url, "DefaultSheetID", sheetId);
-    char *modified_query = strdup(template_batch_update_query); // Make a copy to modify
+    char *modified_query = duplicate_Malloc(template_batch_update_query); // Make a copy to modify
     modified_query = replaceWord_Realloc(modified_query, "DefaultRange", range);
     modified_query = replaceWord_Realloc(modified_query, "DefaultValues", values);
 
@@ -157,7 +157,7 @@ void batchGetSheet(const char *sheetId, const char *range){
 
     char *requestType = "GET";
     char *query = "";
-    char *modified_url = strdup(template_batch_get_url); // Make a copy to modify
+    char *modified_url = duplicate_Malloc(template_batch_get_url); // Make a copy to modify
     modified_url = replaceWord_Realloc(modified_url, "DefaultSheetID", sheetId);
     modified_url = replaceWord_Realloc(modified_url, "DefaultRange", range);
 

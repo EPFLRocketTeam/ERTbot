@@ -110,7 +110,7 @@ void wikiApi(char *query){
 static void getPageContentQuery(const char* id){
     log_message(LOG_DEBUG, "Entering function getPageContentQuery");
 
-    char *modified_query = strdup(template_pages_singles_query); // Make a copy to modify
+    char *modified_query = duplicate_Malloc(template_pages_singles_query); // Make a copy to modify
     modified_query = replaceWord_Realloc(modified_query, default_page.id, id);
     wikiApi(modified_query);
     free(modified_query);
@@ -138,12 +138,12 @@ static void getListQuery(const char *sort){
     log_message(LOG_DEBUG, "Entering function getListQuery");
 
     if(strcmp(sort, "path") == 0 || strcmp(sort, "exact path") == 0){
-        char* temp_query = strdup(template_list_pages_sortByPath_query); // Make a copy to modify
+        char* temp_query = duplicate_Malloc(template_list_pages_sortByPath_query); // Make a copy to modify
         wikiApi(temp_query);
         free(temp_query);
     }
     else if(strcmp(sort, "time") == 0){
-        char *temp_query = strdup(template_list_pages_sortByTime_query); // Make a copy to modify
+        char *temp_query = duplicate_Malloc(template_list_pages_sortByTime_query); // Make a copy to modify
         wikiApi(temp_query);
         free(temp_query);
     }
@@ -397,7 +397,7 @@ pageList* populatePageList(pageList** head, const char *filterType, const char *
 void createPageMutation(const char* path, const char* content, const char* title){
     log_message(LOG_DEBUG, "Entering function createPageMutation");
 
-    char *temp_query = strdup(template_create_page_mutation);
+    char *temp_query = duplicate_Malloc(template_create_page_mutation);
     temp_query = replaceWord_Realloc(temp_query, default_page.path, path);
     temp_query = replaceWord_Realloc(temp_query, default_page.content, content);
     temp_query = replaceWord_Realloc(temp_query, default_page.title, title);

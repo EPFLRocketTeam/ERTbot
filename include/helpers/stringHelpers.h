@@ -117,4 +117,6 @@ char* extractText(const char *inputString, const char *startDelimiter, const cha
  * @warning The caller is responsible for freeing the memory of the returned string to avoid memory leaks.
  */
 char* appendToString(char *original, const char *strToAppend);
+
+char* duplicate_Malloc(const char *src);
 #endif

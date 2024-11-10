@@ -18,7 +18,7 @@ START_TEST(test_replace_word_malloc_B) {
 END_TEST
 
 START_TEST(test_replace_word_realloc_A) {
-    char* result = strdup("This is a test string with an oldWord.");
+    char* result = duplicate_Malloc("This is a test string with an oldWord.");
     result = replaceWord_Realloc(result, "oldWord", "newWord");
     ck_assert_str_eq(result, "This is a test string with an newWord.");
     free(result);
@@ -26,7 +26,7 @@ START_TEST(test_replace_word_realloc_A) {
 END_TEST
 
 START_TEST(test_replace_word_realloc_B) {
-    char* result = strdup("This is a test string with an oldWord.");
+    char* result = duplicate_Malloc("This is a test string with an oldWord.");
     result = replaceWord_Realloc(result, "old Word", "newWord");
     ck_assert_str_eq(result, "This is a test string with an oldWord.");
     free(result);

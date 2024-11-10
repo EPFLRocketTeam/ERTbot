@@ -66,12 +66,12 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
     cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
-        char *DRL = strdup("There was an error when parsing the requirements, you might be missing a header value.");
+        char *DRL = duplicate_Malloc("There was an error when parsing the requirements, you might be missing a header value.");
 
         return DRL;
     }
 
-    char *DRL = strdup(template_DRL);
+    char *DRL = duplicate_Malloc(template_DRL);
 
     DRL = replaceWord_Realloc(DRL, "$SubSystem$", cJSON_GetObjectItem(subsystem, "Name")->valuestring);
 
@@ -130,7 +130,7 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
         }
         if(strlen(id->valuestring)<2||strlen(title->valuestring)<2||strlen(description->valuestring)<2){
             free(DRL);
-            DRL = strdup("You are missing an, id, description or title value.");
+            DRL = duplicate_Malloc("You are missing an, id, description or title value.");
             break;
         }
     }

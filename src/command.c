@@ -14,6 +14,8 @@
 #include "pageListHelpers.h"
 #include "timeHelpers.h"
 #include "ERTbot_command.h"
+#include "stringHelpers.h"
+
 
 #define MAX_ARGUMENTS 10
 
@@ -493,7 +495,7 @@ void breakdownCommand(const char* sentence, command* cmd) {
     int word_count = 0;
 
     // Copy the sentence to avoid modifying the original string
-    char* sentence_copy = strdup(sentence);
+    char* sentence_copy = duplicate_Malloc(sentence);
 
     // Tokenize the sentence
     token = strtok(sentence_copy, " ");
@@ -525,34 +527,34 @@ void breakdownCommand(const char* sentence, command* cmd) {
     for (int i = 0; i < word_count; i++) {
         switch (i) {
             case 0:
-                cmd->function = strdup(words[i]);
+                cmd->function = duplicate_Malloc(words[i]);
                 break;
             case 1:
-                cmd->argument_1 = strdup(words[i]);
+                cmd->argument_1 = duplicate_Malloc(words[i]);
                 break;
             case 2:
-                cmd->argument_2 = strdup(words[i]);
+                cmd->argument_2 = duplicate_Malloc(words[i]);
                 break;
             case 3:
-                cmd->argument_3 = strdup(words[i]);
+                cmd->argument_3 = duplicate_Malloc(words[i]);
                 break;
             case 4:
-                cmd->argument_4 = strdup(words[i]);
+                cmd->argument_4 = duplicate_Malloc(words[i]);
                 break;
             case 5:
-                cmd->argument_5 = strdup(words[i]);
+                cmd->argument_5 = duplicate_Malloc(words[i]);
                 break;
             case 6:
-                cmd->argument_6 = strdup(words[i]);
+                cmd->argument_6 = duplicate_Malloc(words[i]);
                 break;
             case 7:
-                cmd->argument_7 = strdup(words[i]);
+                cmd->argument_7 = duplicate_Malloc(words[i]);
                 break;
             case 8:
-                cmd->argument_8 = strdup(words[i]);
+                cmd->argument_8 = duplicate_Malloc(words[i]);
                 break;
             case 9:
-                cmd->argument_9 = strdup(words[i]);
+                cmd->argument_9 = duplicate_Malloc(words[i]);
                 break;
             default:
                 break;

@@ -161,7 +161,7 @@ static void updateRequirementPageContent(pageList* reqPage, cJSON *requirement){
 static char* buildRequirementPageFromJSONRequirementList(cJSON *requirement){
     log_message(LOG_DEBUG, "Entering function buildRequirementPageFromJSONRequirementList");
 
-    char* pageContent = strdup("");
+    char* pageContent = duplicate_Malloc("");
 
     char* requirement_print = cJSON_Print(requirement);
     log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: requirement: %s", requirement_print);
@@ -202,7 +202,7 @@ static char* buildRequirementPageFromJSONRequirementList(cJSON *requirement){
 }
 
 static char* addDollarSigns(const char* characteristic){
-    char* wordToReplace = strdup("$word$");
+    char* wordToReplace = duplicate_Malloc("$word$");
     wordToReplace = replaceWord_Realloc(wordToReplace, "word", characteristic);
     return wordToReplace;
 }
@@ -222,7 +222,7 @@ static int addSectionToPageContent(char** pageContent, const char* template, con
         return 0;
     }
     
-    char *newSection = strdup(template);
+    char *newSection = duplicate_Malloc(template);
     char *wordToReplace = addDollarSigns(item);
 
     newSection = replaceWord_Realloc(newSection, wordToReplace, jsonCharacteristic->valuestring);
