@@ -19,8 +19,8 @@ int main(void) {
     s3 = wikiAPI_suite();
     srunner_add_suite(sr, s3);
 
-    //s4 = createMissingRequirementPages_suite();
-    //srunner_add_suite(sr, s4);
+    s4 = createMissingRequirementPages_suite();
+    srunner_add_suite(sr, s4);
 
     s5 = updateRequirementPages_suite();
     srunner_add_suite(sr, s5);
