@@ -24,7 +24,7 @@
  *       valid and properly formatted. Memory allocated for the new node's strings should be freed when the node is no
  *       longer needed to prevent memory leaks.
  */
-pageList* addPageToList(pageList** head, const char *id, const char *title, const char *path, const char *description, const char *content, const char *updatedAt, const char *createdAt, const char *authorId);
+pageList* addPageToList(pageList** head, const char *id, const char *title, const char *path, const char *description, const char *content, const char *updatedAt);
 
 /**
  * @brief Frees the memory allocated for a linked list of `pageList` nodes.

@@ -45,7 +45,7 @@ START_TEST(test_fetchAndModifyPageContent) {
     initializeApiTokenVariables();
 
     pageList* testPage = NULL;
-    testPage = addPageToList(&testPage, "2015", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    testPage = addPageToList(&testPage, "2015", NULL, NULL, NULL, NULL, NULL);
     testPage = getPage(&testPage);
 
     ck_assert_str_eq(testPage->content, "foo");
@@ -58,7 +58,7 @@ START_TEST(test_fetchAndModifyPageContent) {
     free(outputString);
 
     pageList* testPage2 = NULL;
-    testPage2 = addPageToList(&testPage2, "2015", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    testPage2 = addPageToList(&testPage2, "2015", NULL, NULL, NULL, NULL, NULL);
     testPage2 = getPage(&testPage2);
     ck_assert_str_eq(testPage2->content, "bar");
 
@@ -75,7 +75,8 @@ END_TEST
 // Test suite setup
 Suite *wikiAPI_suite(void) {
     Suite *s;
-    TCase *tc_core1, *tc_core2;
+    TCase *tc_core1;
+    TCase *tc_core2;
 
     s = suite_create("wikiAPI");
 

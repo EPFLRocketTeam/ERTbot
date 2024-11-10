@@ -22,7 +22,7 @@ START_TEST(test_syncDrlToSheet_1) {
     syncDrlToSheet(cmd);
 
     pageList* drlPage = NULL;
-    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL);
 
     getPage(&drlPage);
 
@@ -43,7 +43,7 @@ START_TEST(test_syncDrlToSheet_2) {
     syncDrlToSheet(cmd);
 
     pageList* drlPage = NULL;
-    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL);
 
     getPage(&drlPage);
 
@@ -64,7 +64,7 @@ START_TEST(test_syncDrlToSheet_3) {
     syncDrlToSheet(cmd);
 
     pageList* drlPage = NULL;
-    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL);
 
     getPage(&drlPage);
 
@@ -85,7 +85,7 @@ START_TEST(test_syncDrlToSheet_4) {
     syncDrlToSheet(cmd);
 
     pageList* drlPage = NULL;
-    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL);
 
     getPage(&drlPage);
 
@@ -106,7 +106,7 @@ START_TEST(test_syncDrlToSheet_5) {
     syncDrlToSheet(cmd);
 
     pageList* drlPage = NULL;
-    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    drlPage = addPageToList(&drlPage, "1995", NULL, NULL, NULL, NULL, NULL);
 
     getPage(&drlPage);
 

@@ -272,19 +272,19 @@ static pageList* parseJSON(pageList** head, const char* jsonString, const char* 
         // Add page to list based on the filter condition
         if (strcmp(filterType, "path") == 0 && (strstr(path, filterCondition) != NULL || strcmp(filterCondition, "none") == 0)) {
             log_message(LOG_DEBUG, "Page found after filtering by path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
-            *head = addPageToList(head, id, title, path, NULL, NULL, updatedAt, NULL, NULL);
+            *head = addPageToList(head, id, title, path, NULL, NULL, updatedAt);
             log_message(LOG_DEBUG, "Page added to list");
         }
 
         if (strcmp(filterType, "time") == 0 && (strcmp(filterCondition, "none") == 0 || compareTimes(filterCondition, updatedAt) == -1)) {
             log_message(LOG_DEBUG, "Page found after filtering by time:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
-            *head = addPageToList(head, id, title, path, NULL, NULL, updatedAt, NULL, NULL);
+            *head = addPageToList(head, id, title, path, NULL, NULL, updatedAt);
             log_message(LOG_DEBUG, "Page added to list");
         }
 
         if (strcmp(filterType, "exact path") == 0 && strcmp(path, filterCondition) == 0) {
             log_message(LOG_DEBUG, "Page found after filtering by exact path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
-            *head = addPageToList(head, id, title, path, NULL, NULL, updatedAt, NULL, NULL);
+            *head = addPageToList(head, id, title, path, NULL, NULL, updatedAt);
             log_message(LOG_DEBUG, "Page added to list");
             free(path);
             free(title);
@@ -416,7 +416,7 @@ char *fetchAndModifyPageContent(const char* pageId, const char* newPageContent, 
     log_message(LOG_DEBUG, "Entering function fetchAndModifyPageContent");
 
     pageList* page = NULL;
-    page = addPageToList(&page, pageId, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    page = addPageToList(&page, pageId, NULL, NULL, NULL, NULL, NULL);
     page = getPage(&page);
 
     outputString = malloc(strlen(page->content) + 1);

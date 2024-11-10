@@ -5,7 +5,7 @@ static size_t strlcpy(char *dst, const char *src, size_t dstsize);
 
 static void allocateAndCopy(char **destination, const char *source, const char *field_name);
 
-pageList* addPageToList(pageList** head, const char *id, const char *title, const char *path, const char *description, const char *content, const char *updatedAt, const char *createdAt, const char *authorId) {
+pageList* addPageToList(pageList** head, const char *id, const char *title, const char *path, const char *description, const char *content, const char *updatedAt) {
     log_message(LOG_DEBUG, "Entering function addPageToList");
 
     pageList* newNode = (pageList *)malloc(sizeof(pageList));
@@ -30,8 +30,6 @@ pageList* addPageToList(pageList** head, const char *id, const char *title, cons
     allocateAndCopy(&newNode->description, description, "newNode->description");
     allocateAndCopy(&newNode->content, content, "newNode->content");
     allocateAndCopy(&newNode->updatedAt, updatedAt, "newNode->updatedAt");
-    allocateAndCopy(&newNode->createdAt, createdAt, "newNode->createdAt");
-    allocateAndCopy(&newNode->authorId, authorId, "newNode->authorId");
 
     newNode->next = NULL;  // New node will be the last node
 

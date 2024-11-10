@@ -24,7 +24,7 @@ START_TEST(test_updateRequirementPages_1) {
     cmd.argument_1 = "UT_REQ_1";
 
     pageList* checkPage1 = NULL;
-    checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage1);
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
@@ -33,7 +33,7 @@ START_TEST(test_updateRequirementPages_1) {
     freePageList(&checkPage1);
 
     pageList* checkPage2 = NULL;
-    checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage2);
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
@@ -65,7 +65,7 @@ START_TEST(test_updateRequirementPages_2) {
     cmd.argument_1 = "UT_REQ_2";
 
     pageList* checkPage1 = NULL;
-    checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage1);
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
@@ -74,7 +74,7 @@ START_TEST(test_updateRequirementPages_2) {
     freePageList(&checkPage1);
 
     pageList* checkPage2 = NULL;
-    checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage2);
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
@@ -106,7 +106,7 @@ START_TEST(test_updateRequirementPages_3) {
     cmd.argument_1 = "UT_REQ_3";
 
     pageList* checkPage1 = NULL;
-    checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage1);
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
@@ -115,7 +115,7 @@ START_TEST(test_updateRequirementPages_3) {
     freePageList(&checkPage1);
 
     pageList* checkPage2 = NULL;
-    checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage2);
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
@@ -147,7 +147,7 @@ START_TEST(test_updateRequirementPages_4) {
     cmd.argument_1 = "UT_REQ_4";
 
     pageList* checkPage1 = NULL;
-    checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage1);
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
@@ -156,7 +156,7 @@ START_TEST(test_updateRequirementPages_4) {
     freePageList(&checkPage1);
 
     pageList* checkPage2 = NULL;
-    checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage2);
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);

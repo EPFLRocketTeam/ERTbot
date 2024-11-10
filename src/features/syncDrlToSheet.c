@@ -45,7 +45,7 @@ void syncDrlToSheet(command cmd){
 
     pageList* drlPage = NULL;
     const char *drlPageId = cJSON_GetObjectItem(subsystem, "DRL Page ID")->valuestring;
-    drlPage = addPageToList(&drlPage, drlPageId, NULL, NULL, NULL, DRL, NULL, NULL, NULL);
+    drlPage = addPageToList(&drlPage, drlPageId, NULL, NULL, NULL, DRL, NULL);
 
     updatePageContentMutation(drlPage);
     renderMutation(&drlPage, false);
