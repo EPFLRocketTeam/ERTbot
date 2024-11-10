@@ -58,7 +58,7 @@ char* replaceWord_Malloc(const char* inputString, const char* wordToReplace, con
 char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const char* newWord) {
     log_message(LOG_DEBUG, "Entering function replaceWord_Realloc");
 
-    log_message(LOG_DEBUG, "replaceWord_Realloc: inputString: %s, wordToReplace: %s, newWord: %s", inputString, wordToReplace, newWord);
+    //log_message(LOG_DEBUG, "replaceWord_Realloc: inputString: %s, wordToReplace: %s, newWord: %s", inputString, wordToReplace, newWord);
 
     if (!inputString || !wordToReplace || !newWord){ 
         return NULL;
@@ -68,7 +68,7 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
     size_t newWordLength = strlen(newWord);
     size_t wordToReplaceLength = strlen(wordToReplace);
 
-    log_message(LOG_DEBUG, "replaceWord_Realloc: newWordLength: %zu, wordToReplaceLength: %zu", newWordLength, wordToReplaceLength);
+    //log_message(LOG_DEBUG, "replaceWord_Realloc: newWordLength: %zu, wordToReplaceLength: %zu", newWordLength, wordToReplaceLength);
 
     // Count occurrences of wordToReplace in inputString
     for (char* temp = inputString; (temp = strstr(temp, wordToReplace)); temp += wordToReplaceLength) {
@@ -82,8 +82,8 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
 
     // Calculate new length needed
     size_t newLength = 1 + strlen(inputString) + cnt * (newWordLength - wordToReplaceLength);
-    log_message(LOG_DEBUG, "replaceWord_Realloc: oldLength: %zu, newLength: %zu", l1, newLength);
-    log_message(LOG_DEBUG, "replaceWord_Realloc: cnt * newWordLength: %zu, cnt * wordToReplaceLength: %zu", l2, l3);
+    //log_message(LOG_DEBUG, "replaceWord_Realloc: oldLength: %zu, newLength: %zu", l1, newLength);
+    //log_message(LOG_DEBUG, "replaceWord_Realloc: cnt * newWordLength: %zu, cnt * wordToReplaceLength: %zu", l2, l3);
     //newLength = l1 + l2 + l3 + 1;
 
     // Reallocate inputString to new size
@@ -98,7 +98,7 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
     char* pos = strstr(result, wordToReplace);
     while (pos) {
         size_t remainingLength = strlen(pos + wordToReplaceLength);
-        log_message(LOG_DEBUG, "replaceWord_Realloc: remainingLength: %zu", remainingLength);
+        //log_message(LOG_DEBUG, "replaceWord_Realloc: remainingLength: %zu", remainingLength);
         // Shift the remaining part of the string to make room for newWord, if needed
         memmove(pos + newWordLength, pos + wordToReplaceLength, sizeof(char) *remainingLength + 1);  // Include '\0'
 

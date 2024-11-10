@@ -5,7 +5,7 @@
 #include "sheetAPI.h"
 #include "apiHelpers.h"
 
-static cJSON* parseSheet(const cJSON* values_array, cJSON* parsedSheet);
+static cJSON* parseSheet(const cJSON* values_array);
 
 cJSON* parseArrayIntoJSONRequirementList(char *input_str) {
     log_message(LOG_DEBUG, "Entering function parseArrayIntoJSONRequirementList");
@@ -35,12 +35,12 @@ cJSON* parseArrayIntoJSONRequirementList(char *input_str) {
     }
 
     // Create a JSON array to hold the requirement objects
-    cJSON *requirements = cJSON_CreateArray();
-    requirements = parseSheet(values_array, requirements);
+    cJSON *requirements = parseSheet(values_array);
     if (!requirements) {
         log_message(LOG_ERROR, "Error creating JSON array");
         cJSON_Delete(json);
         cJSON_Delete(input_json);
+        cJSON_Delete(requirements);
         return NULL;
     }
 
@@ -58,7 +58,7 @@ cJSON* parseArrayIntoJSONRequirementList(char *input_str) {
 cJSON* getSubsystemInfo(char* acronym){
     log_message(LOG_DEBUG, "Entering function getSubsystemInfo");
 
-    batchGetSheet("1iB1yl2Nre95kD1g6TFDYvvLe0g5QzghtAHdnxNTD4tg", "INFO!A2:H20");
+    batchGetSheet("1iB1yl2Nre95kD1g6TFDYvvLe0g5QzghtAHdnxNTD4tg", "INFO!A2:H30");
 
     cJSON *input_json = cJSON_Parse(chunk.response);
     if (!input_json) {
@@ -75,8 +75,7 @@ cJSON* getSubsystemInfo(char* acronym){
     }
 
     // Create a JSON array to hold the requirement objects
-    cJSON *subsystemsInfo = cJSON_CreateArray();
-    subsystemsInfo = parseSheet(values_array, subsystemsInfo);
+    cJSON *subsystemsInfo = parseSheet(values_array);
 
     int numberOfSubsystems = cJSON_GetArraySize(subsystemsInfo);
 
@@ -97,18 +96,16 @@ cJSON* getSubsystemInfo(char* acronym){
     exit(1);
 }
 
-static cJSON* parseSheet(const cJSON* values_array, cJSON* parsedSheet){
+static cJSON* parseSheet(const cJSON* values_array){
     log_message(LOG_DEBUG, "Entering function parseSheet");
-
-    char* values_array_print = cJSON_Print(values_array);
-    log_message(LOG_DEBUG, "values_array_print: %s", values_array_print);
-    free(values_array_print);
 
     int numberOfRows = cJSON_GetArraySize(values_array);
     cJSON *headerRow = cJSON_GetArrayItem(values_array, 0);
     int numberOfColumnsInHeader = cJSON_GetArraySize(headerRow);
 
-    for(int i = 1; i<=numberOfRows; i++){
+    cJSON *parsedSheet = cJSON_CreateArray();
+
+    for(int i = 1; i<numberOfRows; i++){
         cJSON *row = cJSON_GetArrayItem(values_array, i);
 
         int numberOfColumnsInRow = cJSON_GetArraySize(row);
@@ -134,9 +131,6 @@ static cJSON* parseSheet(const cJSON* values_array, cJSON* parsedSheet){
         cJSON_AddItemToArray(parsedSheet, parsedSheetRow);
     }
 
-    char* parsedSheet_print = cJSON_Print(parsedSheet);
-    log_message(LOG_DEBUG, "parsedSheet_print: %s", parsedSheet_print);
-    free(parsedSheet_print);
 
     log_message(LOG_DEBUG, "Exiting function parseSheet");
     return parsedSheet;

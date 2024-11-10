@@ -9,22 +9,20 @@ START_TEST(test_getSubsystemInfo) {
     initializeApiTokenVariables();
     refreshOAuthToken();
 
-    cJSON* subsystem = getSubsystemInfo("UT");
+    cJSON* subsystem = getSubsystemInfo("UT_DRL_1");
 
-    ck_assert_str_eq(cJSON_GetObjectItem(subsystem, "Name")->valuestring, "Unit Test");
-    ck_assert_str_eq(cJSON_GetObjectItem(subsystem, "Acronym")->valuestring, "UT");
+    ck_assert_str_eq(cJSON_GetObjectItem(subsystem, "Name")->valuestring, "Propulsion");
+    ck_assert_str_eq(cJSON_GetObjectItem(subsystem, "Acronym")->valuestring, "UT_DRL_1");
     ck_assert_str_eq(cJSON_GetObjectItem(subsystem, "DRL Page ID")->valuestring, "1995");
-    ck_assert_str_eq(cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring, "1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I");
-    ck_assert_str_eq(cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring, "UT!A2:AT300");
-    ck_assert_str_eq(cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/");
+    ck_assert_str_eq(cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring, "1jI0yTxSWGuKINwW-vkQiGHydmVrhnvPnQGuXZr0v0YE");
+    ck_assert_str_eq(cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring, "UT_DRL_1!A2:AT300");
+    ck_assert_str_eq(cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PR_DRL/");
 
     cJSON_Delete(subsystem);
 
 
 }
 END_TEST
-
-
 
 // Test suite setup
 Suite *requirementHelpers_suite(void) {
