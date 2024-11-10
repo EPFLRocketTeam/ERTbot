@@ -43,6 +43,7 @@ int sendMessageToSlack( char *message) {
 
         // Set the write function to ignore the response
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
         // Add headers
         headerlist = curl_slist_append(headerlist, "Content-Type: application/json");

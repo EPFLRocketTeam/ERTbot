@@ -1,6 +1,8 @@
 #include <string.h>
 #include "ERTbot_common.h"
 
+static size_t strlcpy(char *dst, const char *src, size_t dstsize);
+
 pageList* addPageToList(pageList** head, const char *id, const char *title, const char *path, const char *description, const char *content, const char *updatedAt, const char *createdAt, const char *authorId) {
     log_message(LOG_DEBUG, "Entering function addPageToList");
 
@@ -22,43 +24,91 @@ pageList* addPageToList(pageList** head, const char *id, const char *title, cons
 
 
     if(id!=NULL){
-        newNode->id = malloc(strlen(id) + 1);
-        strcpy(newNode->id, id);
+        size_t len = strlen(id) + 1;
+        newNode->id = malloc(len);
+        if(newNode->id){
+            strlcpy(newNode->id, id, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for newNode->id");
+        }
     }
 
     if(title!=NULL){
-        newNode->title = malloc(strlen(title) + 1);
-        strcpy(newNode->title, title);
+        size_t len = strlen(title) + 1;
+        newNode->title = malloc(len);
+        if(newNode->title){
+            strlcpy(newNode->title, title, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for newNode->title");
+        }
     }
 
     if(path!=NULL){
-        newNode->path = malloc(strlen(path) + 1);
-        strcpy(newNode->path, path);
+        size_t len = strlen(path) + 1;
+        newNode->path = malloc(len);
+        if(newNode->path){
+            strlcpy(newNode->path, path, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for newNode->path");
+        }
     }
 
     if(description!=NULL){
-        newNode->description = malloc(strlen(description) + 1);
-        strcpy(newNode->description, description);
+        size_t len = strlen(description) + 1;
+        newNode->description = malloc(len);
+        if(newNode->description){
+            strlcpy(newNode->description, description, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for newNode->description");
+        }
     }
 
     if(content!=NULL){
-        newNode->content = malloc(strlen(content) + 1);
-        strcpy(newNode->content, content);
+        size_t len = strlen(content) + 1;
+        newNode->content = malloc(len);
+        if(newNode->content){
+            strlcpy(newNode->content, content, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for newNode->content");
+        }
     }
 
     if(updatedAt!=NULL){
-        newNode->updatedAt = malloc(strlen(updatedAt) + 1);
-        strcpy(newNode->updatedAt, updatedAt);
+        size_t len = strlen(updatedAt) + 1;
+        newNode->updatedAt = malloc(len);
+        if(newNode->updatedAt){
+            strlcpy(newNode->updatedAt, updatedAt, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for newNode->updatedAt");
+        }
     }
 
     if(createdAt!=NULL){
-        newNode->createdAt = malloc(strlen(createdAt) + 1);
-        strcpy(newNode->createdAt, createdAt);
+        size_t len = strlen(createdAt) + 1;
+        newNode->createdAt = malloc(len);
+        if(newNode->createdAt){
+            strlcpy(newNode->createdAt, createdAt, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for newNode->createdAt");
+        }
     }
 
     if(authorId!=NULL){
-        newNode->authorId = malloc(strlen(authorId) + 1);
-        strcpy(newNode->authorId, authorId);
+        size_t len = strlen(authorId) + 1;
+        newNode->authorId = malloc(len);
+        if(newNode->authorId){
+            strlcpy(newNode->authorId, authorId, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for newNode->authorId");
+        }
     }
 
     newNode->next = NULL;  // New node will be the last node
@@ -130,4 +180,19 @@ void freePageList(pageList** head) {
 
 
     log_message(LOG_DEBUG, "Exiting function freePageList");
+}
+
+static size_t strlcpy(char *dst, const char *src, size_t dstsize) {
+    size_t src_len = 0;
+    while (src[src_len] != '\0') src_len++;
+
+    if (dstsize > 0) {
+        size_t copy_len = (src_len >= dstsize) ? dstsize - 1 : src_len;
+        for (size_t i = 0; i < copy_len; i++) {
+            dst[i] = src[i];
+        }
+        dst[copy_len] = '\0';
+    }
+
+    return src_len;
 }

@@ -6,11 +6,11 @@
 #include "wikiAPI.h"
 #include "sheetAPI.h"
 
-#define REQ_PAGE_1_1 "<!--2024_C_SE_PR_REQ_01-->\\n# 2024_C_SE_PR_REQ_01: PR declaration of purpose\\n>**Description**: PR shall design a bi-liquid propulsion system that will propel the LV to its target apogee.\\n>**Author**: Michaël Fuser\\n{.is-info}\\n<!--2024_C_SE_PR_REQ_01-->"
-#define REQ_PAGE_2_1 "<!--2024_C_SE_PR_REQ_02-->\\n# 2024_C_SE_PR_REQ_02: Total impulse\\n>**Description**: The propulsion system shall produce an impulse of [80000][+15000/-25000]Ns.\\n>**Author**: Michaël Fuser\\n{.is-info}\\n\\n# Verification\\n## Verification 1\\n**Method**: Test\\n**Deadline**: SIR\\n**Status**: :red_circle:Uncompleted\\n<!--2024_C_SE_PR_REQ_02-->"
+#define REQ_PAGE_1_1 "<!--2024_C_SE_PR_REQ_01-->\\n# 2024_C_SE_PR_REQ_01: PR declaration of purpose\\n>**Description**: PR shall design a bi-liquid propulsion system that will propel the LV to its target apogee.\\n\\n>**Author**: Michaël Fuser\\n{.is-info}\\n<!--2024_C_SE_PR_REQ_01-->"
+#define REQ_PAGE_2_1 "<!--2024_C_SE_PR_REQ_02-->\\n# 2024_C_SE_PR_REQ_02: Total impulse\\n>**Description**: The propulsion system shall produce an impulse of [80000][+15000/-25000]Ns.\\n\\n>**Author**: Michaël Fuser\\n{.is-info}\\n\\n# Verification\\n## Verification 1\\n**Method**: Test\\n**Deadline**: SIR\\n**Status**: :red_circle:Uncompleted\\n<!--2024_C_SE_PR_REQ_02-->"
 
-#define REQ_PAGE_1_2 "<!--2024_C_SE_PR_REQ_01-->\\n# 2024_C_SE_PR_REQ_01: PR declaration of purpose\\n>**Description**: PR shall design a bi-liquid propulsion system that will propel the LV to its target apogee.\\n<!--2024_C_SE_PR_REQ_01-->"
-#define REQ_PAGE_2_2 "<!--2024_C_SE_PR_REQ_02-->\\n# 2024_C_SE_PR_REQ_02: Total impulse\\n>**Description**: The propulsion system shall produce an impulse of [80000][+15000/-25000]Ns.\\n\\n# Verification\\n## Verification 1\\n**Method**: Test\\n**Deadline**: SIR\\n**Status**: :red_circle:Uncompleted\\n<!--2024_C_SE_PR_REQ_02-->"
+#define REQ_PAGE_1_2 "<!--2024_C_SE_PR_REQ_01-->\\n# 2024_C_SE_PR_REQ_01: PR declaration of purpose\\n>**Description**: PR shall design a bi-liquid propulsion system that will propel the LV to its target apogee.\\n\\n<!--2024_C_SE_PR_REQ_01-->"
+#define REQ_PAGE_2_2 "<!--2024_C_SE_PR_REQ_02-->\\n# 2024_C_SE_PR_REQ_02: Total impulse\\n>**Description**: The propulsion system shall produce an impulse of [80000][+15000/-25000]Ns.\\n\\n\\n# Verification\\n## Verification 1\\n**Method**: Test\\n**Deadline**: SIR\\n**Status**: :red_circle:Uncompleted\\n<!--2024_C_SE_PR_REQ_02-->"
 
 
 START_TEST(test_updateRequirementPages_1) {
@@ -29,7 +29,7 @@ START_TEST(test_updateRequirementPages_1) {
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage1->title);
-    };
+    }
     freePageList(&checkPage1);
 
     pageList* checkPage2 = NULL;
@@ -38,7 +38,7 @@ START_TEST(test_updateRequirementPages_1) {
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage2->title);
-    };
+    }
     freePageList(&checkPage2);
 
     updateRequirementPage(cmd);
@@ -70,7 +70,7 @@ START_TEST(test_updateRequirementPages_2) {
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage1->title);
-    };
+    }
     freePageList(&checkPage1);
 
     pageList* checkPage2 = NULL;
@@ -79,7 +79,7 @@ START_TEST(test_updateRequirementPages_2) {
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage2->title);
-    };
+    }
     freePageList(&checkPage2);
 
     updateRequirementPage(cmd);
@@ -111,7 +111,7 @@ START_TEST(test_updateRequirementPages_3) {
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage1->title);
-    };
+    }
     freePageList(&checkPage1);
 
     pageList* checkPage2 = NULL;
@@ -120,7 +120,7 @@ START_TEST(test_updateRequirementPages_3) {
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage2->title);
-    };
+    }
     freePageList(&checkPage2);
 
     updateRequirementPage(cmd);
@@ -152,7 +152,7 @@ START_TEST(test_updateRequirementPages_4) {
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage1->title);
-    };
+    }
     freePageList(&checkPage1);
 
     pageList* checkPage2 = NULL;
@@ -161,7 +161,7 @@ START_TEST(test_updateRequirementPages_4) {
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
         log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage2->title);
-    };
+    }
     freePageList(&checkPage2);
 
     updateRequirementPage(cmd);

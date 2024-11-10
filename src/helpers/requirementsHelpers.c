@@ -4,10 +4,11 @@
 #include "ERTbot_common.h"
 #include "sheetAPI.h"
 #include "apiHelpers.h"
+#include "stringHelpers.h"
 
 static cJSON* parseSheet(const cJSON* values_array);
 
-cJSON* parseArrayIntoJSONRequirementList(char *input_str) {
+cJSON* parseArrayIntoJSONRequirementList(const char *input_str) {
     log_message(LOG_DEBUG, "Entering function parseArrayIntoJSONRequirementList");
 
     // Parse the input string as JSON
@@ -18,7 +19,7 @@ cJSON* parseArrayIntoJSONRequirementList(char *input_str) {
     }
 
     // Extract the "values" array from the JSON object
-    cJSON *values_array = cJSON_GetObjectItemCaseSensitive(input_json, "values");
+    const cJSON *values_array = cJSON_GetObjectItemCaseSensitive(input_json, "values");
     if (!cJSON_IsArray(values_array)) {
         log_message(LOG_ERROR, "Error: values is not a JSON array");
         cJSON_Delete(input_json);
@@ -55,7 +56,7 @@ cJSON* parseArrayIntoJSONRequirementList(char *input_str) {
     return json;
 }
 
-cJSON* getSubsystemInfo(char* acronym){
+cJSON* getSubsystemInfo(const char* acronym){
     log_message(LOG_DEBUG, "Entering function getSubsystemInfo");
 
     batchGetSheet("1iB1yl2Nre95kD1g6TFDYvvLe0g5QzghtAHdnxNTD4tg", "INFO!A2:H30");
@@ -67,7 +68,7 @@ cJSON* getSubsystemInfo(char* acronym){
     }
 
     // Extract the "values" array from the JSON object
-    cJSON *values_array = cJSON_GetObjectItemCaseSensitive(input_json, "values");
+    const cJSON *values_array = cJSON_GetObjectItemCaseSensitive(input_json, "values");
     if (!cJSON_IsArray(values_array)) {
         log_message(LOG_ERROR, "Error: values is not a JSON array");
         cJSON_Delete(input_json);
@@ -80,7 +81,7 @@ cJSON* getSubsystemInfo(char* acronym){
     int numberOfSubsystems = cJSON_GetArraySize(subsystemsInfo);
 
     for(int i = 0; i< numberOfSubsystems; i++){
-        cJSON *subsystem = cJSON_GetArrayItem(subsystemsInfo, i);
+        const cJSON *subsystem = cJSON_GetArrayItem(subsystemsInfo, i);
 
         if(strcmp(cJSON_GetObjectItem(subsystem, "Acronym")->valuestring, acronym) == 0){
             cJSON* result = cJSON_DetachItemFromArray(subsystemsInfo, i);
@@ -100,13 +101,13 @@ static cJSON* parseSheet(const cJSON* values_array){
     log_message(LOG_DEBUG, "Entering function parseSheet");
 
     int numberOfRows = cJSON_GetArraySize(values_array);
-    cJSON *headerRow = cJSON_GetArrayItem(values_array, 0);
+    const cJSON *headerRow = cJSON_GetArrayItem(values_array, 0);
     int numberOfColumnsInHeader = cJSON_GetArraySize(headerRow);
 
     cJSON *parsedSheet = cJSON_CreateArray();
 
     for(int i = 1; i<numberOfRows; i++){
-        cJSON *row = cJSON_GetArrayItem(values_array, i);
+        const cJSON *row = cJSON_GetArrayItem(values_array, i);
 
         int numberOfColumnsInRow = cJSON_GetArraySize(row);
         cJSON* parsedSheetRow = cJSON_CreateObject();
@@ -117,14 +118,14 @@ static cJSON* parseSheet(const cJSON* values_array){
         }
 
         for(int j = 0; j < numberOfColumnsInRow; j++){
-            cJSON *headerItem = cJSON_GetArrayItem(headerRow, j);
+            const cJSON *headerItem = cJSON_GetArrayItem(headerRow, j);
             if(strcmp(headerItem->valuestring,"")==0){
                 log_message(LOG_ERROR, "parseSheet: One of your header values is empty");
                 cJSON_Delete(parsedSheetRow);
                 return NULL;
             }
 
-            cJSON *cellItem = cJSON_GetArrayItem(row, j);
+            const cJSON *cellItem = cJSON_GetArrayItem(row, j);
             cJSON_AddStringToObject(parsedSheetRow, headerItem->valuestring, cellItem->valuestring);
         }
 
@@ -136,11 +137,11 @@ static cJSON* parseSheet(const cJSON* values_array){
     return parsedSheet;
 }
 
-cJSON* getRequirements(cJSON* subsystem){
+cJSON* getRequirements(const cJSON* subsystem){
     log_message(LOG_DEBUG, "Entering function getRequirements");
 
-    char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
-    char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
+    const char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
+    const char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
 
     batchGetSheet(reqDbId, sheetId);
 

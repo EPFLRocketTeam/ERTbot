@@ -12,8 +12,8 @@
 
 #define ID_BLOCK_TEMPLATE "\n# $ID$: "
 #define TITLE_BLOCK_TEMPLATE "$Title$\n"
-#define DESCRIPTION_BLOCK_TEMPLATE ">**Description**: $Description$\n"
-#define SOURCE_BLOCK_TEMPLATE "\n>**Source**: $Source$\n"
+#define DESCRIPTION_BLOCK_TEMPLATE ">**Description**: $Description$\n\n"
+#define SOURCE_BLOCK_TEMPLATE ">**Source**: $Source$\n"
 #define AUTHOR_BLOCK_TEMPLATE ">**Author**: $Author$\n"
 #define ASSIGNEE_BLOCK_TEMPLATE ">**Assignee**: $Assignee$\n"
 #define JUSTIFICATION_BLOCK_TEMPLATE "\n## Justification\n$Justification$\n"
@@ -48,9 +48,9 @@
  * - After processing, the page content is added to the `pageList` structure and the list is returned.
  * - If any errors are encountered (e.g., missing "requirements" array or incorrect object format), appropriate error messages are printed.
  */
-static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement);
+static char *buildRequirementPageFromJSONRequirementList(const cJSON *requirement);
 
-static void updateRequirementPageContent(pageList* reqPage, cJSON *requirement);
+static void updateRequirementPageContent(pageList* reqPage, const cJSON *requirement);
 
 static int addSectionToPageContent(char** pageContent, const char* template, const cJSON* object, const char* item);
 
@@ -60,14 +60,14 @@ void updateRequirementPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateRequirementPages");
 
     cJSON* subsystem = getSubsystemInfo(cmd.argument_1);
-    char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
+    const char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
     cJSON *requirementList = getRequirements(subsystem);
 
     pageList* requirementPagesHead = NULL;
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
     pageList* currentReqPage = requirementPagesHead;
 
-    cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
+    const cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
 
 
     if (!cJSON_IsArray(requirements)) {
@@ -77,14 +77,14 @@ void updateRequirementPage(command cmd){
     int num_reqs = cJSON_GetArraySize(requirements);
     while (currentReqPage){
         for (int i = 0; i < num_reqs; i++) {
-            cJSON *requirement = cJSON_GetArrayItem(requirements, i);
+            const cJSON *requirement = cJSON_GetArrayItem(requirements, i);
 
             if (!cJSON_IsObject(requirement)) {
                 log_message(LOG_ERROR, "Error: requirement is not a JSON object");
                 continue;
             }
 
-            cJSON *id = cJSON_GetObjectItem(requirement, "ID");
+            const cJSON *id = cJSON_GetObjectItem(requirement, "ID");
 
             if (!cJSON_IsString(id) || strcmp(id->valuestring, currentReqPage->title) != 0){
                 continue;
@@ -107,7 +107,7 @@ void updateRequirementPage(command cmd){
     return;
 }
 
-static void updateRequirementPageContent(pageList* reqPage, cJSON *requirement){
+static void updateRequirementPageContent(pageList* reqPage, const cJSON *requirement){
 
     free(reqPage->title);
     reqPage->title = NULL;
@@ -123,7 +123,7 @@ static void updateRequirementPageContent(pageList* reqPage, cJSON *requirement){
 
     char* importedRequirementInformation = buildRequirementPageFromJSONRequirementList(requirement);
 
-    cJSON *id = cJSON_GetObjectItem(requirement, "ID");
+    const cJSON *id = cJSON_GetObjectItem(requirement, "ID");
 
     char* flag = createCombinedString("<!--", id->valuestring);
     flag = appendToString(flag, "-->");
@@ -158,7 +158,7 @@ static void updateRequirementPageContent(pageList* reqPage, cJSON *requirement){
     return;
 }
 
-static char* buildRequirementPageFromJSONRequirementList(cJSON *requirement){
+static char* buildRequirementPageFromJSONRequirementList(const cJSON *requirement){
     log_message(LOG_DEBUG, "Entering function buildRequirementPageFromJSONRequirementList");
 
     char* pageContent = duplicate_Malloc("");
@@ -215,7 +215,7 @@ static int addSectionToPageContent(char** pageContent, const char* template, con
         return 0;
     }
 
-    cJSON* jsonCharacteristic = cJSON_GetObjectItem(object, item);
+    const cJSON* jsonCharacteristic = cJSON_GetObjectItem(object, item);
 
     if(!cJSON_IsString(jsonCharacteristic) || strcmp(jsonCharacteristic->valuestring, "") == 0 || strcmp(jsonCharacteristic->valuestring, "N/A") == 0 || strcmp(jsonCharacteristic->valuestring, "TBD")==0){
         log_message(LOG_DEBUG, "addSectionToPageContent: Characteristic has no value");
@@ -289,7 +289,7 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
         snprintf(JsonItemNameDeadline, sizeof(JsonItemNameDeadline), "Verification Deadline %d", verificationNumber);
 
         if(cJSON_HasObjectItem(requirement, JsonItemNameDeadline)){
-            cJSON *verificationDeadline = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameDeadline);
+            const cJSON *verificationDeadline = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameDeadline);
 
             if(strcmp(verificationDeadline->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 && strcmp(verificationDeadline->valuestring, "") != 0){
                 *pageContent = appendToString(*pageContent, "\n**Deadline**: ");
@@ -302,7 +302,7 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
         snprintf(JsonItemNameStatus, sizeof(JsonItemNameStatus), "Verification Status %d", verificationNumber);
 
         if(cJSON_HasObjectItem(requirement, JsonItemNameStatus)){
-            cJSON *verificationStatus = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameStatus);
+            const cJSON *verificationStatus = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameStatus);
         
             if(strcmp(verificationStatus->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 && strcmp(verificationStatus->valuestring, "") != 0){
                 *pageContent = appendToString(*pageContent, "\n**Status**: ");
@@ -316,8 +316,6 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
 
             }
         }
-
-        log_message(LOG_DEBUG, "Page content: %s",  pageContent);
     }
 
     log_message(LOG_DEBUG, "Exiting function addVerificationInformationToPageContent");

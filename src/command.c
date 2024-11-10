@@ -19,6 +19,8 @@
 
 #define MAX_ARGUMENTS 10
 
+static size_t strlcpy(char *dst, const char *src, size_t dstsize);
+
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands_Global, command* command, int period) {
     log_message(LOG_DEBUG, "Entering function addPeriodicCommand");
 
@@ -120,63 +122,156 @@ static command* addCommandToQueue(command** head, const char *function, const ch
 
     // Allocate memory and copy the path and id
     if(function && function != NULL){
-    log_message(LOG_DEBUG, "function added to command");
-    newNode->function = malloc(strlen(function) + 1);
-    strcpy(newNode->function, function);
+        log_message(LOG_DEBUG, "function added to command");
+
+        size_t len = strlen(function) + 1;
+        newNode->function = malloc(len);
+
+        if(newNode->function){
+            strlcpy(newNode->function, function, len);
+        }
+    
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for function");
+        }
+
+
     }
 
     if(argument_1 && argument_1 != NULL){
         log_message(LOG_DEBUG, "argument 1 added to command");
-        newNode->argument_1 = malloc(strlen(argument_1) + 1);
-        strcpy(newNode->argument_1, argument_1);
+
+        size_t len = strlen(argument_1) + 1;
+        newNode->argument_1 = malloc(len);
+
+        if(newNode->argument_1){
+            strlcpy(newNode->argument_1, argument_1, len);
+        }
+    
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for argument_1");
+        }
+
     }
 
     if(argument_2 && argument_2 != NULL){
         log_message(LOG_DEBUG, "argument 2 added to command");
-        newNode->argument_2 = malloc(strlen(argument_2) + 1);
-        strcpy(newNode->argument_2, argument_2);
+
+        size_t len = strlen(argument_2) + 1;
+        newNode->argument_2 = malloc(len);
+
+        if(newNode->argument_2){
+            strlcpy(newNode->argument_2, argument_2, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for argument_2");
+        }
+
     }
 
     if(argument_3 && argument_3 != NULL){
         log_message(LOG_DEBUG, "argument 1 added to command");
-        newNode->argument_3 = malloc(strlen(argument_3) + 1);
-        strcpy(newNode->argument_3, argument_3);
+
+        size_t len = strlen(argument_3) + 1;
+        newNode->argument_3 = malloc(len);
+
+        if(newNode->argument_3){
+            strlcpy(newNode->argument_3, argument_3, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for argument_3");
+        }
+
     }
 
     if(argument_4 && argument_4 != NULL){
         log_message(LOG_DEBUG, "argument 4 added to command");
-        newNode->argument_4 = malloc(strlen(argument_4) + 1);
-        strcpy(newNode->argument_4, argument_4);
+
+        size_t len = strlen(argument_4) + 1;
+        newNode->argument_4 = malloc(len);
+
+        if(newNode->argument_4){
+            strlcpy(newNode->argument_4, argument_4, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for argument_4");
+        }
+
     }
 
     if(argument_5 && argument_5 != NULL){
         log_message(LOG_DEBUG, "argument 5 added to command");
-        newNode->argument_5 = malloc(strlen(argument_5) + 1);
-        strcpy(newNode->argument_5, argument_5);
+
+        size_t len = strlen(argument_5) + 1;
+        newNode->argument_5 = malloc(len);
+
+        if(newNode->argument_5){
+            strlcpy(newNode->argument_5, argument_5, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for argument_5");
+        }
+
     }
 
     if(argument_6 && argument_6 != NULL){
         log_message(LOG_DEBUG, "argument 6 added to command");
-        newNode->argument_6 = malloc(strlen(argument_6) + 1);
-        strcpy(newNode->argument_6, argument_6);
+
+        size_t len = strlen(argument_6) + 1;
+        newNode->argument_6 = malloc(len);
+
+        if(newNode->argument_6){
+            strlcpy(newNode->argument_6, argument_6, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for argument_6");
+        }
+
     }
 
     if(argument_7 && argument_7 != NULL){
         log_message(LOG_DEBUG, "argument 7 added to command");
-        newNode->argument_7 = malloc(strlen(argument_7) + 1);
-        strcpy(newNode->argument_7, argument_7);
+
+        size_t len = strlen(argument_7) + 1;
+        newNode->argument_7 = malloc(len);
+
+        if(newNode->argument_7){
+            strlcpy(newNode->argument_7, argument_7, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for argument_7");
+        }
+
     }
 
     if(argument_8 && argument_8 != NULL){
         log_message(LOG_DEBUG, "argument 8 added to command");
-        newNode->argument_8 = malloc(strlen(argument_8) + 1);
-        strcpy(newNode->argument_8, argument_8);
+
+        size_t len = strlen(argument_8) + 1;
+        newNode->argument_8 = malloc(len);
+
+        if(newNode->argument_8){
+            strlcpy(newNode->argument_8, argument_8, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for argument_8");
+        }
+
     }
 
     if(argument_9 && argument_9 != NULL){
         log_message(LOG_DEBUG, "argument 9 added to command");
-        newNode->argument_9 = malloc(strlen(argument_9) + 1);
-        strcpy(newNode->argument_9, argument_9);
+
+        size_t len = strlen(argument_9) + 1;
+        newNode->argument_9 = malloc(len);
+
+        if(newNode->argument_9){
+            strlcpy(newNode->argument_9, argument_9, len);
+        }
+        else{
+            log_message(LOG_ERROR, "Memory allocation failed for argument_9");
+        }
+
     }
 
 
@@ -627,7 +722,23 @@ command** executeCommand(command** commandQueue){
 
     removeFirstCommand(commandQueue);
 
+
     log_message(LOG_DEBUG, "Exiting function executeCommand");
     return commandQueue;
 
+}
+
+static size_t strlcpy(char *dst, const char *src, size_t dstsize) {
+    size_t src_len = 0;
+    while (src[src_len] != '\0') src_len++;
+
+    if (dstsize > 0) {
+        size_t copy_len = (src_len >= dstsize) ? dstsize - 1 : src_len;
+        for (size_t i = 0; i < copy_len; i++) {
+            dst[i] = src[i];
+        }
+        dst[copy_len] = '\0';
+    }
+
+    return src_len;
 }

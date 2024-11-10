@@ -20,9 +20,9 @@
  * - These fields are added to the "requirements" array in the output JSON object.
  * - If the input format is incorrect or memory allocation fails, the function prints an error message and returns `NULL`.
  */
-cJSON *parseArrayIntoJSONRequirementList(char *input_str);
+cJSON *parseArrayIntoJSONRequirementList(const char *input_str);
 
-cJSON* getSubsystemInfo(char* acronym);
+cJSON* getSubsystemInfo(const char* acronym);
 
-cJSON* getRequirements(cJSON* subsystem);
+cJSON* getRequirements(const cJSON* subsystem);
 #endif

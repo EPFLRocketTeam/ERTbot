@@ -68,7 +68,7 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
 
 
     // Count occurrences of wordToReplace in inputString
-    for (char* temp = inputString; (temp = strstr(temp, wordToReplace)); temp += wordToReplaceLength) {
+    for (const char* temp = inputString; (temp = strstr(temp, wordToReplace)); temp += wordToReplaceLength) {
         cnt++;
     }
 
@@ -83,7 +83,7 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
     inputString = resizedString;
 
     // Replace occurrences of wordToReplace with newWord in place
-    char* result = inputString;
+    const char* result = inputString;
     char* pos = strstr(result, wordToReplace);
     while (pos) {
         size_t remainingLength = strlen(pos + wordToReplaceLength);
@@ -121,10 +121,10 @@ char* replaceParagraph(char* original, char* newSubstring, char* startPtr, char*
     }
 
     // Calculate the lengths
-    int originalLen = strlen(original);
-    int newSubLen = strlen(newSubstring);
-    int replaceLen = endPtr - startPtr + 1;
-    int finalLen = originalLen - replaceLen + newSubLen;
+    size_t originalLen = strlen(original);
+    size_t newSubLen = strlen(newSubstring);
+    size_t replaceLen = endPtr - startPtr + 1;
+    size_t finalLen = originalLen - replaceLen + newSubLen;
 
     log_message(LOG_DEBUG, "lengths set");
 

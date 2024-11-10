@@ -32,7 +32,7 @@ char *template_DRL = "# $SubSystem$ Design Requirements List\n# table {.tabset}"
  * - If any errors are encountered (e.g., missing "requirements" array or incorrect object format), appropriate error messages are printed.
  * - The function returns the final DRL string.
  */
-static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subsystem);
+static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const cJSON* subsystem);
 
 
 void syncDrlToSheet(command cmd){
@@ -44,7 +44,7 @@ void syncDrlToSheet(command cmd){
     char *DRL = buildDrlFromJSONRequirementList(requirementList, subsystem);
 
     pageList* drlPage = NULL;
-    char *drlPageId = cJSON_GetObjectItem(subsystem, "DRL Page ID")->valuestring;
+    const char *drlPageId = cJSON_GetObjectItem(subsystem, "DRL Page ID")->valuestring;
     drlPage = addPageToList(&drlPage, drlPageId, NULL, NULL, NULL, DRL, NULL, NULL, NULL);
 
     updatePageContentMutation(drlPage);
@@ -59,11 +59,11 @@ void syncDrlToSheet(command cmd){
     return;
 }
 
-static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subsystem){
+static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const cJSON* subsystem){
     log_message(LOG_DEBUG, "Entering function buildDrlFromJSONRequirementList");
 
     // Get the requirements array from the requirementList object
-    cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
+    const cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
         char *DRL = duplicate_Malloc("There was an error when parsing the requirements, you might be missing a header value.");
@@ -80,7 +80,7 @@ static char *buildDrlFromJSONRequirementList(cJSON *requirementList, cJSON* subs
     // Iterate over each requirement object in the requirements array
     int num_reqs = cJSON_GetArraySize(requirements);
     for (int i = 0; i < num_reqs; i++) {
-        cJSON *requirement = cJSON_GetArrayItem(requirements, i);
+        const cJSON *requirement = cJSON_GetArrayItem(requirements, i);
         if (!cJSON_IsObject(requirement)) {
             log_message(LOG_ERROR, "Error: requirement is not a JSON object");
             continue;

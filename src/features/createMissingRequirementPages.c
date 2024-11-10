@@ -14,9 +14,9 @@ void createMissingRequirementPages(command cmd){
     pageList* requirementPagesHead = NULL;
 
     cJSON* subsystem = getSubsystemInfo(cmd.argument_1);
-    char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
-    char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
-    char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
+    const char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
+    const char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
+    const char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
 
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
     batchGetSheet(reqDbId, sheetId);
@@ -24,7 +24,7 @@ void createMissingRequirementPages(command cmd){
     cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
 
     // Get the requirements array from the requirementList object
-    cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
+    const cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
     }
@@ -33,7 +33,7 @@ void createMissingRequirementPages(command cmd){
     int num_reqs = cJSON_GetArraySize(requirements);
 
     for (int i = 0; i < num_reqs; i++) {
-        cJSON *requirement = cJSON_GetArrayItem(requirements, i);
+        const cJSON *requirement = cJSON_GetArrayItem(requirements, i);
 
         if (!cJSON_IsObject(requirement)) {
             log_message(LOG_ERROR, "Error: requirement is not a JSON object");
