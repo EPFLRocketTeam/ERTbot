@@ -570,10 +570,6 @@ command** executeCommand(command** commandQueue){
     if((*commandQueue)->function && strcmp((*commandQueue)->function, "shutdown") == 0){ //works
         sendMessageToSlack("Shutting down");
 
-        if(chunk.response){
-            free(chunk.response);
-        }
-
         exit(0);
     }
 

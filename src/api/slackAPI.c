@@ -8,18 +8,12 @@
 
 #include <curl/curl.h>
 #include <ERTbot_config.h>
-#include <apiHelpers.h>
+#include "apiHelpers.h"
 #include "ERTbot_common.h"
 
 
 
 #define MAX_MESSAGE_LENGTH 100000
-
-static size_t muteCallback(const void *ptr, size_t size, size_t nmemb, const void *userdata) {
-    // Do nothing with the data
-    return size * nmemb;
-}
-
 
 int sendMessageToSlack( char *message) {
     log_message(LOG_DEBUG, "Entering function sendMessageToSlack");
@@ -32,6 +26,8 @@ int sendMessageToSlack( char *message) {
     // Initialize libcurl
     curl_global_init(CURL_GLOBAL_ALL);
     curl = curl_easy_init();
+
+    resetChunkResponse();
 
     if(curl) {
         // Construct JSON payload for the message
@@ -46,7 +42,7 @@ int sendMessageToSlack( char *message) {
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
 
         // Set the write function to ignore the response
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, muteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
 
         // Add headers
         headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
@@ -76,6 +72,8 @@ int sendMessageToSlack( char *message) {
     }
 
     curl_global_cleanup();
+
+    freeChunkResponse();
 
     log_message(LOG_DEBUG, "Exiting function sendMessageToSlack");
     return 0;
