@@ -89,6 +89,8 @@ void updateRequirementPage(command cmd){
             }
 
             currentReqPage->content = replaceWord_Realloc(currentReqPage->content, "\r", "");
+            currentReqPage->content = replaceWord_Realloc(currentReqPage->content, "\t", "");
+            currentReqPage->content = replaceWord_Realloc(currentReqPage->content, "   ", "");
 
             updateRequirementPageContent(currentReqPage, requirement);
 
