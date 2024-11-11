@@ -44,7 +44,6 @@ int main(){
 
     sendMessageToSlack("Wiki-Toolbox is Online");
 
-    //Start main loop
     while(1){
 
         headOfCommandQueue = checkForCommand(headOfCommandQueue, headOfPeriodicCommands);

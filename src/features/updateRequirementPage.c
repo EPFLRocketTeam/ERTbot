@@ -57,7 +57,7 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
 void updateRequirementPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateRequirementPages");
 
-    cJSON* subsystem = getSubsystemInfo(cmd.argument_1);
+    cJSON* subsystem = getSubsystemInfo(cmd.argument);
     const char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
     cJSON *requirementList = getRequirements(subsystem);
 

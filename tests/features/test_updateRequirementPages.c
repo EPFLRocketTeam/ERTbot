@@ -21,7 +21,7 @@ START_TEST(test_updateRequirementPages_1) {
 
     command cmd;
     cmd.function = NULL;
-    cmd.argument_1 = "UT_REQ_1";
+    cmd.argument = "UT_REQ_1";
 
     pageList* checkPage1 = NULL;
     checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
@@ -62,7 +62,7 @@ START_TEST(test_updateRequirementPages_2) {
 
     command cmd;
     cmd.function = NULL;
-    cmd.argument_1 = "UT_REQ_2";
+    cmd.argument = "UT_REQ_2";
 
     pageList* checkPage1 = NULL;
     checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
@@ -103,7 +103,7 @@ START_TEST(test_updateRequirementPages_3) {
 
     command cmd;
     cmd.function = NULL;
-    cmd.argument_1 = "UT_REQ_3";
+    cmd.argument = "UT_REQ_3";
 
     pageList* checkPage1 = NULL;
     checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
@@ -144,7 +144,7 @@ START_TEST(test_updateRequirementPages_4) {
 
     command cmd;
     cmd.function = NULL;
-    cmd.argument_1 = "UT_REQ_4";
+    cmd.argument = "UT_REQ_4";
 
     pageList* checkPage1 = NULL;
     checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);

@@ -13,7 +13,7 @@ void createMissingRequirementPages(command cmd){
 
     pageList* requirementPagesHead = NULL;
 
-    cJSON* subsystem = getSubsystemInfo(cmd.argument_1);
+    cJSON* subsystem = getSubsystemInfo(cmd.argument);
     const char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
     const char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
     const char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;

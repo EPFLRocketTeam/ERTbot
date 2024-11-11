@@ -21,7 +21,7 @@ START_TEST(test_createMissingRequirementPages) {
     //call createMissingRequirementPages
     command cmd;
     cmd.function = NULL;
-    cmd.argument_1 = "UT_CREATE_1";
+    cmd.argument = "UT_CREATE_1";
     createMissingRequirementPages(cmd);
 
     //Check if page was created

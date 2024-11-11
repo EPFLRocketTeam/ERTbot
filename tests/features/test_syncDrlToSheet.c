@@ -17,7 +17,7 @@ START_TEST(test_syncDrlToSheet_1) {
 
     command cmd;
     cmd.function = NULL;
-    cmd.argument_1 = "UT_DRL_1";
+    cmd.argument = "UT_DRL_1";
 
     syncDrlToSheet(cmd);
 
@@ -38,7 +38,7 @@ START_TEST(test_syncDrlToSheet_2) {
 
     command cmd;
     cmd.function = NULL;
-    cmd.argument_1 = "UT_DRL_2";
+    cmd.argument = "UT_DRL_2";
 
     syncDrlToSheet(cmd);
 
@@ -59,7 +59,7 @@ START_TEST(test_syncDrlToSheet_3) {
 
     command cmd;
     cmd.function = NULL;
-    cmd.argument_1 = "UT_DRL_3";
+    cmd.argument = "UT_DRL_3";
 
     syncDrlToSheet(cmd);
 
@@ -80,7 +80,7 @@ START_TEST(test_syncDrlToSheet_4) {
 
     command cmd;
     cmd.function = NULL;
-    cmd.argument_1 = "UT_DRL_4";
+    cmd.argument = "UT_DRL_4";
 
     syncDrlToSheet(cmd);
 
@@ -101,7 +101,7 @@ START_TEST(test_syncDrlToSheet_5) {
 
     command cmd;
     cmd.function = NULL;
-    cmd.argument_1 = "UT_DRL_5";
+    cmd.argument = "UT_DRL_5";
 
     syncDrlToSheet(cmd);
 

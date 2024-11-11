@@ -62,39 +62,39 @@ void updateVcdPage(command cmd){
     char *sheetId;
     char *vcdPageId;
 
-    if(strcmp(cmd.argument_1, "ST")==0){
+    if(strcmp(cmd.argument, "ST")==0){
         vcdPageId = "1186";
         sheetId = "ST!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "PR")==0){
+    if(strcmp(cmd.argument, "PR")==0){
         vcdPageId = "1187";
         sheetId = "PR!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "FD")==0){
+    if(strcmp(cmd.argument, "FD")==0){
         vcdPageId = "1182";
         sheetId = "FD!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "RE")==0){
+    if(strcmp(cmd.argument, "RE")==0){
         vcdPageId = "1185";
         sheetId = "RE!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "GS")==0){
+    if(strcmp(cmd.argument, "GS")==0){
         vcdPageId = "1183";
         sheetId = "GS!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "AV")==0){
+    if(strcmp(cmd.argument, "AV")==0){
         vcdPageId = "1181";
         sheetId = "AV!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "TE")==0){
+    if(strcmp(cmd.argument, "TE")==0){
         vcdPageId =
         sheetId = "TE!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "PL")==0){
+    if(strcmp(cmd.argument, "PL")==0){
         vcdPageId = "1184";
         sheetId = "PL!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "GE")==0){
+    if(strcmp(cmd.argument, "GE")==0){
         vcdPageId = "1180";
         sheetId = "GE!A3:AT300";
     }
@@ -108,7 +108,7 @@ void updateVcdPage(command cmd){
     char *pieChart = createVcdPieChart(verificationStatusCount);
 
     char *VCD = pieChart;
-    char *listOfRequirements = buildVcdList(requirementList, cmd.argument_1);
+    char *listOfRequirements = buildVcdList(requirementList, cmd.argument);
     VCD = appendToString(VCD, listOfRequirements);
 
     free(listOfRequirements);

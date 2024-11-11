@@ -44,7 +44,7 @@ static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const
 void syncDrlToSheet(command cmd){
     log_message(LOG_DEBUG, "Entering function syncDrlToSheet");
 
-    cJSON* subsystem = getSubsystemInfo(cmd.argument_1);
+    cJSON* subsystem = getSubsystemInfo(cmd.argument);
     cJSON *requirementList = getRequirements(subsystem);
 
     char *DRL = buildDrlFromJSONRequirementList(requirementList, subsystem);
