@@ -114,7 +114,7 @@ void updateVcdPage(command cmd){
     free(listOfRequirements);
 
     pageList* vcdPage = NULL;
-    vcdPage = addPageToList(&vcdPage, vcdPageId, "", "", "", VCD, "", "", "");
+    vcdPage = addPageToList(&vcdPage, vcdPageId, NULL, NULL, NULL, VCD, NULL);
 
     vcdPage->content = replaceWord_Realloc(vcdPage->content, "\n", "\\\\n");
     vcdPage->content = replaceWord_Realloc(vcdPage->content, "\"", "\\\\\\\"");

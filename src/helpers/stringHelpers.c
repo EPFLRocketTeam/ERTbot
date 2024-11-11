@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "ERTbot_common.h"
+#include "stringHelpers.h"
 
 
 
@@ -32,15 +33,17 @@ char* replaceWord_Malloc(const char* inputString, const char* wordToReplace, con
       }
     }
 
+    size_t len = i + cnt * (newWordLength - wordToReplaceLength) + 1;
+
     // Making new string of enough length
-    result = (char*)malloc(i + cnt * (newWordLength - wordToReplaceLength) + 1);
+    result = (char*)malloc(len);
     if (!result) return NULL;  // Check malloc success
 
     i = 0;
     while (*inputString) {
         // compare the substring with the result
         if (strstr(inputString, wordToReplace) == inputString) {
-            strcpy(&result[i], newWord);
+            strlcpy(&result[i], newWord, len);
             i += newWordLength;
             inputString += wordToReplaceLength;
         }
@@ -161,9 +164,10 @@ char* createCombinedString(const char *str1, const char *str2) {
     // Calculate the length of str1 and str2
     size_t len1 = strlen(str1);
     size_t len2 = strlen(str2);
+    size_t len3 = len1 + len2 + 1;
 
     // Allocate memory for the combined string
-    char *combined = (char *)malloc(len1 + len2 + 1); // +1 for the null terminator
+    char *combined = (char *)malloc(len3); // +1 for the null terminator
 
     if (combined == NULL) {
         log_message(LOG_ERROR, "Memory allocation failed");
@@ -171,7 +175,7 @@ char* createCombinedString(const char *str1, const char *str2) {
     }
 
     // Copy the contents of str1 and str2 into combined
-    strcpy(combined, str1);
+    strlcpy(combined, str1, len3);
     strcat(combined, str2);
 
 
@@ -231,9 +235,10 @@ char* appendToString(char *original, const char *strToAppend) {
     // Calculate the length of original string and the string to append
     size_t lenOriginal = original ? strlen(original) : 0;
     size_t lenAppend = strlen(strToAppend);
+    size_t len = lenOriginal + lenAppend + 1;
 
     // Reallocate memory for the combined string (original + append + null terminator)
-    char *combined = realloc(original, lenOriginal + lenAppend + 1);
+    char *combined = realloc(original, len);
 
     if (combined == NULL) {
         log_message(LOG_ERROR, "Memory reallocation failed");
@@ -241,7 +246,7 @@ char* appendToString(char *original, const char *strToAppend) {
     }
 
     // Copy/concatenate the new string
-    strcpy(combined + lenOriginal, strToAppend); // Append strToAppend to the end of original
+    strlcpy(combined + lenOriginal, strToAppend, len); // Append strToAppend to the end of original
 
     log_message(LOG_DEBUG, "Exiting function appendToString");
     return combined; // Return the reallocated and combined string
@@ -261,3 +266,31 @@ char* duplicate_Malloc(const char *src) {
       
     return dst;                         
 }
+
+size_t strlcpy(char *dst, const char *src, size_t dstsize) {
+    size_t src_len = 0;
+    while (src[src_len] != '\0') src_len++;
+
+    if (dstsize > 0) {
+        size_t copy_len = (src_len >= dstsize) ? dstsize - 1 : src_len;
+        for (size_t i = 0; i < copy_len; i++) {
+            dst[i] = src[i];
+        }
+        dst[copy_len] = '\0';
+    }
+
+    return src_len;
+}
+
+void allocateAndCopy(char **destination, const char *source, const char *field_name) {
+    if (source != NULL) {
+        size_t len = strlen(source) + 1;
+        *destination = malloc(len);
+        if (*destination) {
+            strlcpy(*destination, source, len);
+        } else {
+            log_message(LOG_ERROR, "Memory allocation failed for %s", field_name);
+        }
+    }
+}
+

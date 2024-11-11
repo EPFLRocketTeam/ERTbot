@@ -128,7 +128,7 @@ static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const
             DRL = appendToString(DRL, description->valuestring);
             DRL = appendToString(DRL, "\n");
         }
-        if(strlen(id->valuestring)<2||strlen(title->valuestring)<2||strlen(description->valuestring)<2){
+        if(title->valuestring == NULL || description->valuestring == NULL ||strlen(title->valuestring)<2||strlen(description->valuestring)<2){
             free(DRL);
             DRL = duplicate_Malloc("You are missing an, id, description or title value.");
             break;

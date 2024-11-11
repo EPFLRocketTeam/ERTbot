@@ -1,9 +1,6 @@
 #include <string.h>
 #include "ERTbot_common.h"
-
-static size_t strlcpy(char *dst, const char *src, size_t dstsize);
-
-static void allocateAndCopy(char **destination, const char *source, const char *field_name);
+#include "stringHelpers.h"
 
 pageList* addPageToList(pageList** head, const char *id, const char *title, const char *path, const char *description, const char *content, const char *updatedAt) {
     log_message(LOG_DEBUG, "Entering function addPageToList");
@@ -101,29 +98,5 @@ void freePageList(pageList** head) {
     log_message(LOG_DEBUG, "Exiting function freePageList");
 }
 
-static size_t strlcpy(char *dst, const char *src, size_t dstsize) {
-    size_t src_len = 0;
-    while (src[src_len] != '\0') src_len++;
 
-    if (dstsize > 0) {
-        size_t copy_len = (src_len >= dstsize) ? dstsize - 1 : src_len;
-        for (size_t i = 0; i < copy_len; i++) {
-            dst[i] = src[i];
-        }
-        dst[copy_len] = '\0';
-    }
 
-    return src_len;
-}
-
-static void allocateAndCopy(char **destination, const char *source, const char *field_name) {
-    if (source != NULL) {
-        size_t len = strlen(source) + 1;
-        *destination = malloc(len);
-        if (*destination) {
-            strlcpy(*destination, source, len);
-        } else {
-            log_message(LOG_ERROR, "Memory allocation failed for %s", field_name);
-        }
-    }
-}

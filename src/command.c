@@ -19,8 +19,6 @@
 
 #define MAX_ARGUMENTS 10
 
-static size_t strlcpy(char *dst, const char *src, size_t dstsize);
-
 static void setCommandArgument(char** dest, const char* src, const char* argName);
 
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands_Global, command* command, int period) {
@@ -585,21 +583,6 @@ command** executeCommand(command** commandQueue){
     log_message(LOG_DEBUG, "Exiting function executeCommand");
     return commandQueue;
 
-}
-
-static size_t strlcpy(char *dst, const char *src, size_t dstsize) {
-    size_t src_len = 0;
-    while (src[src_len] != '\0') src_len++;
-
-    if (dstsize > 0) {
-        size_t copy_len = (src_len >= dstsize) ? dstsize - 1 : src_len;
-        for (size_t i = 0; i < copy_len; i++) {
-            dst[i] = src[i];
-        }
-        dst[copy_len] = '\0';
-    }
-
-    return src_len;
 }
 
 static void setCommandArgument(char** dest, const char* src, const char* argName) {

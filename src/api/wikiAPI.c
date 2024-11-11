@@ -26,7 +26,6 @@ char *template_create_page_mutation = "{\"query\":\"mutation { pages { create(co
 char *template_delete_page_mutation = "{\"query\":\"mutation { pages { delete(id: DefaultID) { responseResult { succeeded, message } } } } \"}";
 
 
-
 /**
  * @brief Sends a GraphQL query to the Wiki API using a POST request.
  *
@@ -419,14 +418,19 @@ char *fetchAndModifyPageContent(const char* pageId, const char* newPageContent, 
     page = addPageToList(&page, pageId, NULL, NULL, NULL, NULL, NULL);
     page = getPage(&page);
 
-    outputString = malloc(strlen(page->content) + 1);
+    size_t len;
+    len = strlen(page->content) + 1;
+
+    outputString = malloc(len);
     if (outputString != NULL) {
-        strcpy(outputString, page->content);
+        strlcpy(outputString, page->content, len);
     }
 
-    page->content = realloc(page->content, strlen(newPageContent) + 1);
 
-    strcpy(page->content, newPageContent);
+    size_t len2;
+    len2 = strlen(newPageContent) + 1;
+    page->content = realloc(page->content, len2);
+    strlcpy(page->content, newPageContent, len2);
 
     updatePageContentMutation(page);
 

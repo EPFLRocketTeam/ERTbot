@@ -119,4 +119,8 @@ char* extractText(const char *inputString, const char *startDelimiter, const cha
 char* appendToString(char *original, const char *strToAppend);
 
 char* duplicate_Malloc(const char *src);
+
+void allocateAndCopy(char **destination, const char *source, const char *field_name);
+
+size_t strlcpy(char *dst, const char *src, size_t dstsize);
 #endif
