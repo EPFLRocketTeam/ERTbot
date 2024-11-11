@@ -96,13 +96,13 @@ static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const
             log_message(LOG_ERROR, "Error: requirement is not a JSON object");
             continue;
         }
-
-        const cJSON *id = cJSON_GetObjectItem(requirement, "ID");
         
-        if(strlen(id->valuestring) < 2){
+        if(!cJSON_HasObjectItem(requirement, "ID") || !cJSON_IsString(cJSON_GetObjectItem(requirement, "ID"))||strlen(cJSON_GetObjectItem(requirement, "ID")->valuestring) < 2){
             log_message(LOG_DEBUG, "ID is smaller than one, breaking");
             break;
         }
+
+        const cJSON *id = cJSON_GetObjectItem(requirement, "ID");
 
         if(strstr(id->valuestring, "2024_") == NULL){
 
