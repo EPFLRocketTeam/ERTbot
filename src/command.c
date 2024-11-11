@@ -491,6 +491,10 @@ command** executeCommand(command** commandQueue){
         sendMessageToSlack("updateDRL");
         sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
         sendMessageToSlack("-> example: updateDRL ST");
+        sendMessageToSlack("-----------------");
+        sendMessageToSlack("createMissingRequirementPages");
+        sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
+        sendMessageToSlack("-> example: updateDRL ST");
     }
 
     else{
