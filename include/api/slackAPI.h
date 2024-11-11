@@ -54,23 +54,4 @@ void checkLastSlackMessage();
  */
 slackMessage* getSlackMessage(slackMessage* slackMsg);
 
-/**
- * @brief Invites a user to one or more Slack channels using the Slack API.
- *
- * @param[in] channels A comma-separated list of Slack channel IDs to which the user will be invited.
- * @param[in] email The email address of the user to invite.
- *
- * @return int Returns 0 on success and 1 on failure.
- *
- * @details This function sends a POST request to the Slack API to invite a user to specified channels. The request
- *          payload is formatted as JSON and includes the channel IDs, user email, and team ID. The function handles
- *          setting the required HTTP headers, including the authorization token. If the request fails or if libcurl
- *          initialization fails, the function returns 1. On success, it returns 0.
- *
- * @note The function assumes that the environment variable `SLACK_API_TOKEN` is set with the Slack API token, and that
- *       `SLACK_API_TOKEN` is valid. The maximum JSON payload length is defined by `2000` bytes.
- *
- * @warning This function has not been tested yet and is not integrated into the program yet
- */
-int addSlackMember(char *channels, char *email);
 #endif
