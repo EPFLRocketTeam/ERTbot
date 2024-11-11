@@ -159,14 +159,14 @@ int addSectionToPageContent(char** pageContent, const char* template, const cJSO
     log_message(LOG_DEBUG, "Entering function addSectionToPageContent");
 
     if(!cJSON_HasObjectItem(object, item)){
-        log_message(LOG_ERROR, "addSectionToPageContent: characteristic does not exist");
+        log_message(LOG_DEBUG, "addSectionToPageContent: characteristic does not exist");
         return 0;
     }
 
     const cJSON* jsonCharacteristic = cJSON_GetObjectItem(object, item);
 
     if(!cJSON_IsString(jsonCharacteristic) || strcmp(jsonCharacteristic->valuestring, "") == 0 || strcmp(jsonCharacteristic->valuestring, "N/A") == 0 || strcmp(jsonCharacteristic->valuestring, "TBD")==0){
-        log_message(LOG_ERROR, "addSectionToPageContent: Characteristic has no value");
+        log_message(LOG_DEBUG, "addSectionToPageContent: Characteristic has no value");
         return 0;
     }
     
