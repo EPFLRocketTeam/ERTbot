@@ -51,6 +51,9 @@ void syncDrlToSheet(command cmd){
 
     pageList* drlPage = NULL;
     const char *drlPageId = cJSON_GetObjectItem(subsystem, "DRL Page ID")->valuestring;
+
+    DRL = replaceWord_Realloc(DRL, "\r", "");
+
     drlPage = addPageToList(&drlPage, drlPageId, NULL, NULL, NULL, DRL, NULL);
 
     updatePageContentMutation(drlPage);

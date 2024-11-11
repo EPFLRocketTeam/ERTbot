@@ -88,6 +88,8 @@ void updateRequirementPage(command cmd){
                 continue;
             }
 
+            currentReqPage->content = replaceWord_Realloc(currentReqPage->content, "\r", "");
+
             updateRequirementPageContent(currentReqPage, requirement);
 
             break;
@@ -198,7 +200,6 @@ static char* buildRequirementPageFromJSONRequirementList(const cJSON *requiremen
 
     return pageContent;
 }
-
 
 static void addVerificationInformationToPageContent(char** pageContent, const cJSON* requirement){
     log_message(LOG_DEBUG, "Enter function addVerificationInformationToPageContent");
