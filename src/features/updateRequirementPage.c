@@ -52,8 +52,6 @@ static char *buildRequirementPageFromJSONRequirementList(const cJSON *requiremen
 
 static void updateRequirementPageContent(pageList* reqPage, const cJSON *requirement);
 
-static int addSectionToPageContent(char** pageContent, const char* template, const cJSON* object, const char* item);
-
 static void addVerificationInformationToPageContent(char** pageContent, const cJSON* requirement);
 
 void updateRequirementPage(command cmd){
@@ -201,41 +199,6 @@ static char* buildRequirementPageFromJSONRequirementList(const cJSON *requiremen
     return pageContent;
 }
 
-static char* addDollarSigns(const char* characteristic){
-    char* wordToReplace = duplicate_Malloc("$word$");
-    wordToReplace = replaceWord_Realloc(wordToReplace, "word", characteristic);
-    return wordToReplace;
-}
-
-static int addSectionToPageContent(char** pageContent, const char* template, const cJSON* object, const char* item){
-    log_message(LOG_DEBUG, "Entering function addSectionToPageContent");
-
-    if(!cJSON_HasObjectItem(object, item)){
-        log_message(LOG_DEBUG, "addSectionToPageContent: characteristic does not exist");
-        return 0;
-    }
-
-    const cJSON* jsonCharacteristic = cJSON_GetObjectItem(object, item);
-
-    if(!cJSON_IsString(jsonCharacteristic) || strcmp(jsonCharacteristic->valuestring, "") == 0 || strcmp(jsonCharacteristic->valuestring, "N/A") == 0 || strcmp(jsonCharacteristic->valuestring, "TBD")==0){
-        log_message(LOG_DEBUG, "addSectionToPageContent: Characteristic has no value");
-        return 0;
-    }
-    
-    char *newSection = duplicate_Malloc(template);
-    char *wordToReplace = addDollarSigns(item);
-
-    newSection = replaceWord_Realloc(newSection, wordToReplace, jsonCharacteristic->valuestring);
-
-    *pageContent = appendToString(*pageContent, newSection);
-
-    free(wordToReplace);
-    free(newSection);
-
-
-    log_message(LOG_DEBUG, "Exiting function addSectionToPageContent");
-    return 1;
-}
 
 static void addVerificationInformationToPageContent(char** pageContent, const cJSON* requirement){
     log_message(LOG_DEBUG, "Enter function addVerificationInformationToPageContent");

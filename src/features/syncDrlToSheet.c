@@ -9,6 +9,12 @@
 #include "pageListHelpers.h"
 
 
+#define DRL_TABSET_TITLE_TEMPLATE "\n\n\n## $ID$\n"
+#define DRL_ID_BLOCK_TEMPLATE "- [$ID$](/"
+#define DRL_PAGE_DIRECTORY "$Requirement Pages Directory$"
+#define DRL_PAGE_NAME "$ID$) **"
+#define DRL_TITLE_BLOCK_TEMPLATE "$Title$**\n"
+#define DRL_DESCRIPTION_BLOCK_TEMPLATE "$Description$\n"
 
 char *template_DRL = "# $SubSystem$ Design Requirements List\n# table {.tabset}";
 
@@ -86,49 +92,32 @@ static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const
             continue;
         }
 
-        cJSON *id = cJSON_GetObjectItem(requirement, "ID");
-        cJSON *title = cJSON_GetObjectItem(requirement, "Title");
-        cJSON *description = cJSON_GetObjectItem(requirement, "Description");
+        const cJSON *id = cJSON_GetObjectItem(requirement, "ID");
         
-
         if(strlen(id->valuestring) < 2){
             log_message(LOG_DEBUG, "ID is smaller than one, breaking");
             break;
         }
 
-        if(title == NULL || strstr(id->valuestring, "2024_") == NULL){
+        if(strstr(id->valuestring, "2024_") == NULL){
 
             if(!isFirstGroup){
                 DRL = appendToString(DRL, "{.links-list}");
-                isFirstGroup = 0;
             }
             else{isFirstGroup = 0;}
 
-            DRL = appendToString(DRL, "\n\n\n## ");
-            DRL = appendToString(DRL, id->valuestring);
-            DRL = appendToString(DRL, "\n");
+            (void)addSectionToPageContent(&DRL, DRL_TABSET_TITLE_TEMPLATE, requirement, "ID");
+
             continue;
         }
-        if (cJSON_IsString(id) && id->valuestring) {
-            log_message(LOG_DEBUG, "ID: %s", id->valuestring);
-            DRL = appendToString(DRL, "- [");
-            DRL = appendToString(DRL, id->valuestring);
-            DRL = appendToString(DRL, "](/");
-            DRL = appendToString(DRL, cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring);
-            DRL = appendToString(DRL, id->valuestring);
-            DRL = appendToString(DRL, ") **");
-        }
-        if (cJSON_IsString(title) && title->valuestring) {
-            log_message(LOG_DEBUG, "title: %s", title->valuestring);
-            DRL = appendToString(DRL, title->valuestring);
-            DRL = appendToString(DRL, "**\n");
-        }
-        if (cJSON_IsString(description) && description->valuestring) {
-            log_message(LOG_DEBUG, "Description: %s", description->valuestring);
-            DRL = appendToString(DRL, description->valuestring);
-            DRL = appendToString(DRL, "\n");
-        }
-        if(title->valuestring == NULL || description->valuestring == NULL ||strlen(title->valuestring)<2||strlen(description->valuestring)<2){
+
+        (void)addSectionToPageContent(&DRL, DRL_ID_BLOCK_TEMPLATE, requirement, "ID");
+        (void)addSectionToPageContent(&DRL, DRL_PAGE_DIRECTORY, subsystem, "Requirement Pages Directory");
+        (void)addSectionToPageContent(&DRL, DRL_PAGE_NAME, requirement, "ID");
+        int hasTitle = addSectionToPageContent(&DRL, DRL_TITLE_BLOCK_TEMPLATE, requirement, "Title");
+        int hasDescription = addSectionToPageContent(&DRL, DRL_DESCRIPTION_BLOCK_TEMPLATE, requirement, "Description");
+
+        if(!hasTitle || !hasDescription){
             free(DRL);
             DRL = duplicate_Malloc("You are missing an, id, description or title value.");
             break;

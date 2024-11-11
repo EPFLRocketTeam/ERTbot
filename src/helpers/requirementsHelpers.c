@@ -148,3 +148,39 @@ cJSON* getRequirements(const cJSON* subsystem){
     log_message(LOG_DEBUG, "Exiting function getRequirements");
     return parseArrayIntoJSONRequirementList(chunk.response);
 }
+
+char* addDollarSigns(const char* characteristic){
+    char* wordToReplace = duplicate_Malloc("$word$");
+    wordToReplace = replaceWord_Realloc(wordToReplace, "word", characteristic);
+    return wordToReplace;
+}
+
+int addSectionToPageContent(char** pageContent, const char* template, const cJSON* object, const char* item){
+    log_message(LOG_DEBUG, "Entering function addSectionToPageContent");
+
+    if(!cJSON_HasObjectItem(object, item)){
+        log_message(LOG_ERROR, "addSectionToPageContent: characteristic does not exist");
+        return 0;
+    }
+
+    const cJSON* jsonCharacteristic = cJSON_GetObjectItem(object, item);
+
+    if(!cJSON_IsString(jsonCharacteristic) || strcmp(jsonCharacteristic->valuestring, "") == 0 || strcmp(jsonCharacteristic->valuestring, "N/A") == 0 || strcmp(jsonCharacteristic->valuestring, "TBD")==0){
+        log_message(LOG_ERROR, "addSectionToPageContent: Characteristic has no value");
+        return 0;
+    }
+    
+    char *newSection = duplicate_Malloc(template);
+    char *wordToReplace = addDollarSigns(item);
+
+    newSection = replaceWord_Realloc(newSection, wordToReplace, jsonCharacteristic->valuestring);
+
+    *pageContent = appendToString(*pageContent, newSection);
+
+    free(wordToReplace);
+    free(newSection);
+
+
+    log_message(LOG_DEBUG, "Exiting function addSectionToPageContent");
+    return 1;
+}

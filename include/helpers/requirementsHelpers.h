@@ -25,4 +25,8 @@ cJSON *parseArrayIntoJSONRequirementList(const char *input_str);
 cJSON* getSubsystemInfo(const char* acronym);
 
 cJSON* getRequirements(const cJSON* subsystem);
+
+char* addDollarSigns(const char* characteristic);
+
+int addSectionToPageContent(char** pageContent, const char* template, const cJSON* object, const char* item);
 #endif
