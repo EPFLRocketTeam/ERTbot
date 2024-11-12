@@ -96,10 +96,6 @@ void updateRequirementPage(command cmd){
                 continue;
             }
 
-            currentReqPage->content = replaceWord_Realloc(currentReqPage->content, "\r", "");
-            currentReqPage->content = replaceWord_Realloc(currentReqPage->content, "\t", "");
-            currentReqPage->content = replaceWord_Realloc(currentReqPage->content, "   ", "");
-
             updateRequirementPageContent(currentReqPage, requirement);
 
             break;
@@ -149,6 +145,17 @@ static void updateRequirementPageContent(pageList* reqPage, const cJSON *require
     end--;
 
     char *newContent = replaceParagraph(reqPage->content, importedRequirementInformation, start, end);
+    
+    if(strcmp(newContent, reqPage->content)==0){
+        free(newContent);
+        free(reqPage->content);
+        reqPage->content = NULL;
+        free(importedRequirementInformation);
+        free(flag);
+        log_message(LOG_DEBUG, "updateRequirementPageContent: Requirement Page is already up to date.");
+        return;
+    }
+
     if (newContent != NULL) {
         free(reqPage->content);  // Free the old content
         reqPage->content = newContent;  // Update to point to the new content
@@ -156,6 +163,9 @@ static void updateRequirementPageContent(pageList* reqPage, const cJSON *require
 
     reqPage->content = replaceWord_Realloc(reqPage->content, "\n", "\\\\n");
     reqPage->content = replaceWord_Realloc(reqPage->content, "\"", "\\\\\\\"");
+    reqPage->content = replaceWord_Realloc(reqPage->content, "\r", "");
+    reqPage->content = replaceWord_Realloc(reqPage->content, "\t", "");
+    reqPage->content = replaceWord_Realloc(reqPage->content, "   ", "");
 
     updatePageContentMutation(reqPage);
     renderMutation(&reqPage, false);
@@ -164,7 +174,6 @@ static void updateRequirementPageContent(pageList* reqPage, const cJSON *require
     reqPage->content = NULL;
 
     free(importedRequirementInformation);
-
     free(flag);
 
     return;
