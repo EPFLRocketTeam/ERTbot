@@ -70,8 +70,10 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
 
 
     // Count occurrences of wordToReplace in inputString
-    for (const char* temp = inputString; (temp = strstr(temp, wordToReplace)); temp += wordToReplaceLength) {
+    const char *ptr = inputString;
+    while ((ptr = strstr(ptr, wordToReplace)) != NULL) {
         cnt++;
+        ptr += wordToReplaceLength;
     }
 
     // Calculate new length needed
