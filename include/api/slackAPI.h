@@ -54,4 +54,18 @@ void checkLastSlackMessage();
  */
 slackMessage* getSlackMessage(slackMessage* slackMsg);
 
+slackMessage* sendUpdatedableSlackMessage(slackMessage* slackMsg);
+
+int updateSlackMessage(slackMessage* slackMessage);
+
+void sendLoadingBar(const int currentValue, const int totalValue);
+
+void sendCompletedStatusMessage(const char *commandName);
+
+void sendStartingStatusMessage(const char *commandName);
+
+void freeSlackCommandStatusMessageVariables();
+
+void initialiseSlackCommandStatusMessage();
+
 #endif

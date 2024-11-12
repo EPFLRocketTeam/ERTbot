@@ -10,12 +10,13 @@
 #include <ERTbot_config.h>
 #include "apiHelpers.h"
 #include "ERTbot_common.h"
+#include "stringHelpers.h"
 
-
+slackMessage* commandStatusMessage;
 
 #define MAX_MESSAGE_LENGTH 100000
 
-int sendMessageToSlack( char *message) {
+int sendMessageToSlackAPI(char *message) {
     log_message(LOG_DEBUG, "Entering function sendMessageToSlack");
 
     CURL *curl;
@@ -74,10 +75,18 @@ int sendMessageToSlack( char *message) {
 
     curl_global_cleanup();
 
-    freeChunkResponse();
-
     log_message(LOG_DEBUG, "Exiting function sendMessageToSlack");
     return 0;
+}
+
+int sendMessageToSlack(char *message) {
+    log_message(LOG_DEBUG, "Entering function sendMessageToSlack");
+
+    int returnValue = sendMessageToSlackAPI(message);
+
+    freeChunkResponse();
+
+    return returnValue;
 }
 
 void checkLastSlackMessage() {
@@ -141,6 +150,71 @@ void checkLastSlackMessage() {
     log_message(LOG_DEBUG, "Exiting function checkLastSlackMessage");
 }
 
+int updateSlackMessage(slackMessage* slackMessage) {
+    log_message(LOG_DEBUG, "Entering function sendMessageToSlack");
+
+    CURL *curl;
+    CURLcode res;
+    struct curl_slist *headerlist = NULL;
+    static  char *url = "https://slack.com/api/chat.update";
+
+    // Initialize libcurl
+    curl_global_init(CURL_GLOBAL_ALL);
+    curl = curl_easy_init();
+
+    resetChunkResponse();
+
+    if(curl) {
+        // Construct JSON payload for the message
+        char json[MAX_MESSAGE_LENGTH];
+        snprintf(json, sizeof(json), "{\"channel\":\"%s\",\"ts\":\"%s\",\"text\":\"%s\"}", SLACK_WIKI_TOOLBOX_CHANNEL, slackMessage->timestamp, slackMessage->message);
+
+        // Set the URL for Slack message posting
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
+
+        // Set the POST data (JSON payload)
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
+
+        // Set the write function to ignore the response
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+
+        // Add headers
+        headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
+        headerlist = curl_slist_append(headerlist, "charset: utf-8");
+
+        char auth_header[128];
+        snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s", SLACK_API_TOKEN);
+        headerlist = curl_slist_append(headerlist, auth_header);
+
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+
+        // Perform the request
+        res = curl_easy_perform(curl);
+
+        // Clean up
+        curl_easy_cleanup(curl);
+        curl_slist_free_all(headerlist);
+
+        if(res != CURLE_OK) {
+            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            return 1;
+        }
+    }
+    else {
+        log_message(LOG_ERROR, "Failed to initialize libcurl");
+        return 1;
+    }
+
+    curl_global_cleanup();
+
+    freeChunkResponse();
+
+    log_message(LOG_DEBUG, "Exiting function sendMessageToSlack");
+    return 0;
+}
+
 slackMessage* getSlackMessage(slackMessage* slackMsg) {
     log_message(LOG_DEBUG, "Entering function getSlackMessage");
 
@@ -155,4 +229,140 @@ slackMessage* getSlackMessage(slackMessage* slackMsg) {
     log_message(LOG_DEBUG, "Exiting function getSlackMessage");
 
     return slackMsg;
+}
+
+slackMessage* sendUpdatedableSlackMessage(slackMessage* slackMsg) {
+    log_message(LOG_DEBUG, "Entering function sendUpdatedableSlackMessage");
+
+    sendMessageToSlackAPI(slackMsg->message);
+
+    log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
+
+    if(slackMsg->timestamp){
+        free(slackMsg->timestamp);
+        slackMsg->timestamp = NULL;
+    }
+
+    slackMsg->timestamp = jsonParserGetStringValue(chunk.response, "\"ts\"");
+
+    freeChunkResponse();
+
+    log_message(LOG_DEBUG, "Exiting function sendUpdatedableSlackMessage");
+
+    return slackMsg;
+}
+
+void sendLoadingBar(const int currentValue, const int totalValue){
+    log_message(LOG_DEBUG, "Entering function sendLoadingBar");
+    
+
+#ifndef TESTING
+
+
+    if (totalValue <= 0 || currentValue < 0 || currentValue > totalValue) {
+        fprintf(stderr, "Invalid values for currentValue or totalValue\n");
+        return;
+    }
+
+    const int barWidth = 20; // Width of the loading bar in characters
+    int progress = (int)((double)currentValue / totalValue * barWidth);
+
+    // Create the loading bar string
+    char loadingBar[barWidth + 3]; // 20 bars + 2 brackets + null terminator
+    loadingBar[0] = '[';
+    for (int i = 1; i <= barWidth; i++) {
+        loadingBar[i] = (i <= progress) ? '#' : '-';
+    }
+    loadingBar[barWidth + 1] = ']';
+    loadingBar[barWidth + 2] = '\0';
+
+    // Calculate the percentage
+    int percentage = (int)((double)currentValue / totalValue * 100);
+
+    // Create the final message string
+    char newMessage[100];
+    snprintf(newMessage, sizeof(newMessage), "%s %d%% (%d/%d)", loadingBar, percentage, currentValue, totalValue);
+
+    commandStatusMessage->message = newMessage;
+
+    updateSlackMessage(commandStatusMessage);
+
+#endif
+
+    
+    log_message(LOG_DEBUG, "Exiting function sendLoadingBar");
+    return;
+}
+
+void initialiseSlackCommandStatusMessage(){
+
+    log_message(LOG_DEBUG, "Entering function initialiseSlackCommandStatusMessage");
+    
+    commandStatusMessage = (slackMessage*)malloc(sizeof(slackMessage));
+
+    commandStatusMessage->message = NULL;
+    commandStatusMessage->timestamp = NULL;
+    commandStatusMessage->sender = NULL;
+
+    
+    log_message(LOG_DEBUG, "Exiting function initialiseSlackCommandStatusMessage");
+
+    return ;
+}
+
+void freeSlackCommandStatusMessageVariables(){
+    log_message(LOG_DEBUG, "Entering function freeSlackCommandStatusMessageVariables");
+    
+    
+    if(commandStatusMessage->message){
+        free(commandStatusMessage->message);
+        commandStatusMessage->message = NULL;
+    }
+
+    if(commandStatusMessage->timestamp){
+        free(commandStatusMessage->timestamp);
+        commandStatusMessage->timestamp = NULL;
+    }
+
+    if(commandStatusMessage->sender){
+        free(commandStatusMessage->sender);
+        commandStatusMessage->sender = NULL;
+    }
+    
+    
+    log_message(LOG_DEBUG, "Exiting function freeSlackCommandStatusMessageVariables");
+    return;
+}
+
+void sendStartingStatusMessage(const char *commandName){
+    log_message(LOG_DEBUG, "Entering function sendStartingStatusMessage");
+
+    commandStatusMessage->message = duplicate_Malloc("Starting ");
+    commandStatusMessage->message = appendToString(commandStatusMessage->message, commandName);
+
+    sendUpdatedableSlackMessage(commandStatusMessage);
+    
+    free(commandStatusMessage->message);
+    commandStatusMessage->message = NULL;
+
+    
+    log_message(LOG_DEBUG, "Exiting function sendStartingStatusMessage");
+
+    return;
+}
+
+void sendCompletedStatusMessage(const char *commandName){
+    log_message(LOG_DEBUG, "Entering function sendCompletedStatusMessage");
+    
+
+    commandStatusMessage->message = duplicate_Malloc(commandName);
+    commandStatusMessage->message = appendToString(commandStatusMessage->message, " finished");
+
+    updateSlackMessage(commandStatusMessage);
+    
+    freeSlackCommandStatusMessageVariables();
+
+    
+    log_message(LOG_DEBUG, "Exiting function sendCompletedStatusMessage");
+    return;
 }

@@ -9,6 +9,7 @@
 #include "wikiAPI.h"
 #include "requirementsHelpers.h"
 #include "pageListHelpers.h"
+#include "slackAPI.h"
 
 #define ID_BLOCK_TEMPLATE "\n# $ID$: "
 #define TITLE_BLOCK_TEMPLATE "$Title$\n"
@@ -77,6 +78,8 @@ void updateRequirementPage(command cmd){
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
     }
 
+    int cnt = 0;
+
     int num_reqs = cJSON_GetArraySize(requirements);
     while (currentReqPage){
         for (int i = 0; i < num_reqs; i++) {
@@ -102,6 +105,8 @@ void updateRequirementPage(command cmd){
             break;
         }
 
+        cnt++;
+        sendLoadingBar(cnt, num_reqs);
 
         currentReqPage = currentReqPage->next;
     }

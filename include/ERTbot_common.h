@@ -64,6 +64,8 @@ typedef struct slackMessage {
   char *timestamp;
 }slackMessage;
 
+extern slackMessage* commandStatusMessage;
+
 /**
  * @struct pageList
  * @brief Structure to represent a linked list of pages, each containing metadata and content.

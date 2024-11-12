@@ -35,6 +35,7 @@ int main(){
 
     //initalise
     initializeApiTokenVariables();
+    initialiseSlackCommandStatusMessage();
     lastPageRefreshCheck = getCurrentEDTTimeString();
     headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
     //declare command queue variable
