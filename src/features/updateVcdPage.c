@@ -4,6 +4,7 @@
 #include <cjson/cJSON.h>
 #include "sheetAPI.h"
 #include "ERTbot_common.h"
+#include "ERTbot_config"
 #include "requirementsHelpers.h"
 #include "stringHelpers.h"
 #include "wikiAPI.h"
@@ -27,28 +28,6 @@
  * - The final Vega chart specification is returned, ready to be used for rendering a pie chart.
  */
 static char *createVcdPieChart(const int* verificationStatusCount);
-
-/**
- * @brief Updates a JSON string representing a stacked area chart with new weekly data.
- *
- * This function updates a JSON string that contains data for a stacked area chart by adding new data points for the specified week. The new data points include verified, partially verified, and unverified values.
- *
- * @param json_str A string containing the JSON data of the existing chart. This JSON is expected to have a "data" object with a "values" array where new entries will be added.
- * @param week A string representing the week for which the data is being added. This value will be included in each new data entry.
- * @param verifiedValue An integer representing the value for the "Verified" status for the given week.
- * @param partiallyVerifiedValue An integer representing the value for the "Partially Verified" status for the given week.
- * @param unverifiedValue An integer representing the value for the "Unverified" status for the given week.
- *
- * @return A dynamically allocated string containing the updated JSON data, with new data points added to the "values" array. The caller is responsible for freeing this string.
- *
- * @details
- * - The function parses the input JSON string and retrieves the "values" array from the "data" object.
- * - Three new JSON objects are created, each representing one of the statuses ("Verified", "Partially Verified", "Unverified") with their corresponding values and the specified week.
- * - These new JSON objects are added to the "values" array.
- * - The updated JSON structure is converted back to a string and returned.
- * - If any error occurs during parsing or updating, the function returns `NULL`.
- */
-static char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue);
 
 
 static void countVerificationStatus(cJSON *requirementList, int* verificationStatusCount);
@@ -417,125 +396,24 @@ static char *buildVcdList(cJSON *requirementList, char* subSystem){
     return VCD;
 }
 
-void countVerificationStatus(cJSON *requirementList, int* verificationStatusCount){
-    log_message(LOG_DEBUG, "Entering function countVerificationStatus");
-
-    // Get the requirements array from the requirementList object
-    cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
-    if (!cJSON_IsArray(requirements)) {
-        log_message(LOG_ERROR, "Error: requirements is not a JSON array");
-    }
-
-    int verifiedCount = 0;
-    int partiallyCount = 0;
-    int uncompleteCount = 0;
-
-    // Iterate over each requirement object in the requirements array
-    int num_reqs = cJSON_GetArraySize(requirements);
-    for (int i = 0; i < num_reqs; i++) {
-        cJSON *requirement = cJSON_GetArrayItem(requirements, i);
-        if (!cJSON_IsObject(requirement)) {
-            log_message(LOG_ERROR, "Error: requirement is not a JSON object");
-            continue;
-        }
-
-        // Get and print each item of the requirement object
-        cJSON *R1V1S = cJSON_GetObjectItemCaseSensitive(requirement, "Review 1 Verification 1 Status");
-        cJSON *R1V2S = cJSON_GetObjectItemCaseSensitive(requirement, "Review 1 Verification 2 Status");
-        cJSON *R1V3S = cJSON_GetObjectItemCaseSensitive(requirement, "Review 1 Verification 3 Status");
-        cJSON *title = cJSON_GetObjectItemCaseSensitive(requirement, "Title");
-
-        int countNA  = 0;
-        int countCompleted  = 0;
-        int countUncompleted  = 0;
-
-        if(title == NULL){
-            log_message(LOG_DEBUG, "Found a new group");
-            continue;
-        }
-
-        for(int j = 0; j < 3; j++){
-
-            cJSON *tempStatus = NULL;
-
-
-            switch (j)
-            {
-            case 0:
-                tempStatus = R1V1S;
-                break;
-
-            case 1:
-                tempStatus = R1V2S;
-                break;
-
-            case 2:
-                tempStatus = R1V3S;
-                break;
-
-            default:
-                break;
-            }
-
-            log_message(LOG_DEBUG, "tempStatus string values: %s", tempStatus->valuestring);
-
-            if (strcmp(tempStatus->valuestring, "N/A") == 0){
-                countNA++ ;
-            }
-
-            if (strcmp(tempStatus->valuestring, "Completed") == 0){
-                countCompleted++ ;
-            }
-
-            if (strcmp(tempStatus->valuestring, "Uncompleted") == 0){
-                countUncompleted++ ;
-            }
-
-        }
-
-        if(countUncompleted == 0 && countCompleted == 0){
-            continue;
-        }
-
-        if(countUncompleted == 0 && countCompleted != 0){
-            verifiedCount++;
-        }
-
-        if(countUncompleted != 0 && countCompleted != 0){
-            partiallyCount++;
-        }
-
-        if(countUncompleted != 0 && countCompleted == 0){
-            uncompleteCount++;
-        }
-
-    }
-
-    log_message(LOG_DEBUG, "uncompleteCount: %d", uncompleteCount);
-    log_message(LOG_DEBUG, "partiallyCount: %d", partiallyCount);
-    log_message(LOG_DEBUG, "verifiedCount: %d", verifiedCount);
-
-    verificationStatusCount[0] = uncompleteCount;
-    verificationStatusCount[1] = partiallyCount;
-    verificationStatusCount[2] = verifiedCount;
-
-    return;
+static int getStatusCount(const cJSON* deadlineObject, const char* statusName){
+    const cJSON* statusObject = cJSON_GetObjectItem(deadlineObject, statusName);
+    return cJSON_GetArraySize(statusObject);
 }
 
-static char *createVcdPieChart(const int* verificationStatusCount){
+static char *createVcdPieChart(const cJSON* deadlineObject){
     log_message(LOG_DEBUG, "Entering function createVcdPieChart");
-
 
     char *pieChart = "```kroki\nvega\n\n{\n  \"$schema\": \"https://vega.github.io/schema/vega/v5.0.json\",\n  \"width\": 350,\n  \"height\": 350,\n  \"autosize\": \"pad\",\n  \"signals\": [\n    {\"name\": \"startAngle\", \"value\": 0},\n    {\"name\": \"endAngle\", \"value\": 6.29},\n    {\"name\": \"padAngle\", \"value\": 0},\n    {\"name\": \"sort\", \"value\": true},\n    {\"name\": \"strokeWidth\", \"value\": 2},\n    {\n      \"name\": \"selected\",\n      \"value\": \"\",\n      \"on\": [{\"events\": \"mouseover\", \"update\": \"datum\"}]\n    }\n  ],\n  \"data\": [\n    {\n      \"name\": \"table\",\n      \"values\": [\n        {\"continent\": \"Unverified\", \"population\": DefaultUnverifiedPopulation},\n        {\"continent\": \"Partially Verified\", \"population\": DefaultPartiallyVerifiedPopulation},\n        {\"continent\": \"Verified\", \"population\": DefaultVerifiedPopulation}\n      ],\n      \"transform\": [\n        {\n          \"type\": \"pie\",\n          \"field\": \"population\",\n          \"startAngle\": {\"signal\": \"startAngle\"},\n          \"endAngle\": {\"signal\": \"endAngle\"},\n          \"sort\": {\"signal\": \"sort\"}\n        }\n      ]\n    },\n    {\n      \"name\": \"fieldSum\",\n      \"source\": \"table\",\n      \"transform\": [\n        {\n          \"type\": \"aggregate\",\n          \"fields\": [\"population\"],\n          \"ops\": [\"sum\"],\n          \"as\": [\"sum\"]\n        }\n      ]\n    }\n  ],\n  \"legends\": [\n    {\n      \"fill\": \"color\",\n      \"title\": \"Legends\",\n      \"orient\": \"none\",\n      \"padding\": {\"value\": 10},\n      \"encode\": {\n        \"symbols\": {\"enter\": {\"fillOpacity\": {\"value\": 1}}},\n        \"legend\": {\n          \"update\": {\n            \"x\": {\n              \"signal\": \"(width / 2) + if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.1 * 0.8, if(width >= height, height, width) / 2 * 0.8)\",\n              \"offset\": 20\n            },\n            \"y\": {\"signal\": \"(height / 2)\", \"offset\": -50}\n          }\n        }\n      }\n    }\n  ],\n  \"scales\": [\n    {\"name\": \"color\", \"type\": \"ordinal\", \"range\": [\"#cf2608\", \"#ff9900\", \"#67b505\"]}\n  ],\n  \"marks\": [\n    {\n      \"type\": \"arc\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"fill\": {\"scale\": \"color\", \"field\": \"continent\"},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"}\n        },\n        \"update\": {\n          \"startAngle\": {\"field\": \"startAngle\"},\n          \"endAngle\": {\"field\": \"endAngle\"},\n          \"cornerRadius\": {\"value\": 15},\n          \"padAngle\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.015, 0.015)\"\n          },\n          \"innerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 0.45, if(width >= height, height, width) / 2 * 0.5)\"\n          },\n          \"outerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.8, if(width >= height, height, width) / 2 * 0.8)\"\n          },\n          \"opacity\": {\n            \"signal\": \"if(selected && selected.continent !== datum.continent, 1, 1)\"\n          },\n          \"stroke\": {\"signal\": \"scale('color', datum.continent)\"},\n          \"strokeWidth\": {\"signal\": \"strokeWidth\"},\n          \"fillOpacity\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.8, 0.8)\"\n          }\n        }\n      }\n    },\n    {\n      \"type\": \"text\",\n      \"encode\": {\n        \"enter\": {\"fill\": {\"value\": \"#525252\"}, \"text\": {\"value\": \"\"}},\n        \"update\": {\n          \"opacity\": {\"value\": 1},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"},\n          \"fontSize\": {\"signal\": \"if(width >= height, height, width) * 0.05\"},\n          \"text\": {\"value\": \"Verification Status\"}\n        }\n      }\n    },\n    {\n      \"name\": \"mark_population\",\n      \"type\": \"text\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"text\": {\n            \"signal\": \"if(datum['endAngle'] - datum['startAngle'] < 0.3, '', format(datum['population'] / 1, '.0f'))\"\n          },\n          \"x\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"y\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"radius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.65, if(width >= height, height, width) / 2 * 0.65)\"\n          },\n          \"theta\": {\"signal\": \"(datum['startAngle'] + datum['endAngle'])/2\"},\n          \"fill\": {\"value\": \"#FFFFFF\"},\n          \"fontSize\": {\"value\": 12},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"}\n        }\n      }\n    }\n  ]\n}\n\n```";
 
     char unverifiedPopulation[10];
-    sprintf(unverifiedPopulation, "%d", verificationStatusCount[0]);
+    sprintf(unverifiedPopulation, "%d", getStatusCount(deadlineObject, "uncompleted"));
 
     char partiallyVerifiedPopulation[10];
-    sprintf(partiallyVerifiedPopulation, "%d", verificationStatusCount[1]);
+    sprintf(partiallyVerifiedPopulation, "%d", getStatusCount(deadlineObject, "in progress"));
 
     char verifiedPopulation[10];
-    sprintf(verifiedPopulation, "%d", verificationStatusCount[2]);
+    sprintf(verifiedPopulation, "%d", getStatusCount(deadlineObject, "completed"));
 
     pieChart = replaceWord_Malloc(pieChart, "DefaultUnverifiedPopulation", unverifiedPopulation);
     pieChart = replaceWord_Realloc(pieChart, "DefaultPartiallyVerifiedPopulation", partiallyVerifiedPopulation);
@@ -546,62 +424,123 @@ static char *createVcdPieChart(const int* verificationStatusCount){
     return pieChart;
 }
 
-static char *updateVcdStackedAreaChart(char *json_str, char *week, int verifiedValue, int partiallyVerifiedValue, int unverifiedValue) {
-    log_message(LOG_DEBUG, "Entering function updateVcdStackedAreaChart");
+static cJSON getDeadlineObject(cJSON* verificationInformation, char* deadlineName){
+    int arraySize = cJSON_GetArraySize(verificationInformation);
 
-
-    log_message(LOG_DEBUG, "JSON string: %s", json_str);
-
-    // Parse the input JSON string
-    cJSON *root = cJSON_Parse(json_str);
-    if (root == NULL) {
-        return NULL;
+    if(arraySize == 0){
+        return addDeadlineObject(verificationInformation, deadlineName);
     }
 
-    // Find the "values" array
-    cJSON *data = cJSON_GetObjectItem(root, "data");
-    if (data == NULL) {
-        cJSON_Delete(root);
-        return NULL;
+    for(int i = 0; i < arraySize; i++){
+        char JsonItemNameDeadline[50];
+        snprintf(JsonItemNameDeadline, sizeof(JsonItemNameDeadline), "Deadline %d", i);
+
+        cJSON* deadlineObject = cJSON_GetObjectItem(verificationInformation, JsonItemNameDeadline);
+        
+        if(strcmp((deadlineObject, "Deadline Name")->valuestring, deadlineName) == 0){
+            return deadlineObject;
+        }
     }
 
-    cJSON *values = cJSON_GetObjectItem(data, "values");
-    if (values == NULL || !cJSON_IsArray(values)) {
-        cJSON_Delete(root);
-        return NULL;
+    return addDeadlineObject(verificationInformation, deadlineName);
+}
+
+static cJSON* addDeadlineObject(cJSON* verificationInformation, char* deadlineName){
+    int arraySize = cJSON_GetArraySize(verificationInformation);
+    int deadlineNumber = arraySize + 1;
+
+    char JsonItemNameDeadline[50];
+    snprintf(JsonItemNameDeadline, sizeof(JsonItemNameDeadline), "Deadline %d", deadlineNumber);
+
+    cJSON* deadlineName = cJSON_CreateString(deadlineName);
+    cJSON* deadlineObject = cJSON_CreateObject();
+
+    cJSON_AddItemToObject(verificationInformation, JsonItemNameDeadline, deadlineObject);
+    cJSON_AddItemToObject(deadlineObject, "Deadline Name", deadlineName);
+
+    return;
+}
+
+static cJSON* getMethodArray(cJSON* statusObject, char* methodName){
+
+    if(cJSON_HasObjectItem(statusObject, methodName);){
+        return cJSON_GetObjectItem(statusObject, methodName);
     }
 
+    cJSON* methodeArray = cJSON_CreateArray();
+    cJSON_AddItemToObject(statusObject, methodName, methodeArray);
 
-    // Create new JSON objects for the three new items
-    cJSON *item1 = cJSON_CreateObject();
-    cJSON_AddStringToObject(item1, "week", week);
-    cJSON_AddStringToObject(item1, "status", "Verified");
-    cJSON_AddNumberToObject(item1, "value", verifiedValue);
+   return cJSON_GetObjectItem(statusObject, methodName);
+}
 
-    cJSON *item2 = cJSON_CreateObject();
-    cJSON_AddStringToObject(item2, "week", week);
-    cJSON_AddStringToObject(item2, "status", "Partially Verified");
-    cJSON_AddNumberToObject(item2, "value", partiallyVerifiedValue);
+static cJSON* getStatusArray(cJSON* deadlineObject, char* statusName){
 
-    cJSON *item3 = cJSON_CreateObject();
-    cJSON_AddStringToObject(item3, "week", week);
-    cJSON_AddStringToObject(item3, "status", "Unverified");
-    cJSON_AddNumberToObject(item3, "value", unverifiedValue);
+    if(cJSON_HasObjectItem(deadlineObject, statusName);){
+        return cJSON_GetObjectItem(deadlineObject, statusName);
+    }
 
-    // Add the new items to the "values" array
-    cJSON_AddItemToArray(values, item1);
-    cJSON_AddItemToArray(values, item2);
-    cJSON_AddItemToArray(values, item3);
+    cJSON* statusArray = cJSON_CreateArray();
+    cJSON_AddItemToObject(deadlineObject, statusName, statusArray);
 
-    log_message(LOG_DEBUG, "about to call cJSON_Print");
+   return cJSON_GetObjectItem(deadlineObject, statusName);
+}
 
-    // Convert the updated JSON structure back to a string
-    char *updated_json_str = cJSON_Print(root);
-
-    // Clean up
-    cJSON_Delete(root);
+static bool verificationMethodAlreadyExists(const cJSON* deadlineObject, const char* verificationMethod){
+    return cJSON_HasObjectItem(deadlineObject, verificationMethod);
+}
 
 
-    log_message(LOG_DEBUG, "Exiting function updateVcdStackedAreaChart");
-    return updated_json_str;
+static bool verificationDeadlineEmpty(const cJSON* requirement, const char* JsonItemNameDeadline){
+    if(!cJSON_HasObjectItem(requirement, JsonItemNameDeadline) || strcmp(cJSON_GetObjectItem(requirement, JsonItemNameDeadline)->valuestring, "N/A") == 0 
+        || strcmp(cJSON_GetObjectItem(requirement, JsonItemNameDeadline)->valuestring, "") == 0){
+        return true;
+    }
+
+    return false;
+}
+
+
+static cJSON* parseVerificationInformation(cJSON* requirements){
+    int num_reqs = cJSON_GetArraySize(requirements);
+
+    cJSON* verificationInformation = cJSON_CreateObject();
+
+    for (int i = 0; i < num_reqs; i++) {
+        const cJSON *requirement = cJSON_GetArrayItem(requirements, i);
+
+        if (!cJSON_IsObject(requirement)) {
+            log_message(LOG_ERROR, "Error: requirement is not a JSON object");
+            continue;
+        }
+
+        for (int verificationNumber = 1; verificationNumber <= MAXIMUM_NUMBER_OF_VERIFICATIONS; verificationNumber++){
+
+            char JsonItemNameDeadline[50];
+            snprintf(JsonItemNameDeadline, sizeof(JsonItemNameDeadline), "Verification Deadline %d", verificationNumber);
+
+            char JsonItemNameMethod[50];
+            snprintf(JsonItemNameMethod, sizeof(JsonItemNameMethod), "Verification Method %d", verificationNumber);
+
+            char JsonItemNameStatus[50];
+            snprintf(JsonItemNameStatus, sizeof(JsonItemNameStatus), "Verification Status %d", verificationNumber);
+            
+            if(verificationDeadlineEmpty(requirement, JsonItemNameDeadline)){
+                continue;
+            }
+
+            char* deadlineName = cJSON_GetObjectItem(requirement, JsonItemNameDeadline)->valuestring;
+            char* methodName = cJSON_GetObjectItem(requirement, JsonItemNameMethod)->valuestring;
+            char* statusName = cJSON_GetObjectItem(requirement, JsonItemNameStatus)->valuestring;
+
+            cJSON* deadlineObject = getDeadlineObject(verificationInformation, deadlineName);
+            cJSON* statusArray = getStatusArray(deadlineObject, statusName);
+            cJSON* methodArray = getMethodArray(statusArray, methodName);
+            cJSON* stringItem = cJSON_CreateString(cJSON_GetObjectItem(requirement, "ID")->valuestring)
+
+            cJSON_AddItemToArray(methodArray, stringItem);
+        }
+    }
+
+    return verificationInformation;
+
 }
