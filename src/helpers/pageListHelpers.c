@@ -1,7 +1,8 @@
 #include <string.h>
 #include "ERTbot_common.h"
+#include "stringHelpers.h"
 
-pageList* addPageToList(pageList** head, const char *id, const char *title, const char *path, const char *description, const char *content, const char *updatedAt, const char *createdAt, const char *authorId) {
+pageList* addPageToList(pageList** head, const char *id, const char *title, const char *path, const char *description, const char *content, const char *updatedAt) {
     log_message(LOG_DEBUG, "Entering function addPageToList");
 
     pageList* newNode = (pageList *)malloc(sizeof(pageList));
@@ -11,29 +12,21 @@ pageList* addPageToList(pageList** head, const char *id, const char *title, cons
     }
 
     // Allocate memory and copy the path and id
-    newNode->id = malloc(strlen(id) + 1);
-    strcpy(newNode->id, id);
+    newNode->id = NULL;
+    newNode->title = NULL;
+    newNode->path = NULL;
+    newNode->description = NULL;
+    newNode->content = NULL;
+    newNode->updatedAt = NULL;
+    newNode->createdAt = NULL;
+    newNode->authorId = NULL;
 
-    newNode->title = malloc(strlen(title) + 1);
-    strcpy(newNode->title, title);
-
-    newNode->path = malloc(strlen(path) + 1);
-    strcpy(newNode->path, path);
-
-    newNode->description = malloc(strlen(description) + 1);
-    strcpy(newNode->description, description);
-
-    newNode->content = malloc(strlen(content) + 1);
-    strcpy(newNode->content, content);
-
-    newNode->updatedAt = malloc(strlen(updatedAt) + 1);
-    strcpy(newNode->updatedAt, updatedAt);
-
-    newNode->createdAt = malloc(strlen(createdAt) + 1);
-    strcpy(newNode->createdAt, createdAt);
-
-    newNode->authorId = malloc(strlen(authorId) + 1);
-    strcpy(newNode->authorId, authorId);
+    allocateAndCopy(&newNode->id, id, "newNode->id");
+    allocateAndCopy(&newNode->title, title, "newNode->title");
+    allocateAndCopy(&newNode->path, path, "newNode->path");
+    allocateAndCopy(&newNode->description, description, "newNode->description");
+    allocateAndCopy(&newNode->content, content, "newNode->content");
+    allocateAndCopy(&newNode->updatedAt, updatedAt, "newNode->updatedAt");
 
     newNode->next = NULL;  // New node will be the last node
 
@@ -52,7 +45,6 @@ pageList* addPageToList(pageList** head, const char *id, const char *title, cons
     // Link the new node after the last node
     lastNode->next = newNode;
 
-
     log_message(LOG_DEBUG, "Exiting function addPageToList");
     return *head;
 }
@@ -64,36 +56,35 @@ void freePageList(pageList** head) {
         pageList* temp = *head;
         *head = (*head)->next;
 
-        // Debugging prints
-        if (temp->id){
+        if (temp->id && temp->id != NULL){
             log_message(LOG_DEBUG, "Freeing page struct variable id: %p", (void*)temp->id);
             free(temp->id);
         }
-        if (temp->title){
+        if (temp->title && temp->title != NULL){
             log_message(LOG_DEBUG, "Freeing page struct variable title: %p", (void*)temp->title);
             free(temp->title);
         }
-        if (temp->path){
+        if (temp->path && temp->path != NULL){
             log_message(LOG_DEBUG, "Freeing page struct variable path: %p", (void*)temp->path);
             free(temp->path);
         }
-        if (temp->description){
+        if (temp->description && temp->description != NULL){
             log_message(LOG_DEBUG, "Freeing page struct variable description: %p", (void*)temp->description);
             free(temp->description);
         }
-        if (temp->content){
+        if (temp->content && temp->content != NULL){
             log_message(LOG_DEBUG, "Freeing page struct variable content: %p", (void*)temp->content);
             free(temp->content);
         }
-        if (temp->updatedAt){
+        if (temp->updatedAt && temp->updatedAt != NULL){
             log_message(LOG_DEBUG, "Freeing page struct variable updatedAt: %p", (void*)temp->updatedAt);
             free(temp->updatedAt);
         }
-        if (temp->createdAt){
+        if (temp->createdAt && temp->createdAt != NULL){
             log_message(LOG_DEBUG, "Freeing page struct variable createdAt: %p", (void*)temp->createdAt);
             free(temp->createdAt);
         }
-        if (temp->authorId){
+        if (temp->authorId && temp->authorId != NULL){
             log_message(LOG_DEBUG, "Freeing page struct variable authorId: %p", (void*)temp->authorId);
             free(temp->authorId);
         }
@@ -106,3 +97,6 @@ void freePageList(pageList** head) {
 
     log_message(LOG_DEBUG, "Exiting function freePageList");
 }
+
+
+

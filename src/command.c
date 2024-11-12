@@ -14,8 +14,12 @@
 #include "pageListHelpers.h"
 #include "timeHelpers.h"
 #include "ERTbot_command.h"
+#include "stringHelpers.h"
+
 
 #define MAX_ARGUMENTS 10
+
+static void setCommandArgument(char** dest, const char* src, const char* argName);
 
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands_Global, command* command, int period) {
     log_message(LOG_DEBUG, "Entering function addPeriodicCommand");
@@ -95,7 +99,7 @@ static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands
     return *headOfPeriodicCommands_Global;
 }
 
-static command* addCommandToQueue(command** head, const char *function, const char *argument_1, const char *argument_2, const char *argument_3, const char *argument_4, const char *argument_5, const char *argument_6, const char *argument_7, const char *argument_8, const char *argument_9) {
+static command* addCommandToQueue(command** head, const char *function, const char *argument) {
     log_message(LOG_DEBUG, "Entering function addCommandToQueue");
 
     command* newNode = (command *)malloc(sizeof(command));
@@ -106,77 +110,11 @@ static command* addCommandToQueue(command** head, const char *function, const ch
 
     // Initialize all pointers to NULL
     newNode->function = NULL;
-    newNode->argument_1 = NULL;
-    newNode->argument_2 = NULL;
-    newNode->argument_3 = NULL;
-    newNode->argument_4 = NULL;
-    newNode->argument_5 = NULL;
-    newNode->argument_6 = NULL;
-    newNode->argument_7 = NULL;
-    newNode->argument_8 = NULL;
-    newNode->argument_9 = NULL;
+    newNode->argument = NULL;
 
-    // Allocate memory and copy the path and id
-    if(function && function != NULL){
-    log_message(LOG_DEBUG, "function added to command");
-    newNode->function = malloc(strlen(function) + 1);
-    strcpy(newNode->function, function);
-    }
-
-    if(argument_1 && argument_1 != NULL){
-        log_message(LOG_DEBUG, "argument 1 added to command");
-        newNode->argument_1 = malloc(strlen(argument_1) + 1);
-        strcpy(newNode->argument_1, argument_1);
-    }
-
-    if(argument_2 && argument_2 != NULL){
-        log_message(LOG_DEBUG, "argument 2 added to command");
-        newNode->argument_2 = malloc(strlen(argument_2) + 1);
-        strcpy(newNode->argument_2, argument_2);
-    }
-
-    if(argument_3 && argument_3 != NULL){
-        log_message(LOG_DEBUG, "argument 1 added to command");
-        newNode->argument_3 = malloc(strlen(argument_3) + 1);
-        strcpy(newNode->argument_3, argument_3);
-    }
-
-    if(argument_4 && argument_4 != NULL){
-        log_message(LOG_DEBUG, "argument 4 added to command");
-        newNode->argument_4 = malloc(strlen(argument_4) + 1);
-        strcpy(newNode->argument_4, argument_4);
-    }
-
-    if(argument_5 && argument_5 != NULL){
-        log_message(LOG_DEBUG, "argument 5 added to command");
-        newNode->argument_5 = malloc(strlen(argument_5) + 1);
-        strcpy(newNode->argument_5, argument_5);
-    }
-
-    if(argument_6 && argument_6 != NULL){
-        log_message(LOG_DEBUG, "argument 6 added to command");
-        newNode->argument_6 = malloc(strlen(argument_6) + 1);
-        strcpy(newNode->argument_6, argument_6);
-    }
-
-    if(argument_7 && argument_7 != NULL){
-        log_message(LOG_DEBUG, "argument 7 added to command");
-        newNode->argument_7 = malloc(strlen(argument_7) + 1);
-        strcpy(newNode->argument_7, argument_7);
-    }
-
-    if(argument_8 && argument_8 != NULL){
-        log_message(LOG_DEBUG, "argument 8 added to command");
-        newNode->argument_8 = malloc(strlen(argument_8) + 1);
-        strcpy(newNode->argument_8, argument_8);
-    }
-
-    if(argument_9 && argument_9 != NULL){
-        log_message(LOG_DEBUG, "argument 9 added to command");
-        newNode->argument_9 = malloc(strlen(argument_9) + 1);
-        strcpy(newNode->argument_9, argument_9);
-    }
-
+     // Set function and arguments using the helper function
+    setCommandArgument(&newNode->function, function, "function");
+    setCommandArgument(&newNode->argument, argument, "argument");
 
     log_message(LOG_DEBUG, "All arguments added to command struct");
     newNode->next = NULL;  // New node will be the last node
@@ -226,40 +164,8 @@ void removeFirstCommand(command **head) {
         free(temp->function);
     }
 
-    if (temp->argument_1 && temp->argument_1 != NULL){
-        free(temp->argument_1);
-    }
-
-    if (temp->argument_2 && temp->argument_2 != NULL){
-        free(temp->argument_2);
-    }
-
-    if (temp->argument_3 && temp->argument_3 != NULL){
-        free(temp->argument_3);
-    }
-
-    if (temp->argument_4 && temp->argument_4 != NULL){
-        free(temp->argument_4);
-    }
-
-    if (temp->argument_5 && temp->argument_5 != NULL){
-        free(temp->argument_5);
-    }
-
-    if (temp->argument_6 && temp->argument_6 != NULL){
-        free(temp->argument_6);
-    }
-
-    if (temp->argument_7 && temp->argument_7 != NULL){
-        free(temp->argument_7);
-    }
-
-    if (temp->argument_8 && temp->argument_8 != NULL){
-        free(temp->argument_8);
-    }
-
-    if (temp->argument_9 && temp->argument_9 != NULL){
-        free(temp->argument_9);
+    if (temp->argument && temp->argument != NULL){
+        free(temp->argument);
     }
 
     log_message(LOG_DEBUG, "freed all variables");
@@ -283,7 +189,7 @@ static command** checkAndEnqueuePeriodicCommands(command** commandQueue, Periodi
         if (periodicCommand->next_time <= currentTime) {
             // Enqueue the command into the commandQueue
             command cmd = *periodicCommand->command;
-            *commandQueue = addCommandToQueue(commandQueue, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
+            *commandQueue = addCommandToQueue(commandQueue, cmd.function, cmd.argument);
 
             log_message(LOG_DEBUG, "Periodic command added to queue:%s", cmd.function);
 
@@ -319,7 +225,7 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
     if(strcmp(slackMsg->sender, "U06RQCAT0H1") != 0){
         breakdownCommand(slackMsg->message, &cmd);
         log_message(LOG_DEBUG, "Command broke down");
-        *headOfPeriodicCommands_Global = addCommandToQueue(headOfPeriodicCommands_Global, cmd.function, cmd.argument_1, cmd.argument_2, cmd.argument_3, cmd.argument_4, cmd.argument_5, cmd.argument_6, cmd.argument_7, cmd.argument_8, cmd.argument_9);
+        *headOfPeriodicCommands_Global = addCommandToQueue(headOfPeriodicCommands_Global, cmd.function, cmd.argument);
         sendMessageToSlack("Command added to queue");
         log_message(LOG_INFO, "Received a %s command on slack", cmd.function);
         log_message(LOG_DEBUG, "Command added to queue");
@@ -353,7 +259,7 @@ static command** lookForNewlyUpdatedPages(command** commandQueue){
 
     while(updatedPages){
 
-        *commandQueue = addCommandToQueue(commandQueue, "onPageUpdate", updatedPages->id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        *commandQueue = addCommandToQueue(commandQueue, "onPageUpdate", updatedPages->id);
         log_message(LOG_INFO, "onPageUpdate command has been added to queue for page id: %s", updatedPages->id);
         updatedPages = updatedPages->next;
     }
@@ -493,7 +399,7 @@ void breakdownCommand(const char* sentence, command* cmd) {
     int word_count = 0;
 
     // Copy the sentence to avoid modifying the original string
-    char* sentence_copy = strdup(sentence);
+    char* sentence_copy = duplicate_Malloc(sentence);
 
     // Tokenize the sentence
     token = strtok(sentence_copy, " ");
@@ -511,48 +417,16 @@ void breakdownCommand(const char* sentence, command* cmd) {
 
     // Initialize the command struct fields to NULL
     cmd->function = NULL;
-    cmd->argument_1 = NULL;
-    cmd->argument_2 = NULL;
-    cmd->argument_3 = NULL;
-    cmd->argument_4 = NULL;
-    cmd->argument_5 = NULL;
-    cmd->argument_6 = NULL;
-    cmd->argument_7 = NULL;
-    cmd->argument_8 = NULL;
-    cmd->argument_9 = NULL;
+    cmd->argument = NULL;
 
     // Copy words into struct fields
     for (int i = 0; i < word_count; i++) {
         switch (i) {
             case 0:
-                cmd->function = strdup(words[i]);
+                cmd->function = duplicate_Malloc(words[i]);
                 break;
             case 1:
-                cmd->argument_1 = strdup(words[i]);
-                break;
-            case 2:
-                cmd->argument_2 = strdup(words[i]);
-                break;
-            case 3:
-                cmd->argument_3 = strdup(words[i]);
-                break;
-            case 4:
-                cmd->argument_4 = strdup(words[i]);
-                break;
-            case 5:
-                cmd->argument_5 = strdup(words[i]);
-                break;
-            case 6:
-                cmd->argument_6 = strdup(words[i]);
-                break;
-            case 7:
-                cmd->argument_7 = strdup(words[i]);
-                break;
-            case 8:
-                cmd->argument_8 = strdup(words[i]);
-                break;
-            case 9:
-                cmd->argument_9 = strdup(words[i]);
+                cmd->argument = duplicate_Malloc(words[i]);
                 break;
             default:
                 break;
@@ -569,10 +443,6 @@ command** executeCommand(command** commandQueue){
 
     if((*commandQueue)->function && strcmp((*commandQueue)->function, "shutdown") == 0){ //works
         sendMessageToSlack("Shutting down");
-
-        if(chunk.response){
-            free(chunk.response);
-        }
 
         exit(0);
     }
@@ -621,6 +491,10 @@ command** executeCommand(command** commandQueue){
         sendMessageToSlack("updateDRL");
         sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
         sendMessageToSlack("-> example: updateDRL ST");
+        sendMessageToSlack("-----------------");
+        sendMessageToSlack("createMissingRequirementPages");
+        sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
+        sendMessageToSlack("-> example: updateDRL ST");
     }
 
     else{
@@ -629,7 +503,21 @@ command** executeCommand(command** commandQueue){
 
     removeFirstCommand(commandQueue);
 
+
     log_message(LOG_DEBUG, "Exiting function executeCommand");
     return commandQueue;
 
+}
+
+static void setCommandArgument(char** dest, const char* src, const char* argName) {
+    if (src && src[0] != '\0') {
+        log_message(LOG_DEBUG, "%s added to command", argName);
+        size_t len = strlen(src) + 1;
+        *dest = malloc(len);
+        if (*dest) {
+            strlcpy(*dest, src, len);
+        } else {
+            log_message(LOG_ERROR, "Memory allocation failed for %s", argName);
+        }
+    }
 }

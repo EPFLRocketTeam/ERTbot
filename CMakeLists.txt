@@ -36,7 +36,6 @@ set(SOURCES
     src/helpers/requirementsHelpers.c
     src/helpers/stringHelpers.c
     src/helpers/timeHelpers.c
-    src/helpers/wikiLinksHelpers.c
 )
 
 # Set the output directory for executables
@@ -86,11 +85,15 @@ set(TEST_SOURCES
     tests/test_main.c
     tests/api/test_wikiAPI.c
     tests/features/test_createMissingRequirementPages.c
+    tests/helpers/test_requirementHelpers.c
 )
 
 # Test executable
 add_executable(ERTbot_tests ${SOURCES} ${TEST_SOURCES})
 target_compile_definitions(ERTbot_tests PRIVATE TESTING)
+
+# Add debugging symbols for the test executable
+target_compile_options(ERTbot_tests PRIVATE -g)
 
 if(APPLE)
     # Add the include directory and library path for ERTbot

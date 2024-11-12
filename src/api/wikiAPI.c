@@ -26,7 +26,6 @@ char *template_create_page_mutation = "{\"query\":\"mutation { pages { create(co
 char *template_delete_page_mutation = "{\"query\":\"mutation { pages { delete(id: DefaultID) { responseResult { succeeded, message } } } } \"}";
 
 
-
 /**
  * @brief Sends a GraphQL query to the Wiki API using a POST request.
  *
@@ -42,15 +41,15 @@ char *template_delete_page_mutation = "{\"query\":\"mutation { pages { delete(id
  */
 void wikiApi(char *query){
     log_message(LOG_DEBUG, "Entering function wikiApi");
+    log_message(LOG_DEBUG, "wikiApi query: %s", query);
 
-  CURL *curl;
-  CURLcode res;
-  struct curl_slist *headers = NULL;
-  curl_global_init(CURL_GLOBAL_ALL);
-  curl = curl_easy_init();
+    CURL *curl;
+    CURLcode res;
+    struct curl_slist *headers = NULL;
+    curl_global_init(CURL_GLOBAL_ALL);
+    curl = curl_easy_init();
 
-  chunk.response = malloc(1);  /* grown as needed by the realloc above */
-  chunk.size = 0;    /* no data at this point */
+    resetChunkResponse();
 
     if (curl) {
         // Set the API URL
@@ -110,10 +109,9 @@ void wikiApi(char *query){
 static void getPageContentQuery(const char* id){
     log_message(LOG_DEBUG, "Entering function getPageContentQuery");
 
-    char *temp_query = strdup(template_pages_singles_query); // Make a copy to modify
-    char *modified_query = replaceWord(temp_query, default_page.id, id);
+    char *modified_query = duplicate_Malloc(template_pages_singles_query); // Make a copy to modify
+    modified_query = replaceWord_Realloc(modified_query, default_page.id, id);
     wikiApi(modified_query);
-    free(temp_query);
     free(modified_query);
 
     log_message(LOG_DEBUG, "Exiting function getPageContentQuery");
@@ -139,12 +137,12 @@ static void getListQuery(const char *sort){
     log_message(LOG_DEBUG, "Entering function getListQuery");
 
     if(strcmp(sort, "path") == 0 || strcmp(sort, "exact path") == 0){
-        char* temp_query = strdup(template_list_pages_sortByPath_query); // Make a copy to modify
+        char* temp_query = duplicate_Malloc(template_list_pages_sortByPath_query); // Make a copy to modify
         wikiApi(temp_query);
         free(temp_query);
     }
     else if(strcmp(sort, "time") == 0){
-        char *temp_query = strdup(template_list_pages_sortByTime_query); // Make a copy to modify
+        char *temp_query = duplicate_Malloc(template_list_pages_sortByTime_query); // Make a copy to modify
         wikiApi(temp_query);
         free(temp_query);
     }
@@ -170,7 +168,8 @@ pageList* getPage(pageList** head){
     current->createdAt = jsonParserGetStringValue(chunk.response, "\"createdAt\"");
     current->authorId = jsonParserGetIntValue(chunk.response, "\"authorId\"");
     log_message(LOG_DEBUG, "title: %s\n, path: %s\n, description: %s\n, content: %s\n, updatedAt: %s\n", current->title, current->path, current->description, current->content, current->updatedAt);
-    free(chunk.response);
+
+    freeChunkResponse();
 
     log_message(LOG_DEBUG, "Exiting function getPage");
     return current;
@@ -180,9 +179,8 @@ pageList* getPage(pageList** head){
 static pageList* parseJSON(pageList** head, const char* jsonString, const char* filterType, const char* filterCondition) {
     log_message(LOG_DEBUG, "Entering function parseJSON");
 
-
     if (strstr(filterCondition, "\\") != NULL) {
-        filterCondition = replaceWord(filterCondition, "\\", "");
+        filterCondition = replaceWord_Malloc(filterCondition, "\\", "");
     }
 
     const char* start = strstr(jsonString, "\"list\":");
@@ -273,19 +271,19 @@ static pageList* parseJSON(pageList** head, const char* jsonString, const char* 
         // Add page to list based on the filter condition
         if (strcmp(filterType, "path") == 0 && (strstr(path, filterCondition) != NULL || strcmp(filterCondition, "none") == 0)) {
             log_message(LOG_DEBUG, "Page found after filtering by path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
-            *head = addPageToList(head, id, title, path, "", "", updatedAt, "", "");
+            *head = addPageToList(head, id, title, path, NULL, NULL, updatedAt);
             log_message(LOG_DEBUG, "Page added to list");
         }
 
         if (strcmp(filterType, "time") == 0 && (strcmp(filterCondition, "none") == 0 || compareTimes(filterCondition, updatedAt) == -1)) {
             log_message(LOG_DEBUG, "Page found after filtering by time:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
-            *head = addPageToList(head, id, title, path, "", "", updatedAt, "", "");
+            *head = addPageToList(head, id, title, path, NULL, NULL, updatedAt);
             log_message(LOG_DEBUG, "Page added to list");
         }
 
         if (strcmp(filterType, "exact path") == 0 && strcmp(path, filterCondition) == 0) {
             log_message(LOG_DEBUG, "Page found after filtering by exact path:\n path: %s,\n title: %s,\n id: %s,\n updatedAt: %s\n", path, title, id, updatedAt);
-            *head = addPageToList(head, id, title, path, "", "", updatedAt, "", "");
+            *head = addPageToList(head, id, title, path, NULL, NULL, updatedAt);
             log_message(LOG_DEBUG, "Page added to list");
             free(path);
             free(title);
@@ -325,15 +323,15 @@ void updatePageContentMutation(pageList* head){
 
     char *temp_query = template_update_page_mutation;
     log_message(LOG_DEBUG, "About to update page (id: %s) to content: %s", head->id, head->content);
-    temp_query = replaceWord(temp_query, default_page.id, head->id);
-    temp_query = replaceWord(temp_query, default_page.content, head->content);
+    temp_query = replaceWord_Malloc(temp_query, default_page.id, head->id);
+    temp_query = replaceWord_Realloc(temp_query, default_page.content, head->content);
 
     log_message(LOG_DEBUG, "About to update send query: %s\n", temp_query);
     wikiApi(temp_query);
 
-    if(chunk.response){
-        free(chunk.response);
-    }
+    freeChunkResponse();
+
+    free(temp_query);
 
     log_message(LOG_DEBUG, "Exiting function updatePageContentMutation");
 }
@@ -341,11 +339,14 @@ void updatePageContentMutation(pageList* head){
 void renderMutation(pageList** head, bool renderEntireList){
     log_message(LOG_DEBUG, "Entering function renderMutation");
 
+#ifndef TESTING
+
     pageList* current = *head;
     while (current)  {
         char *temp_query = template_render_page_mutation;
-        temp_query = replaceWord(temp_query, default_page.id, current->id);
+        temp_query = replaceWord_Malloc(temp_query, default_page.id, current->id);
         wikiApi(temp_query);
+        free(temp_query);
 
         if(!renderEntireList){
             break;
@@ -354,9 +355,9 @@ void renderMutation(pageList** head, bool renderEntireList){
         current = current->next;
     }
 
-    if(chunk.response){
-        free(chunk.response);
-    }
+    freeChunkResponse();
+
+#endif
 
     log_message(LOG_DEBUG, "Exiting function renderMutation");
 }
@@ -367,29 +368,26 @@ void movePageMutation(pageList** head){
     pageList* current = *head;
     while (current)  {
         char *temp_query = template_move_page_mutation;
-        temp_query = replaceWord(temp_query, default_page.id, current->id);
-        temp_query = replaceWord(temp_query, default_page.path, current->path);
+        temp_query = replaceWord_Malloc(temp_query, default_page.id, current->id);
+        temp_query = replaceWord_Realloc(temp_query, default_page.path, current->path);
         wikiApi(temp_query);
+        free(temp_query);
         current = current->next;
     }
 
-    if(chunk.response){
-        free(chunk.response);
-    }
+    freeChunkResponse();
 
     log_message(LOG_DEBUG, "Exiting function movePageMutation");
 }
 
-pageList* populatePageList(pageList** head, const char *filterType, char *filterCondition){
+pageList* populatePageList(pageList** head, const char *filterType, const char *filterCondition){
     log_message(LOG_DEBUG, "Entering function populatePageList");
 
     pageList* temp = *head;
     getListQuery(filterType);
     temp = parseJSON(&temp, chunk.response, filterType, filterCondition);
 
-    if(chunk.response){
-        free(chunk.response);
-    }
+    freeChunkResponse();
 
     log_message(LOG_DEBUG, "Exiting function populatePageList");
     return temp;
@@ -398,13 +396,15 @@ pageList* populatePageList(pageList** head, const char *filterType, char *filter
 void createPageMutation(const char* path, const char* content, const char* title){
     log_message(LOG_DEBUG, "Entering function createPageMutation");
 
-    char *temp_query = template_create_page_mutation;
-    temp_query = replaceWord(temp_query, default_page.path, path);
-    temp_query = replaceWord(temp_query, default_page.content, content);
-    temp_query = replaceWord(temp_query, default_page.title, title);
+    char *temp_query = duplicate_Malloc(template_create_page_mutation);
+    temp_query = replaceWord_Realloc(temp_query, default_page.path, path);
+    temp_query = replaceWord_Realloc(temp_query, default_page.content, content);
+    temp_query = replaceWord_Realloc(temp_query, default_page.title, title);
     log_message(LOG_DEBUG, "About to call the create page query %s", temp_query);
 
     wikiApi(temp_query);
+
+    free(temp_query);
 
     log_message(LOG_DEBUG, "chunk.response after calling for a page creation: %s", chunk.response);
 
@@ -415,17 +415,22 @@ char *fetchAndModifyPageContent(const char* pageId, const char* newPageContent, 
     log_message(LOG_DEBUG, "Entering function fetchAndModifyPageContent");
 
     pageList* page = NULL;
-    page = addPageToList(&page, pageId, "", "", "", "", "", "", "");
+    page = addPageToList(&page, pageId, NULL, NULL, NULL, NULL, NULL);
     page = getPage(&page);
 
-    outputString = malloc(strlen(page->content) + 1);
+    size_t len;
+    len = strlen(page->content) + 1;
+
+    outputString = malloc(len);
     if (outputString != NULL) {
-        strcpy(outputString, page->content);
+        strlcpy(outputString, page->content, len);
     }
 
-    page->content = realloc(page->content, strlen(newPageContent) + 1);
 
-    strcpy(page->content, newPageContent);
+    size_t len2;
+    len2 = strlen(newPageContent) + 1;
+    page->content = realloc(page->content, len2);
+    strlcpy(page->content, newPageContent, len2);
 
     updatePageContentMutation(page);
 
@@ -440,8 +445,9 @@ void deletePageMutation(const char* id){
     log_message(LOG_DEBUG, "Entering function deletePageMutation");
 
     char *temp_query = template_delete_page_mutation;
-    temp_query = replaceWord(temp_query, default_page.id, id);
+    temp_query = replaceWord_Malloc(temp_query, default_page.id, id);
     wikiApi(temp_query);
+    free(temp_query);
 
     log_message(LOG_DEBUG, "Exiting function deletePageMutation");
 }

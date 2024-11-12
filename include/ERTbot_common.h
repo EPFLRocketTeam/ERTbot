@@ -136,21 +136,13 @@ extern pageList default_page;
  *
  * @details
  * - `function`: A string representing the name of the function to be executed.
- * - `argument_1` to `argument_9`: Strings representing the arguments that are passed to the function.
+ * - `argument` to `argument_9`: Strings representing the arguments that are passed to the function.
  *   These fields are optional and may be left NULL if not used.
  * - `next`: A pointer to the next command in a sequence, allowing commands to be chained together.
  */
 typedef struct command {
     char *function;
-    char *argument_1;
-    char *argument_2;
-    char *argument_3;
-    char *argument_4;
-    char *argument_5;
-    char *argument_6;
-    char *argument_7;
-    char *argument_8;
-    char *argument_9;
+    char *argument;
     struct command *next;
 }command;
 

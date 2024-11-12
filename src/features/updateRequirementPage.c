@@ -10,7 +10,21 @@
 #include "requirementsHelpers.h"
 #include "pageListHelpers.h"
 
-char *template_REQ = "";
+#define ID_BLOCK_TEMPLATE "\n# $ID$: "
+#define TITLE_BLOCK_TEMPLATE "$Title$\n"
+#define DESCRIPTION_BLOCK_TEMPLATE ">**Description**: $Description$\n\n"
+#define SOURCE_BLOCK_TEMPLATE ">**Source**: $Source$\n"
+#define AUTHOR_BLOCK_TEMPLATE ">**Author**: $Author$\n"
+#define ASSIGNEE_BLOCK_TEMPLATE ">**Assignee**: $Assignee$\n"
+#define JUSTIFICATION_BLOCK_TEMPLATE "\n## Justification\n$Justification$\n"
+#define COMPLIANCE_BLOCK_TEMPLATE "\n# Compliance\n$Compliance$\n"
+#define CRITICALITY_BLOCK_TEMPLATE "\n# Criticality\n$Criticality$\n"
+#define FIRST_VERIFICATION_METHOD_BLOCK_TEMPLATE "\n# Verification\n##Verification 1\n**Method**: "
+
+#define VERIFICATION_METHOD_BLOCK_TEMPLATE "\n## Verification $Verification Number$\n**Method**: $Verification Method$"
+#define VERIFICATION_DEADLINE_BLOCK_TEMPLATE "\n**Deadline**: $Verification Deadline$"
+#define VERIFICATION_STATUS_BLOCK_TEMPLATE "\n**Status**: $Verification Status$\n"
+
 
 /**
  * @brief Builds a `pageList` entry from a JSON object containing requirements for a specific requirement ID.
@@ -39,152 +53,53 @@ char *template_REQ = "";
  * - After processing, the page content is added to the `pageList` structure and the list is returned.
  * - If any errors are encountered (e.g., missing "requirements" array or incorrect object format), appropriate error messages are printed.
  */
-static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement);
+static char *buildRequirementPageFromJSONRequirementList(const cJSON *requirement);
+
+static void updateRequirementPageContent(pageList* reqPage, const cJSON *requirement);
+
+static void addVerificationInformationToPageContent(char** pageContent, const cJSON* requirement);
 
 void updateRequirementPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateRequirementPages");
 
-    refreshOAuthToken();
-    char *sheetId;
+    cJSON* subsystem = getSubsystemInfo(cmd.argument);
+    const char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
+    cJSON *requirementList = getRequirements(subsystem);
+
     pageList* requirementPagesHead = NULL;
-    char *path = cmd.argument_1;
-    path = replaceWord(path, "\\", "");
-
-
-
-    if(strstr(cmd.argument_1, "ST")){
-        sheetId = "ST!A3:AT300";
-        if(strcmp(cmd.argument_1, "ST")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_ST_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "PR")){
-        sheetId = "PR!A3:AT300";
-        if(strcmp(cmd.argument_1, "PR")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PR_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "FD")){
-        sheetId = "FD!A3:AT300";
-        if(strcmp(cmd.argument_1, "FD")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_FD_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "RE")){
-        sheetId = "RE!A3:AT300";
-        if(strcmp(cmd.argument_1, "RE")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_RE_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "GS")){
-        sheetId = "GS!A3:AT300";
-        if(strcmp(cmd.argument_1, "GS")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GS_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "AV")){
-        sheetId = "AV!A3:AT300";
-        if(strcmp(cmd.argument_1, "AV")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_AV_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "TE")){
-        sheetId = "TE!A3:AT300";
-        if(strcmp(cmd.argument_1, "TE")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_TE_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "PL")){
-        sheetId = "PL!A3:AT300";
-        if(strcmp(cmd.argument_1, "PL")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_PL_DRL/";
-        }
-    }
-
-    if(strstr(cmd.argument_1, "GE")){
-        sheetId = "GE!A3:AT300";
-        if(strcmp(cmd.argument_1, "GE")==0){
-            path = "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_GE_DRL/";
-        }
-    }
-
-    if(strcmp(cmd.argument_1, "UT")==0){
-        sheetId = "UT!A3:AT300";
-
-        if(strcmp(cmd.argument_1, "UT")==0){
-            path = "management/it/ERTbot_Test_Pages/";
-        }
-    }
-
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
+    pageList* currentReqPage = requirementPagesHead;
+
+    const cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
 
 
-    batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
-
-    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
-
-    // Get the requirements array from the requirementList object
-    cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
     }
 
-    pageList* currentReqPage = requirementPagesHead;
-
-    // Iterate over each requirement object in the requirements array
     int num_reqs = cJSON_GetArraySize(requirements);
-
     while (currentReqPage){
         for (int i = 0; i < num_reqs; i++) {
-            cJSON *requirement = cJSON_GetArrayItem(requirements, i);
+            const cJSON *requirement = cJSON_GetArrayItem(requirements, i);
 
             if (!cJSON_IsObject(requirement)) {
                 log_message(LOG_ERROR, "Error: requirement is not a JSON object");
                 continue;
             }
 
-            // Get and print each item of the requirement object
-            cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
+            const cJSON *id = cJSON_GetObjectItem(requirement, "ID");
 
-            if (cJSON_IsString(id) && id->valuestring && strcmp(id->valuestring, currentReqPage->title) == 0){
-                currentReqPage = getPage(&currentReqPage);
-                currentReqPage->content = replaceWord(currentReqPage->content, "\\n", "\n");
-                char* importedRequirementInformation = buildRequirementPageFromJSONRequirementList(requirement);
-                char* flag = createCombinedString("<!--", id->valuestring);
-                flag = appendToString(flag, "-->");
-
-                log_message(LOG_DEBUG, "initialising pointer to flags");
-                char* start = currentReqPage->content;
-                char* end;
-
-                log_message(LOG_DEBUG, "Looking for flag: %s in currentReqPage->content: %s", flag, currentReqPage->content);
-                start = strstr(start, flag);
-                start = start + strlen(flag);
-
-                log_message(LOG_DEBUG, "Looking for flag: %s in start+1: %s", flag, start+1);
-                end = strstr(start + 1, flag);
-                end--;
-
-                currentReqPage->content = replaceParagraph(currentReqPage->content, importedRequirementInformation, start, end);
-
-                currentReqPage->content = replaceWord(currentReqPage->content, "\n", "\\\\n");
-                currentReqPage->content = replaceWord(currentReqPage->content, "\"", "\\\\\\\"");
-                log_message(LOG_DEBUG, "About to update page:%s", currentReqPage->path);
-                updatePageContentMutation(currentReqPage);
-                renderMutation(&currentReqPage, false);
-
-                free(flag);
-
-                break;
+            if (!cJSON_IsString(id) || strcmp(id->valuestring, currentReqPage->title) != 0){
+                continue;
             }
 
+            currentReqPage->content = replaceWord_Realloc(currentReqPage->content, "\r", "");
+            currentReqPage->content = replaceWord_Realloc(currentReqPage->content, "\t", "");
+            currentReqPage->content = replaceWord_Realloc(currentReqPage->content, "   ", "");
+
+            updateRequirementPageContent(currentReqPage, requirement);
+
+            break;
         }
 
 
@@ -192,190 +107,134 @@ void updateRequirementPage(command cmd){
     }
 
     cJSON_Delete(requirementList);
+    cJSON_Delete(subsystem);
     freePageList(&requirementPagesHead);
 
     log_message(LOG_DEBUG, "Exiting function updateRequirementPage");
     return;
 }
 
-static char *buildRequirementPageFromJSONRequirementList(cJSON *requirement){
+static void updateRequirementPageContent(pageList* reqPage, const cJSON *requirement){
+
+    free(reqPage->title);
+    reqPage->title = NULL;
+
+    free(reqPage->path);
+    reqPage->path = NULL;
+
+    free(reqPage->updatedAt);
+    reqPage->updatedAt = NULL;
+
+    reqPage = getPage(&reqPage);
+    reqPage->content = replaceWord_Realloc(reqPage->content, "\\n", "\n");
+
+    char* importedRequirementInformation = buildRequirementPageFromJSONRequirementList(requirement);
+
+    const cJSON *id = cJSON_GetObjectItem(requirement, "ID");
+
+    char* flag = createCombinedString("<!--", id->valuestring);
+    flag = appendToString(flag, "-->");
+
+    char* start = reqPage->content;
+    start = strstr(start, flag);
+    start = start + strlen(flag);
+
+    char* end;
+    end = strstr(start + 1, flag);
+    end--;
+
+    char *newContent = replaceParagraph(reqPage->content, importedRequirementInformation, start, end);
+    if (newContent != NULL) {
+        free(reqPage->content);  // Free the old content
+        reqPage->content = newContent;  // Update to point to the new content
+    }
+
+    reqPage->content = replaceWord_Realloc(reqPage->content, "\n", "\\\\n");
+    reqPage->content = replaceWord_Realloc(reqPage->content, "\"", "\\\\\\\"");
+
+    updatePageContentMutation(reqPage);
+    renderMutation(&reqPage, false);
+
+    free(reqPage->content);
+    reqPage->content = NULL;
+
+    free(importedRequirementInformation);
+
+    free(flag);
+
+    return;
+}
+
+static char* buildRequirementPageFromJSONRequirementList(const cJSON *requirement){
     log_message(LOG_DEBUG, "Entering function buildRequirementPageFromJSONRequirementList");
 
-    char *pageContent = strdup(template_REQ);
+    char* pageContent = duplicate_Malloc("");
 
-    // Get and print each item of the requirement object
-    cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
-    cJSON *title = cJSON_GetObjectItemCaseSensitive(requirement, "Title");
-    cJSON *description = cJSON_GetObjectItemCaseSensitive(requirement, "Description");
-    cJSON *source = cJSON_GetObjectItemCaseSensitive(requirement, "Source");
-    cJSON *author = cJSON_GetObjectItemCaseSensitive(requirement, "Author");
-    cJSON *justification = cJSON_GetObjectItemCaseSensitive(requirement, "Justification");
-    cJSON *criticality = cJSON_GetObjectItemCaseSensitive(requirement, "Criticality");
-    cJSON *compliance = cJSON_GetObjectItemCaseSensitive(requirement, "Compliance");
-    cJSON *verification_status = cJSON_GetObjectItemCaseSensitive(requirement, "Verification Status");
-    cJSON *assignee = cJSON_GetObjectItemCaseSensitive(requirement, "Assignee");
-
-    cJSON *path = cJSON_GetObjectItemCaseSensitive(requirement, "Path");
+    char* requirement_print = cJSON_Print(requirement);
+    log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: requirement: %s", requirement_print);
+    free(requirement_print);
 
 
+    log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: starting to append standard block");
 
-    //TITLE
-    if (cJSON_IsString(id) && id->valuestring) {
-        pageContent = appendToString(pageContent, "\n# ");
-        pageContent = appendToString(pageContent, id->valuestring);
-        pageContent = appendToString(pageContent, ": ");
-    }
-    if (cJSON_IsString(title) && title->valuestring) {
-        pageContent = appendToString(pageContent, title->valuestring);
-        pageContent = appendToString(pageContent, "\n");
-    }
+    (void)addSectionToPageContent(&pageContent, ID_BLOCK_TEMPLATE, requirement, "ID");
+    (void)addSectionToPageContent(&pageContent, TITLE_BLOCK_TEMPLATE, requirement, "Title");
+    (void)addSectionToPageContent(&pageContent, DESCRIPTION_BLOCK_TEMPLATE, requirement, "Description");
 
+    log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: Description finished");
 
-    //DESCRIPTION
-    if (cJSON_IsString(description) && description->valuestring) {
-        pageContent = appendToString(pageContent, ">**Description**: ");
-        pageContent = appendToString(pageContent, description->valuestring);
-        pageContent = appendToString(pageContent, "\n");
-    }
+    int hasSource = addSectionToPageContent(&pageContent, SOURCE_BLOCK_TEMPLATE, requirement, "Source");
+    int hasAuthor = addSectionToPageContent(&pageContent, AUTHOR_BLOCK_TEMPLATE, requirement, "Author");
+    int hasAssignee = addSectionToPageContent(&pageContent, ASSIGNEE_BLOCK_TEMPLATE, requirement, "Assignee");
 
-
-    //INFORMATION BOX: SOURCES AND ASSIGNEE
-    if (cJSON_IsString(source) && source->valuestring && strcmp(source->valuestring, "") != 0) {
-        pageContent = appendToString(pageContent, "\n>**Source**: ");
-        pageContent = appendToString(pageContent, source->valuestring);
-        pageContent = appendToString(pageContent, "\n");
-    }
-    if (cJSON_IsString(author) && author->valuestring && strcmp(author->valuestring, "") != 0) {
-        pageContent = appendToString(pageContent, ">**Author**: ");
-        pageContent = appendToString(pageContent, author->valuestring);
-        pageContent = appendToString(pageContent, "\n");
-    }
-    if (cJSON_IsString(assignee) && assignee->valuestring && strcmp(assignee->valuestring, "") != 0) {
-        pageContent = appendToString(pageContent, ">**Assignee**: ");
-        pageContent = appendToString(pageContent, assignee->valuestring);
-        pageContent = appendToString(pageContent, "\n");
-    }
-    if (strcmp(source->valuestring, "") != 0 || strcmp(author->valuestring, "") != 0 || strcmp(assignee->valuestring, "") != 0) {
+    if(hasSource || hasAuthor || hasAssignee){
         pageContent = appendToString(pageContent, "{.is-info}\n");
     }
 
+    log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: Assignee finished");
 
-    //JUSTIFICATION
-    if (cJSON_IsString(justification) && justification->valuestring && strcmp(justification->valuestring, "") != 0) {
-        pageContent = appendToString(pageContent, "\n## Justification\n");
-        pageContent = appendToString(pageContent, justification->valuestring);
-        pageContent = appendToString(pageContent, "\n");
-    }
+    (void)addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Justification");
+    (void)addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Compliance");
+    (void)addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Criticality");
 
-
-    //COMPLIANCE
-    if (cJSON_IsString(compliance) && compliance->valuestring && strcmp(compliance->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-
-        if(strcmp(compliance->valuestring, "Compliant") == 0){
-            pageContent = appendToString(pageContent, "\n# Compliance\n");
-            pageContent = appendToString(pageContent, ":green_circle: Compliant\n");
-        }
-        if(strcmp(compliance->valuestring, "Unknown") == 0){
-            pageContent = appendToString(pageContent, "\n# Compliance\n");
-            pageContent = appendToString(pageContent, ":orange_circle: Unknown\n");
-        }
-        if(strcmp(compliance->valuestring, "Uncompliant") == 0){
-            pageContent = appendToString(pageContent, "\n# Compliance\n");
-            pageContent = appendToString(pageContent, ":red_circle: Uncompliant\n");
-        }
-    }
-
-
-    //CRITICALITY
-    if (cJSON_IsString(criticality) && criticality->valuestring && strcmp(criticality->valuestring, REQ_SHEET_EMPTY_VALUE) != 0) {
-
-        if(strcmp(criticality->valuestring, "Low") == 0){
-            pageContent = appendToString(pageContent, "\n# Criticality\n");
-            pageContent = appendToString(pageContent, ":green_circle: Low\n");
-        }
-        if(strcmp(criticality->valuestring, "Medium") == 0){
-            pageContent = appendToString(pageContent, "\n# Criticality\n");
-            pageContent = appendToString(pageContent, ":orange_circle: Medium\n");
-        }
-        if(strcmp(criticality->valuestring, "High") == 0){
-            pageContent = appendToString(pageContent, "\n# Criticality\n");
-            pageContent = appendToString(pageContent, ":red_circle: High\n");
-        }
-    }
-
-
-
-    //VERIFICAITON
-    int isVerification = 0;
-    int verificationCount = 0;
+    log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: Criticality finished");
 
     log_message(LOG_DEBUG, "Going to start filling in the verification section");
 
-    for(int reviewNumber = 1; reviewNumber <= MAXIMUM_NUMBER_OF_REVIEWS; reviewNumber++){
-        for (int verificationNumber = 1; verificationNumber <= MAXIMUM_NUMBER_OF_VERIFICATIONS_PER_REVIEW; verificationNumber++){
-
-            char JsonItemNameMethod[1024];
-            snprintf(JsonItemNameMethod, sizeof(JsonItemNameMethod), "Review %d Verification %d Method", reviewNumber, verificationNumber);
-
-            char JsonItemNameStatus[1024];
-            snprintf(JsonItemNameStatus, sizeof(JsonItemNameStatus), "Review %d Verification %d Status", reviewNumber, verificationNumber);
-
-            cJSON *verificationMethod = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameMethod);
-            cJSON *verificationStatus = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameStatus);
-
-            char *reviewName = REVIEW_1_NAME;
-
-            switch(reviewNumber) {
-                case 1: reviewName = REVIEW_1_NAME; break;
-                case 2: reviewName = REVIEW_2_NAME; break;
-                case 3: reviewName = REVIEW_3_NAME; break;
-                case 4: reviewName = REVIEW_4_NAME; break;
-                case 5: reviewName = REVIEW_5_NAME; break;
-                case 6: reviewName = REVIEW_6_NAME; break;
-            }
-
-
-            if(strcmp(verificationMethod->valuestring, REQ_SHEET_EMPTY_VALUE) != 0){
-
-                log_message(LOG_DEBUG, "Verification method found");
-
-                verificationCount++;
-
-                if(isVerification == 0){
-                    pageContent = appendToString(pageContent, "\n# Verification");
-                    isVerification = 1;
-                }
-
-                char temp_verificationNumber[100];
-                snprintf(temp_verificationNumber, sizeof(temp_verificationNumber), "\n## Verification %d\n", verificationCount);
-                pageContent = appendToString(pageContent, temp_verificationNumber);
-
-                pageContent = appendToString(pageContent, "**Method**: ");
-                pageContent = appendToString(pageContent, verificationMethod->valuestring);
-                pageContent = appendToString(pageContent, "\n**Deadline**: ");
-                pageContent = appendToString(pageContent, reviewName);
-                pageContent = appendToString(pageContent, "\n");
-
-                if(strcmp(verificationStatus->valuestring, REQ_SHEET_EMPTY_VALUE) != 0){
-                    pageContent = appendToString(pageContent, "**Status**: ");
-
-                    if(strcmp(verificationStatus->valuestring, "Completed") == 0){pageContent = appendToString(pageContent, ":green_circle:");}
-                    if(strcmp(verificationStatus->valuestring, "In progress") == 0){pageContent = appendToString(pageContent, ":orange_circle:");}
-                    if(strcmp(verificationStatus->valuestring, "Uncompleted") == 0){pageContent = appendToString(pageContent, ":red_circle:");}
-
-                    pageContent = appendToString(pageContent, verificationStatus->valuestring);
-                    pageContent = appendToString(pageContent, "\n");
-
-                }
-
-                log_message(LOG_DEBUG, "Page content: %s",  pageContent);
-
-            }
-
-        }
-    }
+    addVerificationInformationToPageContent(&pageContent, requirement);
 
     log_message(LOG_DEBUG, "Exiting function buildRequirementPageFromJSONRequirementList");
 
     return pageContent;
+}
+
+static void addVerificationInformationToPageContent(char** pageContent, const cJSON* requirement){
+    log_message(LOG_DEBUG, "Enter function addVerificationInformationToPageContent");
+
+    //VERIFICAITON
+    bool verificationTitleAdded = false;
+    int verificationCount = 0;
+    
+    for (int verificationNumber = 1; verificationNumber <= MAXIMUM_NUMBER_OF_VERIFICATIONS; verificationNumber++){
+
+        char JsonItemNameMethod[50];
+        snprintf(JsonItemNameMethod, sizeof(JsonItemNameMethod), "Verification Method %d", verificationNumber);
+
+        if(!cJSON_HasObjectItem(requirement, JsonItemNameMethod) || strcmp(cJSON_GetObjectItem(requirement, JsonItemNameMethod)->valuestring, "N/A") == 0 
+            || strcmp(cJSON_GetObjectItem(requirement, JsonItemNameMethod)->valuestring, "") == 0){
+            continue;
+        }
+
+        verificationCount++;
+        if(!verificationTitleAdded){
+            *pageContent = appendToString(*pageContent, "\n# Verification");
+            verificationTitleAdded = true;
+        }
+
+        (void)addVerificationSectionToPageContent(pageContent, VERIFICATION_METHOD_BLOCK_TEMPLATE, requirement, "Verification Method", verificationNumber, verificationCount);
+        (void)addVerificationSectionToPageContent(pageContent, VERIFICATION_DEADLINE_BLOCK_TEMPLATE, requirement, "Verification Deadline", verificationNumber, verificationCount);
+        (void)addVerificationSectionToPageContent(pageContent, VERIFICATION_STATUS_BLOCK_TEMPLATE, requirement, "Verification Status", verificationNumber, verificationCount);
+    }
+
+    log_message(LOG_DEBUG, "Exiting function addVerificationInformationToPageContent");
 }

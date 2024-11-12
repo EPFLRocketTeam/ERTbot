@@ -18,6 +18,7 @@ LOG_FILES=("debug.log" "error.log" "info.log")
 # Parse command-line arguments
 REBUILD=false
 RUN_TESTS=false
+RUN_TESTS_VALGRIND=false
 RUN_PROGRAM=false
 EXECUTION_OPTION_SPECIFIED=false
 
@@ -25,6 +26,7 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --rebuild) REBUILD=true ;;               # Flag to rebuild with CMake
         --run-tests) RUN_TESTS=true; EXECUTION_OPTION_SPECIFIED=true ;;  # Flag to run tests
+        --run-tests-valgrind) RUN_TESTS_VALGRIND=true; EXECUTION_OPTION_SPECIFIED=true ;;  # Flag to run tests
         --run-program) RUN_PROGRAM=true; EXECUTION_OPTION_SPECIFIED=true ;;  # Flag to run the main program
         *) echo "Unknown option: $1" ; exit 1 ;;
     esac
@@ -77,6 +79,12 @@ done
 if $RUN_TESTS; then
     echo "Running tests..."
     ./ERTbot_tests || { echo "Tests failed"; exit 1; }
+fi
+
+# Run tests if specified
+if $RUN_TESTS_VALGRIND; then
+    echo "Running tests..."
+    valgrind --leak-check=yes ./ERTbot_tests || { echo "Tests failed"; exit 1; }
 fi
 
 # Run the main program if specified

@@ -23,7 +23,6 @@ void initializeApiTokenVariables() {
     GITHUB_API_TOKEN = getenv("GITHUB_API_TOKEN");
     WIKI_API_TOKEN = getenv("WIKI_API_TOKEN");
     SLACK_API_TOKEN = getenv("SLACK_API_TOKEN");
-    SHEET_API_TOKEN = getenv("SHEET_API_TOKEN");
     GOOGLE_CLIENT_ID = getenv("GOOGLE_CLIENT_ID");
     GOOGLE_CLIENT_SECRET = getenv("GOOGLE_CLIENT_SECRET");
     GOOGLE_REFRESH_TOKEN = getenv("GOOGLE_REFRESH_TOKEN");
@@ -126,4 +125,22 @@ char *jsonParserGetIntValue(const char *json, char *key) {
 
     log_message(LOG_DEBUG, "Exiting function jsonParserGetIntValue");
     return valueStr;  // Return success
+}
+
+void freeChunkResponse(){
+    if(chunk.response){
+        free(chunk.response);
+
+        chunk.response = NULL;
+        chunk.size = 0;
+    }
+}
+
+void resetChunkResponse(){
+    if (chunk.response != NULL){
+        free(chunk.response);
+    }
+
+    chunk.response = malloc(1);
+    chunk.size = 0;
 }

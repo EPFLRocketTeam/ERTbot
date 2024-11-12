@@ -10,7 +10,7 @@
  * This function retrieves data from a specified range in a Google Sheets document, parses the data into a JSON requirements list, and updates the content of a DRL page with the formatted data. The DRL page is then updated and rendered with the new content.
  * 
  * @param cmd A command structure containing the following:
- * - `cmd.argument_1`: Not used in this function, but part of the `command` structure.
+ * - `cmd.argument`: Not used in this function, but part of the `command` structure.
  * 
  * @details
  * - Retrieves data from a Google Sheets document using `batchGetSheet` and parses the response into a JSON requirements list.
@@ -27,7 +27,7 @@ void syncDrlToSheet(command cmd);
  * This function retrieves data from a specified range in a Google Sheets document, parses the data into a JSON requirements list, and builds a requirement page with the formatted content. The content of the page is updated and rendered accordingly.
  * 
  * @param cmd A command structure containing the following:
- * - `cmd.argument_1`: The identifier for the requirement page to be created.
+ * - `cmd.argument`: The identifier for the requirement page to be created.
  * 
  * @details
  * - Retrieves data from a Google Sheets document using `batchGetSheet` and parses the response into a JSON requirements list with `parseArrayIntoJSONRequirementList`.

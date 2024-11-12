@@ -15,4 +15,4 @@ compile_commands.json
 .vscode
 
 #Ignore build and run scripts
-build_and_test.sh
+build_and_run.sh

@@ -29,8 +29,7 @@ void sheetAPI(char *query, char *url, char *requestType) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
 
-    chunk.response = malloc(1);  /* grown as needed by the realloc above */
-    chunk.size = 0;    /* no data at this point */
+    resetChunkResponse();
 
     if (curl) {
         // Set the URL for the request
@@ -67,44 +66,6 @@ void sheetAPI(char *query, char *url, char *requestType) {
     log_message(LOG_DEBUG, "Exiting function sheetAPI");
 }
 
-void batchUpdateSheet(const char *sheetId, const char *range, const char *values){
-    log_message(LOG_DEBUG, "Entering function batchUpdateSheet");
-
-    char *requestType = "POST";
-    char *temp_url = strdup(template_batch_update_url); // Make a copy to modify
-    char *modified_url = replaceWord(temp_url, "DefaultSheetID", sheetId);
-    char *temp_query = strdup(template_batch_update_query); // Make a copy to modify
-    char *modified_query = replaceWord(temp_query, "DefaultRange", range);
-    modified_query = replaceWord(modified_query, "DefaultValues", values);
-
-
-    sheetAPI(modified_query, modified_url, requestType);
-
-    free(modified_query);
-    free(modified_url);
-    free(temp_url);
-    free(temp_query);
-
-    log_message(LOG_DEBUG, "Exiting function batchUpdateSheet");
-}
-
-void batchGetSheet(const char *sheetId, const char *range){
-    log_message(LOG_DEBUG, "Entering function batchGetSheet");
-
-    char *requestType = "GET";
-    char *query = "";
-    char *temp_url = strdup(template_batch_get_url); // Make a copy to modify
-    char *modified_url = replaceWord(temp_url, "DefaultSheetID", sheetId);
-    modified_url = replaceWord(modified_url, "DefaultRange", range);
-
-    sheetAPI(query, modified_url, requestType);
-
-    free(temp_url);
-    free(modified_url);
-
-    log_message(LOG_DEBUG, "Exiting function batchGetSheet");
-}
-
 void refreshOAuthToken() {
     log_message(LOG_DEBUG, "Entering function refreshOAuthToken");
 
@@ -120,8 +81,7 @@ void refreshOAuthToken() {
     char postfields[1024];
     snprintf(postfields, sizeof(postfields), "client_id=%s&client_secret=%s&refresh_token=%s&grant_type=refresh_token", GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN);
 
-    chunk.response = malloc(1);  /* grown as needed by the realloc above */
-    chunk.size = 0;    /* no data at this point */
+    resetChunkResponse();
 
     curl_global_init(CURL_GLOBAL_ALL);
     curl = curl_easy_init();
@@ -148,19 +108,63 @@ void refreshOAuthToken() {
         // Check for errors
         if(res != CURLE_OK) {
             log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        } else {
+        } 
+        else {
             //Yes the key value has an extra : compared to when the same function is called in wikiAPI functions
             //see the note on the jsonParserGetStringValue function
+            if(SHEET_API_TOKEN!=NULL){
+                free(SHEET_API_TOKEN);
+                SHEET_API_TOKEN = NULL;
+            }
+
             SHEET_API_TOKEN = jsonParserGetStringValue(chunk.response, "\"access_token\":");
         }
 
         // Clean up
         curl_easy_cleanup(curl);
-        free(chunk.response);
+        freeChunkResponse();
     }
 
     curl_global_cleanup();
 
     log_message(LOG_DEBUG, "Exiting function refreshOAuthToken");
+    return;
+}
+
+void batchUpdateSheet(const char *sheetId, const char *range, const char *values){
+    log_message(LOG_DEBUG, "Entering function batchUpdateSheet");
+
+    char *requestType = "POST";
+    char *modified_url = duplicate_Malloc(template_batch_update_url); // Make a copy to modify
+    modified_url = replaceWord_Realloc(modified_url, "DefaultSheetID", sheetId);
+    char *modified_query = duplicate_Malloc(template_batch_update_query); // Make a copy to modify
+    modified_query = replaceWord_Realloc(modified_query, "DefaultRange", range);
+    modified_query = replaceWord_Realloc(modified_query, "DefaultValues", values);
+
+
+    sheetAPI(modified_query, modified_url, requestType);
+
+    free(modified_query);
+    free(modified_url);
+
+    log_message(LOG_DEBUG, "Exiting function batchUpdateSheet");
+}
+
+void batchGetSheet(const char *sheetId, const char *range){
+    log_message(LOG_DEBUG, "Entering function batchGetSheet");
+
+    refreshOAuthToken();
+
+    char *requestType = "GET";
+    char *query = "";
+    char *modified_url = duplicate_Malloc(template_batch_get_url); // Make a copy to modify
+    modified_url = replaceWord_Realloc(modified_url, "DefaultSheetID", sheetId);
+    modified_url = replaceWord_Realloc(modified_url, "DefaultRange", range);
+
+    sheetAPI(query, modified_url, requestType);
+
+    free(modified_url);
+
+    log_message(LOG_DEBUG, "Exiting function batchGetSheet");
     return;
 }

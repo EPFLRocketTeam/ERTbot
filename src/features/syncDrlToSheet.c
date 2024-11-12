@@ -9,20 +9,26 @@
 #include "pageListHelpers.h"
 
 
+#define DRL_TABSET_TITLE_TEMPLATE "\n\n\n## $ID$\n"
+#define DRL_ID_BLOCK_TEMPLATE "- [$ID$](/"
+#define DRL_PAGE_DIRECTORY "$Requirement Pages Directory$"
+#define DRL_PAGE_NAME "$ID$) **"
+#define DRL_TITLE_BLOCK_TEMPLATE "$Title$**\n"
+#define DRL_DESCRIPTION_BLOCK_TEMPLATE "$Description$\n"
 
 char *template_DRL = "# $SubSystem$ Design Requirements List\n# table {.tabset}";
 
 /**
  * @brief Builds a DRL (Design Requirements List) string from a JSON object containing requirements.
- * 
+ *
  * This function constructs a DRL string by iterating over a JSON array of requirement objects. Each requirement
  * object is expected to contain specific fields such as "ID", "Path", "Title", and "Description". The resulting
  * DRL string is built by appending formatted information from each requirement to a template DRL string.
- * 
+ *
  * @param requirementList A `cJSON` object containing an array of requirement objects under the "requirements" key.
- * 
+ *
  * @return A dynamically allocated string containing the formatted DRL. The caller is responsible for freeing this memory. If the input JSON is not properly formatted or if memory allocation fails, the function may return an incorrect or partially filled string.
- * 
+ *
  * @details
  * - The function first retrieves the "requirements" array from the `requirementList` object.
  * - It initializes the DRL string using a predefined template.
@@ -32,193 +38,102 @@ char *template_DRL = "# $SubSystem$ Design Requirements List\n# table {.tabset}"
  * - If any errors are encountered (e.g., missing "requirements" array or incorrect object format), appropriate error messages are printed.
  * - The function returns the final DRL string.
  */
-static char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem);
+static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const cJSON* subsystem);
 
 
 void syncDrlToSheet(command cmd){
     log_message(LOG_DEBUG, "Entering function syncDrlToSheet");
 
-    refreshOAuthToken();
+    cJSON* subsystem = getSubsystemInfo(cmd.argument);
+    cJSON *requirementList = getRequirements(subsystem);
 
-    char *sheetId;
-    char *drlPageId;
-
-    if(strcmp(cmd.argument_1, "ST")==0){
-        drlPageId = "420";
-        sheetId = "ST!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "PR")==0){
-        drlPageId = "414";
-        sheetId = "PR!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "FD")==0){
-        drlPageId = "416";
-        sheetId = "FD!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "RE")==0){
-        drlPageId = "419";
-        sheetId = "RE!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "GS")==0){
-        drlPageId = "417";
-        sheetId = "GS!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "AV")==0){
-        drlPageId = "421";
-        sheetId = "AV!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "TE")==0){
-        drlPageId = "1883";
-        sheetId = "TE!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "PL")==0){
-        drlPageId = "418";
-        sheetId = "PL!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "GE")==0){
-        drlPageId = "415";
-        sheetId = "GE!A3:AT300";
-    }
-    if(strcmp(cmd.argument_1, "UT")==0){
-        drlPageId = "1995";
-        sheetId = "UT!A3:AT300";
-    }
-    
-    batchGetSheet("1i_PTwIqLuG9IUI73UaGuOvx8rVTDV1zIS7gmXNjMs1I", sheetId);
-
-    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response); 
-    char *DRL = buildDrlFromJSONRequirementList(requirementList, cmd.argument_1);
+    char *DRL = buildDrlFromJSONRequirementList(requirementList, subsystem);
 
     pageList* drlPage = NULL;
-    drlPage = addPageToList(&drlPage, drlPageId, "", "", "", "", "", "", "");
-    drlPage->content = DRL;
+    const char *drlPageId = cJSON_GetObjectItem(subsystem, "DRL Page ID")->valuestring;
 
+    DRL = replaceWord_Realloc(DRL, "\r", "");
+    DRL = replaceWord_Realloc(DRL, "\t", "");
+    DRL = replaceWord_Realloc(DRL, "   ", "");
 
-    drlPage->content = replaceWord(drlPage->content, "\n", "\\\\n");
-    drlPage->content = replaceWord(drlPage->content, "\"", "\\\\\\\"");
+    drlPage = addPageToList(&drlPage, drlPageId, NULL, NULL, NULL, DRL, NULL);
 
     updatePageContentMutation(drlPage);
     renderMutation(&drlPage, false);
-
     freePageList(&drlPage);
+
     cJSON_Delete(requirementList);
+    cJSON_Delete(subsystem);
+
     free(DRL);
-    
     log_message(LOG_DEBUG, "Exiting function syncDrlToSheet");
     return;
 }
 
-static char *buildDrlFromJSONRequirementList(cJSON *requirementList, char* subSystem){
+static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const cJSON* subsystem){
     log_message(LOG_DEBUG, "Entering function buildDrlFromJSONRequirementList");
-    
+
     // Get the requirements array from the requirementList object
-    cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
+    const cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
+        char *DRL = duplicate_Malloc("There was an error when parsing the requirements, you might be missing a header value.");
+
+        return DRL;
     }
 
-    char *DRL = strdup(template_DRL);
+    char *DRL = duplicate_Malloc(template_DRL);
 
-    if(strcmp(subSystem, "GE") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "General");
-    }
-    if(strcmp(subSystem, "ST") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Structure");
-    }
-    if(strcmp(subSystem, "PR") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Propulsion");
-    }
-    if(strcmp(subSystem, "FD") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Flight Dynamics");
-    }
-    if(strcmp(subSystem, "RE") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Recovery");
-    }
-    if(strcmp(subSystem, "GS") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Ground Segment");
-    }
-    if(strcmp(subSystem, "AV") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Avionics");
-    }
-    if(strcmp(subSystem, "PL") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Payload");
-    }
-    if(strcmp(subSystem, "TE") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Test");
-    }
-    if(strcmp(subSystem, "UT") == 0){
-        DRL = replaceWord(DRL, "$SubSystem$", "Propulsion");
-        subSystem = "PR";
-    }
+    DRL = replaceWord_Realloc(DRL, "$SubSystem$", cJSON_GetObjectItem(subsystem, "Name")->valuestring);
 
     int isFirstGroup = 1;
 
     // Iterate over each requirement object in the requirements array
     int num_reqs = cJSON_GetArraySize(requirements);
     for (int i = 0; i < num_reqs; i++) {
-        cJSON *requirement = cJSON_GetArrayItem(requirements, i);
+        const cJSON *requirement = cJSON_GetArrayItem(requirements, i);
         if (!cJSON_IsObject(requirement)) {
             log_message(LOG_ERROR, "Error: requirement is not a JSON object");
             continue;
         }
-
-        // Get and print each item of the requirement object
-        cJSON *id = cJSON_GetObjectItemCaseSensitive(requirement, "ID");
-        cJSON *title = cJSON_GetObjectItemCaseSensitive(requirement, "Title");
-        cJSON *description = cJSON_GetObjectItemCaseSensitive(requirement, "Description");
-
-        if(strlen(id->valuestring) < 2){
+        
+        if(!cJSON_HasObjectItem(requirement, "ID") || !cJSON_IsString(cJSON_GetObjectItem(requirement, "ID"))||strlen(cJSON_GetObjectItem(requirement, "ID")->valuestring) < 2){
             log_message(LOG_DEBUG, "ID is smaller than one, breaking");
             break;
         }
-        
-        if(title == NULL || strstr(id->valuestring, "2024_") == NULL){
-            log_message(LOG_DEBUG, "Found a new group");
+
+        const cJSON *id = cJSON_GetObjectItem(requirement, "ID");
+
+        if(strstr(id->valuestring, "2024_") == NULL){
 
             if(!isFirstGroup){
                 DRL = appendToString(DRL, "{.links-list}");
-                isFirstGroup = 0;
             }
             else{isFirstGroup = 0;}
 
-            DRL = appendToString(DRL, "\n\n\n## ");
-            DRL = appendToString(DRL, id->valuestring);
-            DRL = appendToString(DRL, "\n");
+            (void)addSectionToPageContent(&DRL, DRL_TABSET_TITLE_TEMPLATE, requirement, "ID");
+
             continue;
         }
 
-        if (cJSON_IsString(id) && id->valuestring) {
-            log_message(LOG_DEBUG, "ID: %s", id->valuestring);
-            log_message(LOG_DEBUG, "title: %s", title->valuestring);
-            DRL = appendToString(DRL, "- [");
-            DRL = appendToString(DRL, id->valuestring);
-            DRL = appendToString(DRL, "](/");
-            DRL = appendToString(DRL, "competition/firehorn/systems_engineering/requirements/2024_C_SE_DRL/2024_C_SE_");
-            DRL = appendToString(DRL, subSystem);
-            DRL = appendToString(DRL, "_DRL/");
-            DRL = appendToString(DRL, id->valuestring);
-            DRL = appendToString(DRL, ") **");
-        }
-        
-        
-        
-        if (cJSON_IsString(title) && title->valuestring) {
-            log_message(LOG_DEBUG, "title: %s", title->valuestring);
-            DRL = appendToString(DRL, title->valuestring);
-            DRL = appendToString(DRL, "**\n");
-        }
-        if (cJSON_IsString(description) && description->valuestring) {
-            log_message(LOG_DEBUG, "Description: %s", description->valuestring);
-            DRL = appendToString(DRL, description->valuestring);
-            DRL = appendToString(DRL, "\n");
-        }
+        (void)addSectionToPageContent(&DRL, DRL_ID_BLOCK_TEMPLATE, requirement, "ID");
+        (void)addSectionToPageContent(&DRL, DRL_PAGE_DIRECTORY, subsystem, "Requirement Pages Directory");
+        (void)addSectionToPageContent(&DRL, DRL_PAGE_NAME, requirement, "ID");
+        int hasTitle = addSectionToPageContent(&DRL, DRL_TITLE_BLOCK_TEMPLATE, requirement, "Title");
+        int hasDescription = addSectionToPageContent(&DRL, DRL_DESCRIPTION_BLOCK_TEMPLATE, requirement, "Description");
 
+        if(!hasTitle || !hasDescription){
+            free(DRL);
+            DRL = duplicate_Malloc("You are missing an, id, description or title value.");
+            break;
+        }
     }
 
     DRL = appendToString(DRL, "{.links-list}");
-    
+    DRL = replaceWord_Realloc(DRL, "\n", "\\\\n");
+    DRL = replaceWord_Realloc(DRL, "\"", "\\\\\\\"");
+
     log_message(LOG_DEBUG, "Exiting function buildDrlFromJSONRequirementList");
 
     return DRL;
-
 }

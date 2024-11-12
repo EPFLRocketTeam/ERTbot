@@ -59,44 +59,42 @@ static char *buildVcdList(cJSON *requirementList, char* subSystem);
 void updateVcdPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateVcdPage");
 
-    refreshOAuthToken();
-
     char *sheetId;
     char *vcdPageId;
 
-    if(strcmp(cmd.argument_1, "ST")==0){
+    if(strcmp(cmd.argument, "ST")==0){
         vcdPageId = "1186";
         sheetId = "ST!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "PR")==0){
+    if(strcmp(cmd.argument, "PR")==0){
         vcdPageId = "1187";
         sheetId = "PR!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "FD")==0){
+    if(strcmp(cmd.argument, "FD")==0){
         vcdPageId = "1182";
         sheetId = "FD!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "RE")==0){
+    if(strcmp(cmd.argument, "RE")==0){
         vcdPageId = "1185";
         sheetId = "RE!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "GS")==0){
+    if(strcmp(cmd.argument, "GS")==0){
         vcdPageId = "1183";
         sheetId = "GS!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "AV")==0){
+    if(strcmp(cmd.argument, "AV")==0){
         vcdPageId = "1181";
         sheetId = "AV!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "TE")==0){
+    if(strcmp(cmd.argument, "TE")==0){
         vcdPageId =
         sheetId = "TE!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "PL")==0){
+    if(strcmp(cmd.argument, "PL")==0){
         vcdPageId = "1184";
         sheetId = "PL!A3:AT300";
     }
-    if(strcmp(cmd.argument_1, "GE")==0){
+    if(strcmp(cmd.argument, "GE")==0){
         vcdPageId = "1180";
         sheetId = "GE!A3:AT300";
     }
@@ -110,22 +108,23 @@ void updateVcdPage(command cmd){
     char *pieChart = createVcdPieChart(verificationStatusCount);
 
     char *VCD = pieChart;
-    char *listOfRequirements = buildVcdList(requirementList, cmd.argument_1);
+    char *listOfRequirements = buildVcdList(requirementList, cmd.argument);
     VCD = appendToString(VCD, listOfRequirements);
 
     free(listOfRequirements);
 
     pageList* vcdPage = NULL;
-    vcdPage = addPageToList(&vcdPage, vcdPageId, "", "", "", VCD, "", "", "");
+    vcdPage = addPageToList(&vcdPage, vcdPageId, NULL, NULL, NULL, VCD, NULL);
 
-    vcdPage->content = replaceWord(vcdPage->content, "\n", "\\\\n");
-    vcdPage->content = replaceWord(vcdPage->content, "\"", "\\\\\\\"");
+    vcdPage->content = replaceWord_Realloc(vcdPage->content, "\n", "\\\\n");
+    vcdPage->content = replaceWord_Realloc(vcdPage->content, "\"", "\\\\\\\"");
 
     updatePageContentMutation(vcdPage);
     renderMutation(&vcdPage, false);
+    freePageList(&vcdPage);
 
     cJSON_Delete(requirementList);
-    freePageList(&vcdPage);
+
 
     free(VCD);
 
@@ -538,9 +537,9 @@ static char *createVcdPieChart(const int* verificationStatusCount){
     char verifiedPopulation[10];
     sprintf(verifiedPopulation, "%d", verificationStatusCount[2]);
 
-    pieChart = replaceWord(pieChart, "DefaultUnverifiedPopulation", unverifiedPopulation);
-    pieChart = replaceWord(pieChart, "DefaultPartiallyVerifiedPopulation", partiallyVerifiedPopulation);
-    pieChart = replaceWord(pieChart, "DefaultVerifiedPopulation", verifiedPopulation);
+    pieChart = replaceWord_Malloc(pieChart, "DefaultUnverifiedPopulation", unverifiedPopulation);
+    pieChart = replaceWord_Realloc(pieChart, "DefaultPartiallyVerifiedPopulation", partiallyVerifiedPopulation);
+    pieChart = replaceWord_Realloc(pieChart, "DefaultVerifiedPopulation", verifiedPopulation);
 
     log_message(LOG_DEBUG, "Exiting function createVcdPieChart");
 

@@ -12,4 +12,6 @@ Suite *createMissingRequirementPages_suite(void);
 Suite *updateRequirementPages_suite(void);
 
 Suite *wikiAPI_suite(void);
+
+Suite *requirementHelpers_suite(void);
 #endif
