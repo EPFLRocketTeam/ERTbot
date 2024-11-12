@@ -17,46 +17,45 @@ char* replaceWord_Malloc(const char* inputString, const char* wordToReplace, con
     if (!inputString || !wordToReplace || !newWord) return NULL;
 
     char* result;
-    int i;
     int cnt = 0;
     size_t newWordLength = strlen(newWord);
     size_t wordToReplaceLength = strlen(wordToReplace);
 
-    // Counting the number of times old word
-    // occur in the string
-    for (i = 0; inputString[i] != '\0'; i++) {
-        if (strstr(&inputString[i], wordToReplace) == &inputString[i]) {
-            cnt++;
-
-            // Jumping to index after the old word.
-            i += wordToReplaceLength - 1;
-      }
+    // Count occurrences of the word to replace in the input string
+    const char *ptr = inputString;
+    while ((ptr = strstr(ptr, wordToReplace)) != NULL) {
+        cnt++;
+        ptr += wordToReplaceLength;
     }
 
-    size_t len = i + cnt * (newWordLength - wordToReplaceLength) + 1;
+    // Calculate the required length for the result string
+    size_t len = strlen(inputString) + cnt * (newWordLength - wordToReplaceLength) + 1;
 
-    // Making new string of enough length
+    // Allocate memory for the result string
     result = (char*)malloc(len);
-    if (!result) return NULL;  // Check malloc success
+    if (!result) return NULL;
 
-    i = 0;
+    size_t i = 0;  
+
+    // Copy and replace occurrences of the word
     while (*inputString) {
-        // compare the substring with the result
-        if (strstr(inputString, wordToReplace) == inputString) {
-            strlcpy(&result[i], newWord, len);
+        const char *match = strstr(inputString, wordToReplace);
+        if (match == inputString) {
+            size_t remaining_len = len - i;
+            strlcpy(&result[i], newWord, remaining_len);  
             i += newWordLength;
             inputString += wordToReplaceLength;
-        }
-        else{
+        } else {
             result[i++] = *inputString++;
         }
     }
 
-  result[i] = '\0';
+    result[i] = '\0'; 
 
-  log_message(LOG_DEBUG, "Exiting function replaceWord_Malloc");
-  return result;
+    log_message(LOG_DEBUG, "Exiting function replaceWord_Malloc");
+    return result;
 }
+
 
 char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const char* newWord) {
     log_message(LOG_DEBUG, "Entering function replaceWord_Realloc");
