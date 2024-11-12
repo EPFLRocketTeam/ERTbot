@@ -21,6 +21,11 @@
 #define CRITICALITY_BLOCK_TEMPLATE "\n# Criticality\n$Criticality$\n"
 #define FIRST_VERIFICATION_METHOD_BLOCK_TEMPLATE "\n# Verification\n##Verification 1\n**Method**: "
 
+#define VERIFICATION_METHOD_BLOCK_TEMPLATE "\n## Verification $Verification Number$\n**Method**: $Verification Method$"
+#define VERIFICATION_DEADLINE_BLOCK_TEMPLATE "\n**Deadline**: $Verification Deadline$"
+#define VERIFICATION_STATUS_BLOCK_TEMPLATE "\n**Status**: $Verification Status$\n"
+
+
 /**
  * @brief Builds a `pageList` entry from a JSON object containing requirements for a specific requirement ID.
  *        Each page's content is a requirement page.
@@ -206,9 +211,8 @@ static char* buildRequirementPageFromJSONRequirementList(const cJSON *requiremen
 static void addVerificationInformationToPageContent(char** pageContent, const cJSON* requirement){
     log_message(LOG_DEBUG, "Enter function addVerificationInformationToPageContent");
 
-
     //VERIFICAITON
-    bool verificationTitleAdded = 0;
+    bool verificationTitleAdded = false;
     int verificationCount = 0;
     
     for (int verificationNumber = 1; verificationNumber <= MAXIMUM_NUMBER_OF_VERIFICATIONS; verificationNumber++){
@@ -216,12 +220,8 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
         char JsonItemNameMethod[50];
         snprintf(JsonItemNameMethod, sizeof(JsonItemNameMethod), "Verification Method %d", verificationNumber);
 
-        if(!cJSON_HasObjectItem(requirement, JsonItemNameMethod)){
-            continue;
-        }
-
-        const cJSON *verificationMethod = cJSON_GetObjectItem(requirement, JsonItemNameMethod);
-        if(strcmp(verificationMethod->valuestring, "N/A") == 0 || strcmp(verificationMethod->valuestring, "") == 0){
+        if(!cJSON_HasObjectItem(requirement, JsonItemNameMethod) || strcmp(cJSON_GetObjectItem(requirement, JsonItemNameMethod)->valuestring, "N/A") == 0 
+            || strcmp(cJSON_GetObjectItem(requirement, JsonItemNameMethod)->valuestring, "") == 0){
             continue;
         }
 
@@ -231,43 +231,9 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
             verificationTitleAdded = true;
         }
 
-        char temp_verificationNumber[100];
-        snprintf(temp_verificationNumber, sizeof(temp_verificationNumber), "\n## Verification %d\n", verificationCount);
-        *pageContent = appendToString(*pageContent, temp_verificationNumber);
-        *pageContent = appendToString(*pageContent, "**Method**: ");
-        *pageContent = appendToString(*pageContent, verificationMethod->valuestring);
-
-
-        char JsonItemNameDeadline[1024];
-        snprintf(JsonItemNameDeadline, sizeof(JsonItemNameDeadline), "Verification Deadline %d", verificationNumber);
-
-        if(cJSON_HasObjectItem(requirement, JsonItemNameDeadline)){
-            const cJSON *verificationDeadline = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameDeadline);
-
-            if(strcmp(verificationDeadline->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 && strcmp(verificationDeadline->valuestring, "") != 0){
-                *pageContent = appendToString(*pageContent, "\n**Deadline**: ");
-                *pageContent = appendToString(*pageContent, verificationDeadline->valuestring);
-            }
-        }
-        
-        char JsonItemNameStatus[1024];
-        snprintf(JsonItemNameStatus, sizeof(JsonItemNameStatus), "Verification Status %d", verificationNumber);
-
-        if(cJSON_HasObjectItem(requirement, JsonItemNameStatus)){
-            const cJSON *verificationStatus = cJSON_GetObjectItemCaseSensitive(requirement, JsonItemNameStatus);
-        
-            if(strcmp(verificationStatus->valuestring, REQ_SHEET_EMPTY_VALUE) != 0 && strcmp(verificationStatus->valuestring, "") != 0){
-                *pageContent = appendToString(*pageContent, "\n**Status**: ");
-
-                if(strcmp(verificationStatus->valuestring, "Completed") == 0){*pageContent = appendToString(*pageContent, ":green_circle:");}
-                if(strcmp(verificationStatus->valuestring, "In progress") == 0){*pageContent = appendToString(*pageContent, ":orange_circle:");}
-                if(strcmp(verificationStatus->valuestring, "Uncompleted") == 0){*pageContent = appendToString(*pageContent, ":red_circle:");}
-
-                *pageContent = appendToString(*pageContent, verificationStatus->valuestring);
-                *pageContent = appendToString(*pageContent, "\n");
-
-            }
-        }
+        (void)addVerificationSectionToPageContent(pageContent, VERIFICATION_METHOD_BLOCK_TEMPLATE, requirement, "Verification Method", verificationNumber, verificationCount);
+        (void)addVerificationSectionToPageContent(pageContent, VERIFICATION_DEADLINE_BLOCK_TEMPLATE, requirement, "Verification Deadline", verificationNumber, verificationCount);
+        (void)addVerificationSectionToPageContent(pageContent, VERIFICATION_STATUS_BLOCK_TEMPLATE, requirement, "Verification Status", verificationNumber, verificationCount);
     }
 
     log_message(LOG_DEBUG, "Exiting function addVerificationInformationToPageContent");

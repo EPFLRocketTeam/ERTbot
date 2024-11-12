@@ -1,10 +1,12 @@
 #include <string.h>
+#include <stdio.h>
 #include <cjson/cJSON.h>
 #include "ERTbot_config.h"
 #include "ERTbot_common.h"
 #include "sheetAPI.h"
 #include "apiHelpers.h"
 #include "stringHelpers.h"
+#include "requirementsHelpers.h"
 
 static cJSON* parseSheet(const cJSON* values_array);
 
@@ -183,4 +185,69 @@ int addSectionToPageContent(char** pageContent, const char* template, const cJSO
 
     log_message(LOG_DEBUG, "Exiting function addSectionToPageContent");
     return 1;
+}
+
+int addVerificationSectionToPageContent(char** pageContent, const char* template, const cJSON* object, const char* itemName, const int verificationNumber, const int verificationCount){
+    log_message(LOG_DEBUG, "Entering function addVerificationSectionToPageContent");
+
+    char item[1024];
+    snprintf(item, sizeof(item), "%s %d", itemName, verificationNumber);
+
+    if(!cJSON_HasObjectItem(object, item)){
+        log_message(LOG_DEBUG, "addVerificationSectionToPageContent: characteristic does not exist");
+        return 0;
+    }
+
+    const cJSON* jsonCharacteristic = cJSON_GetObjectItem(object, item);
+
+    if(!cJSON_IsString(jsonCharacteristic) || strcmp(jsonCharacteristic->valuestring, "") == 0 || strcmp(jsonCharacteristic->valuestring, "N/A") == 0 || strcmp(jsonCharacteristic->valuestring, "TBD")==0){
+        log_message(LOG_DEBUG, "addVerificationSectionToPageContent: Characteristic has no value");
+        return 0;
+    }
+    
+    char *newSection = duplicate_Malloc(template);
+    char *wordToReplace = addDollarSigns(itemName);
+
+    char* statusWithEmoji = addStatusEmoji(jsonCharacteristic->valuestring);
+
+    if(statusWithEmoji){
+        newSection = replaceWord_Realloc(newSection, wordToReplace, statusWithEmoji);
+        free(statusWithEmoji);
+    }
+    else{
+        newSection = replaceWord_Realloc(newSection, wordToReplace, jsonCharacteristic->valuestring);
+    }
+
+    char verificationCountAsString[12];
+    snprintf(verificationCountAsString, sizeof(verificationCountAsString), "%d", verificationCount);
+
+    newSection = replaceWord_Realloc(newSection, "$Verification Number$", verificationCountAsString);
+
+    *pageContent = appendToString(*pageContent, newSection);
+
+    free(wordToReplace);
+    free(newSection);
+
+    log_message(LOG_DEBUG, "Exiting function addVerificationSectionToPageContent");
+    return 1;
+}
+
+char* addStatusEmoji(const char* status){
+
+    char* statusWithEmoji = NULL;
+    
+    if(strcmp(status, "Completed") == 0){
+        statusWithEmoji = duplicate_Malloc(":green_circle:");
+        statusWithEmoji = appendToString(statusWithEmoji, status);
+    }
+    if(strcmp(status, "In progress") == 0){
+        statusWithEmoji = duplicate_Malloc(":orange_circle:");
+        statusWithEmoji = appendToString(statusWithEmoji, status);
+    }
+    if(strcmp(status, "Uncompleted") == 0){
+        statusWithEmoji = duplicate_Malloc(":red_circle:");
+        statusWithEmoji = appendToString(statusWithEmoji, status);
+    }
+
+    return statusWithEmoji;
 }

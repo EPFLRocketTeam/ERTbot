@@ -29,4 +29,8 @@ cJSON* getRequirements(const cJSON* subsystem);
 char* addDollarSigns(const char* characteristic);
 
 int addSectionToPageContent(char** pageContent, const char* template, const cJSON* object, const char* item);
+
+char* addStatusEmoji(const char* status);
+
+int addVerificationSectionToPageContent(char** pageContent, const char* template, const cJSON* object, const char* itemName, const int verificationNumber, const int verificationCount);
 #endif
