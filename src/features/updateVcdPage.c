@@ -1,3 +1,4 @@
+#include <float.h>
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
@@ -13,7 +14,7 @@
 #define VCD_TITLE_TEMPLATE "# Verification Statuses per Deadline\n"
 #define DEADLINE_SUBSECTION_TITLE_TEMPLATE "\n## $Deadline Name$"
 #define STATUS_SUBSUBSECTION_TITLE_TEMPLATE "\n### $Status Name$"
-#define METHOD_SUBSUBSUBSECTION_TITLE_TEMPLATE "\n#### $Method Name$"
+#define METHOD_SUBSUBSUBSECTION_TITLE_TEMPLATE "\n#### $Method Name$\n"
 
 #define VCD_TABSET_TITLE_TEMPLATE "\n\n\n## $ID$\n"
 #define VCD_ID_BLOCK_TEMPLATE "- [$ID$](/"
@@ -26,17 +27,17 @@ static cJSON* parseVerificationInformation(cJSON* requirements);
 
 static char* buildVCD(cJSON* verificationInformation, cJSON* requirements, cJSON* subsystem);
 
-static int parseDeadlineBlock(cJSON* verificationInformation, char* pageContent, char* deadlineItemName, cJSON* requirements, cJSON* subsystem);
+static int parseDeadlineBlock(cJSON* verificationInformation, char** pageContent, char* deadlineItemName, cJSON* requirements, cJSON* subsystem);
 
-static int parseStatusBlock(char* pageContent, cJSON* deadlineObject, char* statusName, cJSON* requirements, cJSON* subsystem);
+static int parseStatusBlock(char** pageContent, cJSON* deadlineObject, char* statusName, cJSON* requirements, cJSON* subsystem);
 
-static int parseMethodBlock(char* pageContent, cJSON* statusObject, char* methodName, cJSON* requirements, cJSON* subsystem);
+static int parseMethodBlock(char** pageContent, cJSON* statusObject, char* methodName, cJSON* requirements, cJSON* subsystem);
 
-static int parseRequirementBlock(char* pageContent, cJSON* requirement, cJSON* subsystem);
+static int parseRequirementBlock(char** pageContent, cJSON* requirement, cJSON* subsystem);
 
 static int getStatusCount(const cJSON* deadlineObject, const char* statusName);
 
-static int appendVcdPieChart(char* pageContent, const cJSON* deadlineObject);
+static int appendVcdPieChart(char** pageContent, const cJSON* deadlineObject);
 
 static cJSON* getDeadlineObject(cJSON* verificationInformation, char* deadlineName);
 
@@ -44,7 +45,7 @@ static cJSON* addDeadlineObject(cJSON* verificationInformation, char* deadlineNa
 
 static cJSON* getMethodArray(cJSON* statusObject, char* methodName);
 
-static cJSON* getStatusArray(cJSON* deadlineObject, char* statusName);
+static cJSON* getStatusObject(cJSON* deadlineObject, char* statusName);
 
 static bool verificationMethodAlreadyExists(const cJSON* deadlineObject, const char* verificationMethod);
 
@@ -52,6 +53,11 @@ static bool verificationDeadlineEmpty(const cJSON* requirement, const char* Json
 
 static cJSON* parseVerificationInformation(cJSON* requirements);
 
+static void logCjsonObject(char* prependText, cJSON* object){
+    char* parsedObject = cJSON_Print(object);
+    log_message(LOG_DEBUG, "%s %s", prependText, parsedObject);
+    free(parsedObject);
+}
 
 void updateVcdPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateVcdPage");
@@ -65,7 +71,12 @@ void updateVcdPage(command cmd){
 
     char* pageContent = buildVCD(verificationInformation, requirements, subsystem);
 
+    log_message(LOG_DEBUG, "pageContent after buildVCD:\n%s\n", pageContent);
+
     pageList* vcdPage = NULL;
+
+    log_message(LOG_DEBUG, "vcdPageId%s", vcdPageId);
+
     vcdPage = addPageToList(&vcdPage, vcdPageId, NULL, NULL, NULL, pageContent, NULL);
 
     vcdPage->content = replaceWord_Realloc(vcdPage->content, "\n", "\\\\n");
@@ -81,6 +92,7 @@ void updateVcdPage(command cmd){
 }
 
 static char* buildVCD(cJSON* verificationInformation, cJSON* requirements, cJSON* subsystem){
+    log_message(LOG_DEBUG, "Entering function buildVCD");
 
     int amountOfDifferentDeadlines = cJSON_GetArraySize(verificationInformation);
     char* pageContent = duplicate_Malloc(VCD_TITLE_TEMPLATE);
@@ -90,90 +102,143 @@ static char* buildVCD(cJSON* verificationInformation, cJSON* requirements, cJSON
         char deadlineItemName[50];
         snprintf(deadlineItemName, sizeof(deadlineItemName), "Deadline %d", i);
 
-        (void)parseDeadlineBlock(verificationInformation, pageContent, deadlineItemName, requirements, subsystem);
+        (void)parseDeadlineBlock(verificationInformation, &pageContent, deadlineItemName, requirements, subsystem);
     }
 
+    log_message(LOG_DEBUG, "Exiting function buildVCD");
     return pageContent;
 }
 
-static int parseDeadlineBlock(cJSON* verificationInformation, char* pageContent, char* deadlineItemName, cJSON* requirements, cJSON* subsystem){
+static int parseDeadlineBlock(cJSON* verificationInformation, char** pageContent, char* deadlineItemName, cJSON* requirements, cJSON* subsystem){
+    log_message(LOG_DEBUG, "Entering function parseDeadlineBlock");
     if(!cJSON_HasObjectItem(verificationInformation, deadlineItemName)){
         return 0;
     }
 
     cJSON* deadlineObject = cJSON_GetObjectItem(verificationInformation, deadlineItemName);
-    (void)addSectionToPageContent(&pageContent, DEADLINE_SUBSECTION_TITLE_TEMPLATE, deadlineObject, "Deadline Name");
+    (void)addSectionToPageContent(pageContent, DEADLINE_SUBSECTION_TITLE_TEMPLATE, deadlineObject, "Deadline Name");
+
     (void)appendVcdPieChart(pageContent, deadlineObject);
+
     (void)parseStatusBlock(pageContent, deadlineObject, "uncompleted", requirements, subsystem);
+
     (void)parseStatusBlock(pageContent, deadlineObject, "in progress", requirements, subsystem);
+
     (void)parseStatusBlock(pageContent, deadlineObject, "completed", requirements, subsystem);
 
+    log_message(LOG_DEBUG, "Exiting function parseDeadlineBlock");
     return 1;
 }
 
-static int parseStatusBlock(char* pageContent, cJSON* deadlineObject, char* statusName, cJSON* requirements, cJSON* subsystem){
+static int parseStatusBlock(char** pageContent, cJSON* deadlineObject, char* statusName, cJSON* requirements, cJSON* subsystem){
+    log_message(LOG_DEBUG, "Entering function parseStatusBlock");
+
     if(!cJSON_HasObjectItem(deadlineObject, statusName)){
         return 0;
     }
 
     cJSON* statusObject = cJSON_GetObjectItem(deadlineObject, statusName);
-    pageContent = appendToString(pageContent, STATUS_SUBSUBSECTION_TITLE_TEMPLATE);
-    pageContent = replaceWord_Realloc(pageContent, "$Status Name$", statusName);
+    *pageContent = appendToString(*pageContent, STATUS_SUBSUBSECTION_TITLE_TEMPLATE);
+
+    *pageContent = replaceWord_Realloc(*pageContent, "$Status Name$", statusName);
+
     (void)parseMethodBlock(pageContent, statusObject, "Test", requirements, subsystem);
+
     (void)parseMethodBlock(pageContent, statusObject, "Review Of Design", requirements, subsystem);
+
     (void)parseMethodBlock(pageContent, statusObject, "Inspection", requirements, subsystem);
+
     (void)parseMethodBlock(pageContent, statusObject, "Analysis", requirements, subsystem);
 
+
+    log_message(LOG_DEBUG, "Exiting function parseStatusBlock");
     return 1;
 }
 
-static int parseMethodBlock(char* pageContent, cJSON* statusObject, char* methodName, cJSON* requirements, cJSON* subsystem){
+static int parseMethodBlock(char** pageContent, cJSON* statusObject, char* methodName, cJSON* requirements, cJSON* subsystem){
+    log_message(LOG_DEBUG, "Entering function parseMethodBlock");
+
     if(!cJSON_HasObjectItem(statusObject, methodName)){
         return 0;
     }
 
     cJSON* methodArray = cJSON_GetObjectItem(statusObject, methodName);
-    pageContent = appendToString(pageContent, STATUS_SUBSUBSECTION_TITLE_TEMPLATE);
-    pageContent = replaceWord_Realloc(pageContent, "$Method Name$", methodName);
+    *pageContent = appendToString(*pageContent, METHOD_SUBSUBSUBSECTION_TITLE_TEMPLATE);
+    *pageContent = replaceWord_Realloc(*pageContent, "$Method Name$", methodName);
 
     int methodArraySize = cJSON_GetArraySize(methodArray);
+    log_message(LOG_DEBUG, "methodArraySize: %d", methodArraySize);
+
     int requirementsArraySize = cJSON_GetArraySize(requirements);
+    log_message(LOG_DEBUG, "requirementsArraySize: %d", requirementsArraySize);
 
 
     for(int j = 0; j < methodArraySize; j++){
         char* requirementId = cJSON_GetArrayItem(methodArray, j)->valuestring;
+        log_message(LOG_DEBUG, "Looking for requirment ID %s", requirementId);
+
         for(int k = 0; k < requirementsArraySize; k++){
-            cJSON* requirement = cJSON_GetArrayItem(requirements, j);
+            cJSON* requirement = cJSON_GetArrayItem(requirements, k);
 
             if(cJSON_HasObjectItem(requirement, "ID")
                 && cJSON_IsString(cJSON_GetObjectItem(requirement, "ID"))
                 && strcmp(cJSON_GetObjectItem(requirement, "ID")->valuestring, requirementId) == 0){
 
+                    log_message(LOG_DEBUG, "Found Requirement!", requirementId);
                 (void)parseRequirementBlock(pageContent, requirement, subsystem);
             }
         }
     }
 
-    pageContent = appendToString(pageContent, "{.links-list}");
+    *pageContent = appendToString(*pageContent, "{.links-list}");
 
+    log_message(LOG_DEBUG, "Exiting function parseMethodBlock");
     return 1;
 }
 
-static int parseRequirementBlock(char* pageContent, cJSON* requirement, cJSON* subsystem){
-    (void)addSectionToPageContent(&pageContent, VCD_ID_BLOCK_TEMPLATE, requirement, "ID");
-    (void)addSectionToPageContent(&pageContent, VCD_PAGE_DIRECTORY, subsystem, "Requirement Pages Directory");
-    (void)addSectionToPageContent(&pageContent, VCD_PAGE_NAME, requirement, "ID");
-    int hasTitle = addSectionToPageContent(&pageContent, VCD_TITLE_BLOCK_TEMPLATE, requirement, "Title");
+static int parseRequirementBlock(char** pageContent, cJSON* requirement, cJSON* subsystem){
+    log_message(LOG_DEBUG, "Entering function parseRequirementBlock");
+    (void)addSectionToPageContent(pageContent, VCD_ID_BLOCK_TEMPLATE, requirement, "ID");
+    (void)addSectionToPageContent(pageContent, VCD_PAGE_DIRECTORY, subsystem, "Requirement Pages Directory");
+    (void)addSectionToPageContent(pageContent, VCD_PAGE_NAME, requirement, "ID");
+    int hasTitle = addSectionToPageContent(pageContent, VCD_TITLE_BLOCK_TEMPLATE, requirement, "Title");
 
+    log_message(LOG_DEBUG, "Exiting function parseRequirementBlock");
     return hasTitle;
 }
 
 static int getStatusCount(const cJSON* deadlineObject, const char* statusName){
+    log_message(LOG_DEBUG, "Entering function getStatusCount");
+
     const cJSON* statusObject = cJSON_GetObjectItem(deadlineObject, statusName);
-    return cJSON_GetArraySize(statusObject);
+
+    int count = 0;
+
+    if(cJSON_HasObjectItem(statusObject, "Test")
+        && cJSON_IsArray(cJSON_GetObjectItem(statusObject, "Test"))){
+        count = count + cJSON_GetArraySize(cJSON_GetObjectItem(statusObject, "Test"));
+    }
+
+    if(cJSON_HasObjectItem(statusObject, "Inspection")
+        && cJSON_IsArray(cJSON_GetObjectItem(statusObject, "Inspection"))){
+        count = count + cJSON_GetArraySize(cJSON_GetObjectItem(statusObject, "Inspection"));
+    }
+
+    if(cJSON_HasObjectItem(statusObject, "Review Of Design")
+        && cJSON_IsArray(cJSON_GetObjectItem(statusObject, "Review Of Design"))){
+        count = count + cJSON_GetArraySize(cJSON_GetObjectItem(statusObject, "Review Of Design"));
+    }
+
+    if(cJSON_HasObjectItem(statusObject, "Analysis")
+        && cJSON_IsArray(cJSON_GetObjectItem(statusObject, "Analysis"))){
+        count = count + cJSON_GetArraySize(cJSON_GetObjectItem(statusObject, "Analysis"));
+    }
+
+    log_message(LOG_DEBUG, "Exiting function getStatusCount");
+    return count;
 }
 
-static int appendVcdPieChart(char* pageContent, const cJSON* deadlineObject){
+static int appendVcdPieChart(char** pageContent, const cJSON* deadlineObject){
     log_message(LOG_DEBUG, "Entering function createVcdPieChart");
 
     char *pieChart = "\n```kroki\nvega\n\n{\n  \"$schema\": \"https://vega.github.io/schema/vega/v5.0.json\",\n  \"width\": 350,\n  \"height\": 350,\n  \"autosize\": \"pad\",\n  \"signals\": [\n    {\"name\": \"startAngle\", \"value\": 0},\n    {\"name\": \"endAngle\", \"value\": 6.29},\n    {\"name\": \"padAngle\", \"value\": 0},\n    {\"name\": \"sort\", \"value\": true},\n    {\"name\": \"strokeWidth\", \"value\": 2},\n    {\n      \"name\": \"selected\",\n      \"value\": \"\",\n      \"on\": [{\"events\": \"mouseover\", \"update\": \"datum\"}]\n    }\n  ],\n  \"data\": [\n    {\n      \"name\": \"table\",\n      \"values\": [\n        {\"continent\": \"Unverified\", \"population\": DefaultUnverifiedPopulation},\n        {\"continent\": \"Partially Verified\", \"population\": DefaultPartiallyVerifiedPopulation},\n        {\"continent\": \"Verified\", \"population\": DefaultVerifiedPopulation}\n      ],\n      \"transform\": [\n        {\n          \"type\": \"pie\",\n          \"field\": \"population\",\n          \"startAngle\": {\"signal\": \"startAngle\"},\n          \"endAngle\": {\"signal\": \"endAngle\"},\n          \"sort\": {\"signal\": \"sort\"}\n        }\n      ]\n    },\n    {\n      \"name\": \"fieldSum\",\n      \"source\": \"table\",\n      \"transform\": [\n        {\n          \"type\": \"aggregate\",\n          \"fields\": [\"population\"],\n          \"ops\": [\"sum\"],\n          \"as\": [\"sum\"]\n        }\n      ]\n    }\n  ],\n  \"legends\": [\n    {\n      \"fill\": \"color\",\n      \"title\": \"Legends\",\n      \"orient\": \"none\",\n      \"padding\": {\"value\": 10},\n      \"encode\": {\n        \"symbols\": {\"enter\": {\"fillOpacity\": {\"value\": 1}}},\n        \"legend\": {\n          \"update\": {\n            \"x\": {\n              \"signal\": \"(width / 2) + if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.1 * 0.8, if(width >= height, height, width) / 2 * 0.8)\",\n              \"offset\": 20\n            },\n            \"y\": {\"signal\": \"(height / 2)\", \"offset\": -50}\n          }\n        }\n      }\n    }\n  ],\n  \"scales\": [\n    {\"name\": \"color\", \"type\": \"ordinal\", \"range\": [\"#cf2608\", \"#ff9900\", \"#67b505\"]}\n  ],\n  \"marks\": [\n    {\n      \"type\": \"arc\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"fill\": {\"scale\": \"color\", \"field\": \"continent\"},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"}\n        },\n        \"update\": {\n          \"startAngle\": {\"field\": \"startAngle\"},\n          \"endAngle\": {\"field\": \"endAngle\"},\n          \"cornerRadius\": {\"value\": 15},\n          \"padAngle\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.015, 0.015)\"\n          },\n          \"innerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 0.45, if(width >= height, height, width) / 2 * 0.5)\"\n          },\n          \"outerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.8, if(width >= height, height, width) / 2 * 0.8)\"\n          },\n          \"opacity\": {\n            \"signal\": \"if(selected && selected.continent !== datum.continent, 1, 1)\"\n          },\n          \"stroke\": {\"signal\": \"scale('color', datum.continent)\"},\n          \"strokeWidth\": {\"signal\": \"strokeWidth\"},\n          \"fillOpacity\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.8, 0.8)\"\n          }\n        }\n      }\n    },\n    {\n      \"type\": \"text\",\n      \"encode\": {\n        \"enter\": {\"fill\": {\"value\": \"#525252\"}, \"text\": {\"value\": \"\"}},\n        \"update\": {\n          \"opacity\": {\"value\": 1},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"},\n          \"fontSize\": {\"signal\": \"if(width >= height, height, width) * 0.05\"},\n          \"text\": {\"value\": \"Verification Status\"}\n        }\n      }\n    },\n    {\n      \"name\": \"mark_population\",\n      \"type\": \"text\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"text\": {\n            \"signal\": \"if(datum['endAngle'] - datum['startAngle'] < 0.3, '', format(datum['population'] / 1, '.0f'))\"\n          },\n          \"x\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"y\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"radius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.65, if(width >= height, height, width) / 2 * 0.65)\"\n          },\n          \"theta\": {\"signal\": \"(datum['startAngle'] + datum['endAngle'])/2\"},\n          \"fill\": {\"value\": \"#FFFFFF\"},\n          \"fontSize\": {\"value\": 12},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"}\n        }\n      }\n    }\n  ]\n}\n\n```\n## {.tabset}\n";
@@ -187,10 +252,10 @@ static int appendVcdPieChart(char* pageContent, const cJSON* deadlineObject){
     char verifiedPopulation[10];
     sprintf(verifiedPopulation, "%d", getStatusCount(deadlineObject, "completed"));
 
-    pageContent = appendToString(pageContent, pieChart);
-    pageContent = replaceWord_Realloc(pageContent, "DefaultUnverifiedPopulation", unverifiedPopulation);
-    pageContent = replaceWord_Realloc(pageContent, "DefaultPartiallyVerifiedPopulation", partiallyVerifiedPopulation);
-    pageContent = replaceWord_Realloc(pageContent, "DefaultVerifiedPopulation", verifiedPopulation);
+    *pageContent = appendToString(*pageContent, pieChart);
+    *pageContent = replaceWord_Realloc(*pageContent, "DefaultUnverifiedPopulation", unverifiedPopulation);
+    *pageContent = replaceWord_Realloc(*pageContent, "DefaultPartiallyVerifiedPopulation", partiallyVerifiedPopulation);
+    *pageContent = replaceWord_Realloc(*pageContent, "DefaultVerifiedPopulation", verifiedPopulation);
 
     log_message(LOG_DEBUG, "Exiting function createVcdPieChart");
 
@@ -198,27 +263,32 @@ static int appendVcdPieChart(char* pageContent, const cJSON* deadlineObject){
 }
 
 static cJSON* getDeadlineObject(cJSON* verificationInformation, char* deadlineName){
+    log_message(LOG_DEBUG, "Entering function getDeadlineObject");
     int arraySize = cJSON_GetArraySize(verificationInformation);
 
     if(arraySize == 0){
+        log_message(LOG_DEBUG, "Exiting function getDeadlineObject");
         return addDeadlineObject(verificationInformation, deadlineName);
     }
 
-    for(int i = 0; i < arraySize; i++){
+    for(int i = 1; i <= arraySize; i++){
         char JsonItemNameDeadline[50];
         snprintf(JsonItemNameDeadline, sizeof(JsonItemNameDeadline), "Deadline %d", i);
 
         cJSON* deadlineObject = cJSON_GetObjectItem(verificationInformation, JsonItemNameDeadline);
 
         if(strcmp(cJSON_GetObjectItem(deadlineObject, "Deadline Name")->valuestring, deadlineName) == 0){
+            log_message(LOG_DEBUG, "Exiting function getDeadlineObject");
             return deadlineObject;
         }
     }
 
+    log_message(LOG_DEBUG, "Exiting function getDeadlineObject");
     return addDeadlineObject(verificationInformation, deadlineName);
 }
 
 static cJSON* addDeadlineObject(cJSON* verificationInformation, char* deadlineName){
+    log_message(LOG_DEBUG, "Entering function addDeadlineObject");
     int arraySize = cJSON_GetArraySize(verificationInformation);
     int deadlineNumber = arraySize + 1;
 
@@ -231,10 +301,12 @@ static cJSON* addDeadlineObject(cJSON* verificationInformation, char* deadlineNa
     cJSON_AddItemToObject(verificationInformation, JsonItemNameDeadline, deadlineObject);
     cJSON_AddItemToObject(deadlineObject, "Deadline Name", deadlineNameItem);
 
+    log_message(LOG_DEBUG, "Exiting function addDeadlineObject");
     return deadlineObject;
 }
 
 static cJSON* getMethodArray(cJSON* statusObject, char* methodName){
+    log_message(LOG_DEBUG, "Entering function getMethodArray");
 
     if(cJSON_HasObjectItem(statusObject, methodName)){
         return cJSON_GetObjectItem(statusObject, methodName);
@@ -243,18 +315,23 @@ static cJSON* getMethodArray(cJSON* statusObject, char* methodName){
     cJSON* methodeArray = cJSON_CreateArray();
     cJSON_AddItemToObject(statusObject, methodName, methodeArray);
 
+    log_message(LOG_DEBUG, "Exiting function getMethodArray");
    return cJSON_GetObjectItem(statusObject, methodName);
 }
 
-static cJSON* getStatusArray(cJSON* deadlineObject, char* statusName){
+static cJSON* getStatusObject(cJSON* deadlineObject, char* statusName){
+    log_message(LOG_DEBUG, "Entering function getStatusObject");
 
     if(cJSON_HasObjectItem(deadlineObject, statusName)){
+
+        log_message(LOG_DEBUG, "Exiting function getStatusObject");
         return cJSON_GetObjectItem(deadlineObject, statusName);
     }
 
-    cJSON* statusArray = cJSON_CreateArray();
-    cJSON_AddItemToObject(deadlineObject, statusName, statusArray);
+    cJSON* statusObject = cJSON_CreateObject();
+    cJSON_AddItemToObject(deadlineObject, statusName, statusObject);
 
+    log_message(LOG_DEBUG, "Exiting function getStatusObject");
    return cJSON_GetObjectItem(deadlineObject, statusName);
 }
 
@@ -264,17 +341,24 @@ static bool verificationMethodAlreadyExists(const cJSON* deadlineObject, const c
 
 
 static bool verificationDeadlineEmpty(const cJSON* requirement, const char* JsonItemNameDeadline){
+    log_message(LOG_DEBUG, "Entering function verificationDeadlineEmpty");
     if(!cJSON_HasObjectItem(requirement, JsonItemNameDeadline)
         || strcmp(cJSON_GetObjectItem(requirement, JsonItemNameDeadline)->valuestring, "N/A") == 0
         || strcmp(cJSON_GetObjectItem(requirement, JsonItemNameDeadline)->valuestring, "") == 0){
+
+        log_message(LOG_DEBUG, "Exiting function verificationDeadlineEmpty");
         return true;
     }
 
+
+    log_message(LOG_DEBUG, "Exiting function verificationDeadlineEmpty");
     return false;
 }
 
 
-static cJSON* parseVerificationInformation(cJSON* requirements){
+cJSON* parseVerificationInformation(cJSON* requirements){
+    log_message(LOG_DEBUG, "Entering function parseVerificationInformation");
+
     int num_reqs = cJSON_GetArraySize(requirements);
 
     cJSON* verificationInformation = cJSON_CreateObject();
@@ -307,13 +391,18 @@ static cJSON* parseVerificationInformation(cJSON* requirements){
             char* statusName = cJSON_GetObjectItem(requirement, JsonItemNameStatus)->valuestring;
 
             cJSON* deadlineObject = getDeadlineObject(verificationInformation, deadlineName);
-            cJSON* statusArray = getStatusArray(deadlineObject, statusName);
-            cJSON* methodArray = getMethodArray(statusArray, methodName);
+
+            cJSON* statusObject = getStatusObject(deadlineObject, statusName);
+
+            cJSON* methodArray = getMethodArray(statusObject, methodName);
+
             cJSON* stringItem = cJSON_CreateString(cJSON_GetObjectItem(requirement, "ID")->valuestring);
+
 
             cJSON_AddItemToArray(methodArray, stringItem);
         }
     }
 
+    log_message(LOG_DEBUG, "Exiting function parseVerificationInformation");
     return verificationInformation;
 }

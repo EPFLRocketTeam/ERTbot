@@ -81,6 +81,7 @@ set(TEST_SOURCES
     tests/features/test_createMissingRequirementPages.c
     tests/features/test_syncDrlToSheet.c
     tests/features/test_updateRequirementPages.c
+    tests/features/test_updateVcdPage.c
     tests/helpers/test_stringHelpers.c
     tests/test_main.c
     tests/api/test_wikiAPI.c
