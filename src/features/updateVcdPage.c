@@ -34,6 +34,8 @@ static int parseRequirementBlock(char** pageContent, const cJSON* requirement, c
 
 static int getStatusCount(const cJSON* deadlineObject, const char* statusName);
 
+static int countSizeOfArrayItem(const cJSON* statusObject, const char* arrayItemName);
+
 static int appendVcdPieChart(char** pageContent, const cJSON* deadlineObject);
 
 static cJSON* getDeadlineObject(cJSON* verificationInformation, const char* deadlineName);
@@ -49,13 +51,6 @@ static bool verificationMethodAlreadyExists(const cJSON* deadlineObject, const c
 static bool verificationDeadlineEmpty(const cJSON* requirement, const char* JsonItemNameDeadline);
 
 static cJSON* parseVerificationInformation(const cJSON* requirements);
-
-
-static void logCjsonObject(char* prependText, const cJSON* object){
-    char* parsedObject = cJSON_Print(object);
-    log_message(LOG_DEBUG, "%s %s", prependText, parsedObject);
-    free(parsedObject);
-}
 
 void updateVcdPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateVcdPage");
@@ -215,27 +210,24 @@ static int getStatusCount(const cJSON* deadlineObject, const char* statusName){
 
     int count = 0;
 
-    if(cJSON_HasObjectItem(statusObject, "Test")
-        && cJSON_IsArray(cJSON_GetObjectItem(statusObject, "Test"))){
-        count = count + cJSON_GetArraySize(cJSON_GetObjectItem(statusObject, "Test"));
-    }
-
-    if(cJSON_HasObjectItem(statusObject, "Inspection")
-        && cJSON_IsArray(cJSON_GetObjectItem(statusObject, "Inspection"))){
-        count = count + cJSON_GetArraySize(cJSON_GetObjectItem(statusObject, "Inspection"));
-    }
-
-    if(cJSON_HasObjectItem(statusObject, "Review Of Design")
-        && cJSON_IsArray(cJSON_GetObjectItem(statusObject, "Review Of Design"))){
-        count = count + cJSON_GetArraySize(cJSON_GetObjectItem(statusObject, "Review Of Design"));
-    }
-
-    if(cJSON_HasObjectItem(statusObject, "Analysis")
-        && cJSON_IsArray(cJSON_GetObjectItem(statusObject, "Analysis"))){
-        count = count + cJSON_GetArraySize(cJSON_GetObjectItem(statusObject, "Analysis"));
-    }
+    count += countSizeOfArrayItem(statusObject, "Test");
+    count += countSizeOfArrayItem(statusObject, "Inspection");
+    count += countSizeOfArrayItem(statusObject, "Review Of Design");
+    count += countSizeOfArrayItem(statusObject, "Analysis");
 
     log_message(LOG_DEBUG, "Exiting function getStatusCount");
+    return count;
+}
+
+static int countSizeOfArrayItem(const cJSON* statusObject, const char* arrayItemName){
+
+    int count = 0;
+
+    if(cJSON_HasObjectItem(statusObject, arrayItemName)
+        && cJSON_IsArray(cJSON_GetObjectItem(statusObject, arrayItemName))){
+        count = count + cJSON_GetArraySize(cJSON_GetObjectItem(statusObject, arrayItemName));
+    }
+
     return count;
 }
 
