@@ -10,6 +10,7 @@
 #include "stringHelpers.h"
 #include "wikiAPI.h"
 #include "pageListHelpers.h"
+#include "slackAPI.h"
 
 #define VCD_TITLE_TEMPLATE "# Verification Statuses per Deadline\n"
 #define DEADLINE_SUBSECTION_TITLE_TEMPLATE "\n## $Deadline Name$"
@@ -55,13 +56,18 @@ static cJSON* parseVerificationInformation(const cJSON* requirements);
 void updateVcdPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateVcdPage");
 
+    updateCommandStatusMessage("fetching subsystem info");
     cJSON* subsystem = getSubsystemInfo(cmd.argument);
     const char *vcdPageId = cJSON_GetObjectItem(subsystem, "VCD Page ID")->valuestring;
+
+    updateCommandStatusMessage("fetching requirements");
     cJSON *requirementList = getRequirements(subsystem);
     const cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
 
+    updateCommandStatusMessage("parsing requirement verification information");
     cJSON* verificationInformation = parseVerificationInformation(requirements);
 
+    updateCommandStatusMessage("building VCD page content");
     char* pageContent = buildVCD(verificationInformation, requirements, subsystem);
 
     log_message(LOG_DEBUG, "pageContent after buildVCD:\n%s\n", pageContent);
@@ -75,6 +81,7 @@ void updateVcdPage(command cmd){
     vcdPage->content = replaceWord_Realloc(vcdPage->content, "\n", "\\\\n");
     vcdPage->content = replaceWord_Realloc(vcdPage->content, "\"", "\\\\\\\"");
 
+    updateCommandStatusMessage("updating VCD page content");
     updatePageContentMutation(vcdPage);
     renderMutation(&vcdPage, false);
     freePageList(&vcdPage);
@@ -332,7 +339,6 @@ static bool verificationMethodAlreadyExists(const cJSON* deadlineObject, const c
     return cJSON_HasObjectItem(deadlineObject, verificationMethod);
 }
 
-
 static bool verificationDeadlineEmpty(const cJSON* requirement, const char* JsonItemNameDeadline){
     log_message(LOG_DEBUG, "Entering function verificationDeadlineEmpty");
     if(!cJSON_HasObjectItem(requirement, JsonItemNameDeadline)
@@ -347,7 +353,6 @@ static bool verificationDeadlineEmpty(const cJSON* requirement, const char* Json
     log_message(LOG_DEBUG, "Exiting function verificationDeadlineEmpty");
     return false;
 }
-
 
 static cJSON* parseVerificationInformation(const cJSON* requirements){
     log_message(LOG_DEBUG, "Entering function parseVerificationInformation");
@@ -394,6 +399,7 @@ static cJSON* parseVerificationInformation(const cJSON* requirements){
 
             cJSON_AddItemToArray(methodArray, stringItem);
         }
+
     }
 
     log_message(LOG_DEBUG, "Exiting function parseVerificationInformation");

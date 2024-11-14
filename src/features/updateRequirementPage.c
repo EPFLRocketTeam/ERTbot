@@ -63,10 +63,14 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
 void updateRequirementPage(command cmd){
     log_message(LOG_DEBUG, "Entering function updateRequirementPages");
 
+    updateCommandStatusMessage("fetching subsystem info");
     cJSON* subsystem = getSubsystemInfo(cmd.argument);
     const char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
+    
+    updateCommandStatusMessage("fetching requirements");
     cJSON *requirementList = getRequirements(subsystem);
 
+    updateCommandStatusMessage("fetching requirement pages");
     pageList* requirementPagesHead = NULL;
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
     pageList* currentReqPage = requirementPagesHead;
@@ -78,8 +82,8 @@ void updateRequirementPage(command cmd){
         log_message(LOG_ERROR, "Error: requirements is not a JSON array");
     }
 
+    updateCommandStatusMessage("updating requirement pages");
     int cnt = 0;
-
     int num_reqs = cJSON_GetArraySize(requirements);
     while (currentReqPage){
         for (int i = 0; i < num_reqs; i++) {

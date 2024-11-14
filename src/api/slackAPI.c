@@ -83,10 +83,12 @@ int sendMessageToSlackAPI(char *message){
 }
 
 int updateSlackMessage(slackMessage* slackMessage) {
+#ifndef TESTING
     char postFields[MAX_MESSAGE_LENGTH];
     snprintf(postFields, sizeof(postFields), "{\"channel\":\"%s\",\"ts\":\"%s\",\"text\":\"%s\"}", SLACK_WIKI_TOOLBOX_CHANNEL, slackMessage->timestamp, slackMessage->message);
     char *url = "https://slack.com/api/chat.update";
     return slackPostApi(url, postFields);
+#endif
 }
 
 int sendMessageToSlack(char *message) {
@@ -237,6 +239,13 @@ void sendLoadingBar(const int currentValue, const int totalValue){
     
     log_message(LOG_DEBUG, "Exiting function sendLoadingBar");
     return;
+}
+
+void updateCommandStatusMessage(char *newStatusMessage){
+#ifndef TESTING
+    commandStatusMessage->message = newStatusMessage;
+    updateSlackMessage(commandStatusMessage);
+#endif
 }
 
 void initialiseSlackCommandStatusMessage(){

@@ -227,7 +227,6 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
         breakdownCommand(slackMsg->message, &cmd);
         log_message(LOG_DEBUG, "Command broke down");
         *headOfPeriodicCommands_Global = addCommandToQueue(headOfPeriodicCommands_Global, cmd.function, cmd.argument);
-        sendMessageToSlack("Command added to queue");
         log_message(LOG_INFO, "Received a %s command on slack", cmd.function);
         log_message(LOG_DEBUG, "Command added to queue");
     }
@@ -449,8 +448,11 @@ command** executeCommand(command** commandQueue){
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateDRL") == 0){
+        sendStartingStatusMessage("updateDRL");
+
         syncDrlToSheet(**commandQueue);
-        sendMessageToSlack("Finished parsing.");
+        
+        sendCompletedStatusMessage("updateDRL");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateReq") == 0){
@@ -462,18 +464,19 @@ command** executeCommand(command** commandQueue){
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateVCD") == 0){
+        sendStartingStatusMessage("updateVCD");
+        
         updateVcdPage(**commandQueue);
-        sendMessageToSlack("VCD page updated");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "refreshOAuthToken") == 0){
-        refreshOAuthToken();
-        sendMessageToSlack("Token Refreshed");
+        
+        sendCompletedStatusMessage("updateVCD");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "createMissingRequirementPages") == 0){
+        sendStartingStatusMessage("createMissingRequirementPages");
+
         createMissingRequirementPages(**commandQueue);
-        sendMessageToSlack("Pages were created");
+
+        sendCompletedStatusMessage("createMissingRequirementPages");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "help") == 0){
