@@ -217,8 +217,10 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
 
     slackMsg = getSlackMessage(slackMsg);
 
+
+
     //If received a message which was not sent by bot, breakdown message into command structure and return command
-    if(strcmp(slackMsg->sender, "U06RQCAT0H1") != 0){
+    if(slackMsg->sender && strcmp(slackMsg->sender, "U06RQCAT0H1") != 0){
         breakdownCommand(slackMsg->message, &cmd);
         log_message(LOG_DEBUG, "Command broke down");
         *headOfPeriodicCommands_Global = addCommandToQueue(headOfPeriodicCommands_Global, cmd.function, cmd.argument);
@@ -234,10 +236,22 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
         chunk.size = 0;
     }
 
-    free(slackMsg->message);
-    free(slackMsg->sender);
-    free(slackMsg->timestamp);
-    free(slackMsg);
+    if(slackMsg->message){
+        free(slackMsg->message);
+    }
+
+    if(slackMsg->sender){
+        free(slackMsg->sender);
+    }
+
+    if(slackMsg->timestamp){
+        free(slackMsg->timestamp);
+    }
+
+    if(slackMsg){
+        free(slackMsg);
+    }
+
 
     log_message(LOG_DEBUG, "Exiting function lookForCommandOnSlack");
     return headOfPeriodicCommands_Global;

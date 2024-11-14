@@ -48,6 +48,7 @@ int main(){
     while(1){
 
         headOfCommandQueue = checkForCommand(headOfCommandQueue, headOfPeriodicCommands);
+        sleep(1);
 
         if(*headOfCommandQueue){
             cyclesSinceLastCommand = 0;
@@ -61,7 +62,7 @@ int main(){
         }
 
         if(cyclesSinceLastCommand>20){
-            sleep(2);
+            sleep(1);
         }
 
         if(cyclesSinceLastCommand>200){
