@@ -210,11 +210,6 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
     command cmd;
     slackMessage* slackMsg = (slackMessage*)malloc(sizeof(slackMessage));
 
-    slackMsg->message = malloc(200);
-    if (slackMsg->message == NULL) {
-        log_message(LOG_ERROR, "Memory allocation failed");
-    }
-
     if (chunk.response) {
         chunk.response = NULL;
         chunk.size = 0;

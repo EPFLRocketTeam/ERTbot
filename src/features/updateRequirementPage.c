@@ -212,8 +212,8 @@ static char* buildRequirementPageFromJSONRequirementList(const cJSON *requiremen
     log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: Assignee finished");
 
     (void)addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Justification");
-    (void)addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Compliance");
-    (void)addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Criticality");
+    (void)addSectionToPageContent(&pageContent, COMPLIANCE_BLOCK_TEMPLATE, requirement, "Compliance");
+    (void)addSectionToPageContent(&pageContent, CRITICALITY_BLOCK_TEMPLATE, requirement, "Criticality");
 
     log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: Criticality finished");
 

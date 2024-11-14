@@ -87,7 +87,9 @@ int updateSlackMessage(slackMessage* slackMessage) {
     char postFields[MAX_MESSAGE_LENGTH];
     snprintf(postFields, sizeof(postFields), "{\"channel\":\"%s\",\"ts\":\"%s\",\"text\":\"%s\"}", SLACK_WIKI_TOOLBOX_CHANNEL, slackMessage->timestamp, slackMessage->message);
     char *url = "https://slack.com/api/chat.update";
-    return slackPostApi(url, postFields);
+    int returnValue = slackPostApi(url, postFields);
+    freeChunkResponse();
+    return returnValue;
 #endif
 }
 
