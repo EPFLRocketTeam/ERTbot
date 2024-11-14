@@ -209,7 +209,6 @@ void sendLoadingBar(const int currentValue, const int totalValue){
 
 
     if (totalValue <= 0 || currentValue < 0 || currentValue > totalValue) {
-        fprintf(stderr, "Invalid values for currentValue or totalValue\n");
         return;
     }
 
