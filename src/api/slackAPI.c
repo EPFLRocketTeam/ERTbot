@@ -16,13 +16,12 @@ slackMessage* commandStatusMessage;
 
 #define MAX_MESSAGE_LENGTH 100000
 
-int sendMessageToSlackAPI(char *message) {
-    log_message(LOG_DEBUG, "Entering function sendMessageToSlack");
+static int slackPostApi(char* url, char* postFields){
+    log_message(LOG_DEBUG, "Entering function slackPostApi");
 
     CURL *curl;
     CURLcode res;
     struct curl_slist *headerlist = NULL;
-    static  char *url = "https://slack.com/api/chat.postMessage";
 
     // Initialize libcurl
     curl_global_init(CURL_GLOBAL_ALL);
@@ -31,16 +30,12 @@ int sendMessageToSlackAPI(char *message) {
     resetChunkResponse();
 
     if(curl) {
-        // Construct JSON payload for the message
-        char json[MAX_MESSAGE_LENGTH];
-        snprintf(json, sizeof(json), "{\"channel\":\"%s\",\"text\":\"%s\"}", SLACK_WIKI_TOOLBOX_CHANNEL, message);
-
         // Set the URL for Slack message posting
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
 
         // Set the POST data (JSON payload)
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postFields);
 
         // Set the write function to ignore the response
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
@@ -75,8 +70,23 @@ int sendMessageToSlackAPI(char *message) {
 
     curl_global_cleanup();
 
-    log_message(LOG_DEBUG, "Exiting function sendMessageToSlack");
+    log_message(LOG_DEBUG, "Exiting function slackPostApi");
     return 0;
+}
+
+int sendMessageToSlackAPI(char *message){
+    char postFields[MAX_MESSAGE_LENGTH];
+    snprintf(postFields, sizeof(postFields), "{\"channel\":\"%s\",\"text\":\"%s\"}", SLACK_WIKI_TOOLBOX_CHANNEL, message);
+    char *url = "https://slack.com/api/chat.postMessage";
+
+    return slackPostApi(url, postFields);
+}
+
+int updateSlackMessage(slackMessage* slackMessage) {
+    char postFields[MAX_MESSAGE_LENGTH];
+    snprintf(postFields, sizeof(postFields), "{\"channel\":\"%s\",\"ts\":\"%s\",\"text\":\"%s\"}", SLACK_WIKI_TOOLBOX_CHANNEL, slackMessage->timestamp, slackMessage->message);
+    char *url = "https://slack.com/api/chat.update";
+    return slackPostApi(url, postFields);
 }
 
 int sendMessageToSlack(char *message) {
@@ -148,71 +158,6 @@ void checkLastSlackMessage() {
     curl_global_cleanup();
 
     log_message(LOG_DEBUG, "Exiting function checkLastSlackMessage");
-}
-
-int updateSlackMessage(slackMessage* slackMessage) {
-    log_message(LOG_DEBUG, "Entering function sendMessageToSlack");
-
-    CURL *curl;
-    CURLcode res;
-    struct curl_slist *headerlist = NULL;
-    static  char *url = "https://slack.com/api/chat.update";
-
-    // Initialize libcurl
-    curl_global_init(CURL_GLOBAL_ALL);
-    curl = curl_easy_init();
-
-    resetChunkResponse();
-
-    if(curl) {
-        // Construct JSON payload for the message
-        char json[MAX_MESSAGE_LENGTH];
-        snprintf(json, sizeof(json), "{\"channel\":\"%s\",\"ts\":\"%s\",\"text\":\"%s\"}", SLACK_WIKI_TOOLBOX_CHANNEL, slackMessage->timestamp, slackMessage->message);
-
-        // Set the URL for Slack message posting
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-        curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
-
-        // Set the POST data (JSON payload)
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
-
-        // Set the write function to ignore the response
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
-
-        // Add headers
-        headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
-        headerlist = curl_slist_append(headerlist, "charset: utf-8");
-
-        char auth_header[128];
-        snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s", SLACK_API_TOKEN);
-        headerlist = curl_slist_append(headerlist, auth_header);
-
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-
-        // Perform the request
-        res = curl_easy_perform(curl);
-
-        // Clean up
-        curl_easy_cleanup(curl);
-        curl_slist_free_all(headerlist);
-
-        if(res != CURLE_OK) {
-            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-            return 1;
-        }
-    }
-    else {
-        log_message(LOG_ERROR, "Failed to initialize libcurl");
-        return 1;
-    }
-
-    curl_global_cleanup();
-
-    freeChunkResponse();
-
-    log_message(LOG_DEBUG, "Exiting function sendMessageToSlack");
-    return 0;
 }
 
 slackMessage* getSlackMessage(slackMessage* slackMsg) {
