@@ -13,16 +13,16 @@ void createMissingRequirementPages(command cmd){
 
     pageList* requirementPagesHead = NULL;
 
+    updateCommandStatusMessage("fetching subsystem info");
     cJSON* subsystem = getSubsystemInfo(cmd.argument);
     const char *path = cJSON_GetObjectItem(subsystem, "Requirement Pages Directory")->valuestring;
-    const char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
-    const char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
 
+    updateCommandStatusMessage("fetching existing requirements pages");
     requirementPagesHead = populatePageList(&requirementPagesHead, "path", path);
-    batchGetSheet(reqDbId, sheetId);
 
-    cJSON *requirementList = parseArrayIntoJSONRequirementList(chunk.response);
-
+    updateCommandStatusMessage("fetching requirements");
+    cJSON *requirementList = getRequirements(subsystem);
+    
     // Get the requirements array from the requirementList object
     const cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
@@ -32,6 +32,7 @@ void createMissingRequirementPages(command cmd){
     // Iterate over each requirement object in the requirements array
     int num_reqs = cJSON_GetArraySize(requirements);
 
+    updateCommandStatusMessage("finding missing requirement pages");
     for (int i = 0; i < num_reqs; i++) {
         const cJSON *requirement = cJSON_GetArrayItem(requirements, i);
 
@@ -73,12 +74,15 @@ void createMissingRequirementPages(command cmd){
             reqContent = appendToString(reqContent, id->valuestring);
             reqContent = appendToString(reqContent, "-->");
             log_message(LOG_DEBUG, "About to create new page path:%s\nTitle:%s", reqPath, id->valuestring);
+            
+            updateCommandStatusMessage("creating a new page");
             createPageMutation(reqPath, reqContent, id->valuestring);
 
             free(reqPath);
             free(reqContent);
         }
 
+        sendLoadingBar(i, num_reqs);
     }
 
     cJSON_Delete(requirementList);

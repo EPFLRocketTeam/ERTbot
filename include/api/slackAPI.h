@@ -68,4 +68,6 @@ void freeSlackCommandStatusMessageVariables();
 
 void initialiseSlackCommandStatusMessage();
 
+void updateCommandStatusMessage(char *newStatusMessage);
+
 #endif

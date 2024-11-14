@@ -83,10 +83,14 @@ int sendMessageToSlackAPI(char *message){
 }
 
 int updateSlackMessage(slackMessage* slackMessage) {
+#ifndef TESTING
     char postFields[MAX_MESSAGE_LENGTH];
     snprintf(postFields, sizeof(postFields), "{\"channel\":\"%s\",\"ts\":\"%s\",\"text\":\"%s\"}", SLACK_WIKI_TOOLBOX_CHANNEL, slackMessage->timestamp, slackMessage->message);
     char *url = "https://slack.com/api/chat.update";
-    return slackPostApi(url, postFields);
+    int returnValue = slackPostApi(url, postFields);
+    freeChunkResponse();
+    return returnValue;
+#endif
 }
 
 int sendMessageToSlack(char *message) {
@@ -230,13 +234,22 @@ void sendLoadingBar(const int currentValue, const int totalValue){
 
     commandStatusMessage->message = newMessage;
 
-    updateSlackMessage(commandStatusMessage);
+    if (currentValue % (totalValue / 10) == 0) {
+        updateSlackMessage(commandStatusMessage);
+    }
 
 #endif
 
     
     log_message(LOG_DEBUG, "Exiting function sendLoadingBar");
     return;
+}
+
+void updateCommandStatusMessage(char *newStatusMessage){
+#ifndef TESTING
+    commandStatusMessage->message = newStatusMessage;
+    updateSlackMessage(commandStatusMessage);
+#endif
 }
 
 void initialiseSlackCommandStatusMessage(){
@@ -300,8 +313,8 @@ void sendCompletedStatusMessage(const char *commandName){
     log_message(LOG_DEBUG, "Entering function sendCompletedStatusMessage");
     
 
-    commandStatusMessage->message = duplicate_Malloc(commandName);
-    commandStatusMessage->message = appendToString(commandStatusMessage->message, " finished");
+    commandStatusMessage->message = duplicate_Malloc("Finished ");
+    commandStatusMessage->message = appendToString(commandStatusMessage->message, commandName);
 
     updateSlackMessage(commandStatusMessage);
     

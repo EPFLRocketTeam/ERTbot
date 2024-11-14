@@ -210,11 +210,6 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
     command cmd;
     slackMessage* slackMsg = (slackMessage*)malloc(sizeof(slackMessage));
 
-    slackMsg->message = malloc(200);
-    if (slackMsg->message == NULL) {
-        log_message(LOG_ERROR, "Memory allocation failed");
-    }
-
     if (chunk.response) {
         chunk.response = NULL;
         chunk.size = 0;
@@ -227,7 +222,6 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
         breakdownCommand(slackMsg->message, &cmd);
         log_message(LOG_DEBUG, "Command broke down");
         *headOfPeriodicCommands_Global = addCommandToQueue(headOfPeriodicCommands_Global, cmd.function, cmd.argument);
-        sendMessageToSlack("Command added to queue");
         log_message(LOG_INFO, "Received a %s command on slack", cmd.function);
         log_message(LOG_DEBUG, "Command added to queue");
     }
@@ -449,8 +443,11 @@ command** executeCommand(command** commandQueue){
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateDRL") == 0){
+        sendStartingStatusMessage("updateDRL");
+
         syncDrlToSheet(**commandQueue);
-        sendMessageToSlack("Finished parsing.");
+        
+        sendCompletedStatusMessage("updateDRL");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateReq") == 0){
@@ -462,18 +459,41 @@ command** executeCommand(command** commandQueue){
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateVCD") == 0){
+        sendStartingStatusMessage("updateVCD");
+        
         updateVcdPage(**commandQueue);
-        sendMessageToSlack("VCD page updated");
-    }
-
-    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "refreshOAuthToken") == 0){
-        refreshOAuthToken();
-        sendMessageToSlack("Token Refreshed");
+        
+        sendCompletedStatusMessage("updateVCD");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "createMissingRequirementPages") == 0){
+        sendStartingStatusMessage("createMissingRequirementPages");
+
         createMissingRequirementPages(**commandQueue);
-        sendMessageToSlack("Pages were created");
+
+        sendCompletedStatusMessage("createMissingRequirementPages");
+    }
+
+    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "sync") == 0){
+        sendStartingStatusMessage("sync");
+        
+        updateCommandStatusMessage("Starting createMissingRequirementPages");
+        createMissingRequirementPages(**commandQueue);
+        updateCommandStatusMessage("finished createMissingRequirementPages");
+
+        updateCommandStatusMessage("Starting updateDRL");
+        syncDrlToSheet(**commandQueue);
+        updateCommandStatusMessage("finished updateDRL");
+
+        updateCommandStatusMessage("Starting updateReq");
+        updateRequirementPage(**commandQueue);
+        updateCommandStatusMessage("finished updateReq");
+
+        updateCommandStatusMessage("Starting updateVCD");
+        updateVcdPage(**commandQueue);
+        updateCommandStatusMessage("finished updateVCD");
+
+        sendCompletedStatusMessage("sync");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "help") == 0){
@@ -499,6 +519,11 @@ command** executeCommand(command** commandQueue){
         sendMessageToSlack("createMissingRequirementPages");
         sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
         sendMessageToSlack("-> example: updateDRL ST");
+        sendMessageToSlack("-----------------");
+        sendMessageToSlack("sync");
+        sendMessageToSlack("-> Description: Fully synchronises all of the requirements by running createMissingRequirementPages, updateDRL, updateReq and updateVCD on its own.");
+        sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
+        sendMessageToSlack("-> example: sync ST");
     }
 
     else{

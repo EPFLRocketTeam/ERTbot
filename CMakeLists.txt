@@ -44,6 +44,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 # Create the executable from the source files
 add_executable(ERTbot ${SOURCES})
 
+target_compile_options(ERTbot PRIVATE -g)
+
 # Conditionally configure for macOS
 # Set paths for cJSON on macOS
 if(APPLE)

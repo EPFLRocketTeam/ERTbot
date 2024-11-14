@@ -7,6 +7,7 @@
 #include "stringHelpers.h"
 #include "wikiAPI.h"
 #include "pageListHelpers.h"
+#include "slackAPI.h"
 
 
 #define DRL_TABSET_TITLE_TEMPLATE "\n\n\n## $ID$\n"
@@ -44,9 +45,13 @@ static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const
 void syncDrlToSheet(command cmd){
     log_message(LOG_DEBUG, "Entering function syncDrlToSheet");
 
+    updateCommandStatusMessage("fetching subsystem info");
     cJSON* subsystem = getSubsystemInfo(cmd.argument);
+
+    updateCommandStatusMessage("fetching requirements");
     cJSON *requirementList = getRequirements(subsystem);
 
+    updateCommandStatusMessage("building DRL page content");
     char *DRL = buildDrlFromJSONRequirementList(requirementList, subsystem);
 
     pageList* drlPage = NULL;
@@ -58,6 +63,7 @@ void syncDrlToSheet(command cmd){
 
     drlPage = addPageToList(&drlPage, drlPageId, NULL, NULL, NULL, DRL, NULL);
 
+    updateCommandStatusMessage("updating DRL page");
     updatePageContentMutation(drlPage);
     renderMutation(&drlPage, false);
     freePageList(&drlPage);
