@@ -5,6 +5,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include "slackAPI.h"
 #include "wikiAPI.h"
@@ -453,8 +454,11 @@ command** executeCommand(command** commandQueue){
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateReq") == 0){
+        sendStartingStatusMessage("updateReq");
+
         updateRequirementPage(**commandQueue);
-        sendMessageToSlack("Pages updated.");
+
+        sendCompletedStatusMessage("updateReq");
     }
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateVCD") == 0){

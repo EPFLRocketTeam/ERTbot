@@ -21,7 +21,7 @@
 
 memory chunk;
 
-pageList default_page = {"DefaultID", "DefaultTitle", "DefaultPath", "DefauDefaultDescription", "DefaultContent", "DefaultUpdatedAt", NULL};
+pageList default_page = {"DefaultID", "DefaultTitle", "DefaultPath", "DefaultDescription", "DefaultContent", "DefaultUpdatedAt", NULL};
 
 char *lastPageRefreshCheck;
 
@@ -35,6 +35,7 @@ int main(){
 
     //initalise
     initializeApiTokenVariables();
+    initialiseSlackCommandStatusMessage();
     lastPageRefreshCheck = getCurrentEDTTimeString();
     headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
     //declare command queue variable
