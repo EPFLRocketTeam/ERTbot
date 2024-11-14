@@ -234,7 +234,9 @@ void sendLoadingBar(const int currentValue, const int totalValue){
 
     commandStatusMessage->message = newMessage;
 
-    updateSlackMessage(commandStatusMessage);
+    if (currentValue % (totalValue / 10) == 0) {
+        updateSlackMessage(commandStatusMessage);
+    }
 
 #endif
 
