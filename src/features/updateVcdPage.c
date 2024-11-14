@@ -22,38 +22,36 @@
 #define VCD_PAGE_NAME "$ID$) **"
 #define VCD_TITLE_BLOCK_TEMPLATE "$Title$**\n"
 
+static char* buildVCD(const cJSON* verificationInformation, const cJSON* requirements, const cJSON* subsystem);
 
-static cJSON* parseVerificationInformation(cJSON* requirements);
+static int parseDeadlineBlock(const cJSON* verificationInformation, char** pageContent, const char* deadlineItemName, const cJSON* requirements, const cJSON* subsystem);
 
-static char* buildVCD(cJSON* verificationInformation, cJSON* requirements, cJSON* subsystem);
+static int parseStatusBlock(char** pageContent, const cJSON* deadlineObject, const char* statusName, const cJSON* requirements, const cJSON* subsystem);
 
-static int parseDeadlineBlock(cJSON* verificationInformation, char** pageContent, char* deadlineItemName, cJSON* requirements, cJSON* subsystem);
+static int parseMethodBlock(char** pageContent, const cJSON* statusObject, const char* methodName, const cJSON* requirements, const cJSON* subsystem);
 
-static int parseStatusBlock(char** pageContent, cJSON* deadlineObject, char* statusName, cJSON* requirements, cJSON* subsystem);
-
-static int parseMethodBlock(char** pageContent, cJSON* statusObject, char* methodName, cJSON* requirements, cJSON* subsystem);
-
-static int parseRequirementBlock(char** pageContent, cJSON* requirement, cJSON* subsystem);
+static int parseRequirementBlock(char** pageContent, const cJSON* requirement, const cJSON* subsystem);
 
 static int getStatusCount(const cJSON* deadlineObject, const char* statusName);
 
 static int appendVcdPieChart(char** pageContent, const cJSON* deadlineObject);
 
-static cJSON* getDeadlineObject(cJSON* verificationInformation, char* deadlineName);
+static cJSON* getDeadlineObject(cJSON* verificationInformation, const char* deadlineName);
 
-static cJSON* addDeadlineObject(cJSON* verificationInformation, char* deadlineName);
+static cJSON* addDeadlineObject(cJSON* verificationInformation, const char* deadlineName);
 
-static cJSON* getMethodArray(cJSON* statusObject, char* methodName);
+static cJSON* getMethodArray(cJSON* statusObject, const char* methodName);
 
-static cJSON* getStatusObject(cJSON* deadlineObject, char* statusName);
+static cJSON* getStatusObject(cJSON* deadlineObject, const char* statusName);
 
 static bool verificationMethodAlreadyExists(const cJSON* deadlineObject, const char* verificationMethod);
 
 static bool verificationDeadlineEmpty(const cJSON* requirement, const char* JsonItemNameDeadline);
 
-static cJSON* parseVerificationInformation(cJSON* requirements);
+static cJSON* parseVerificationInformation(const cJSON* requirements);
 
-static void logCjsonObject(char* prependText, cJSON* object){
+
+static void logCjsonObject(char* prependText, const cJSON* object){
     char* parsedObject = cJSON_Print(object);
     log_message(LOG_DEBUG, "%s %s", prependText, parsedObject);
     free(parsedObject);
@@ -65,7 +63,7 @@ void updateVcdPage(command cmd){
     cJSON* subsystem = getSubsystemInfo(cmd.argument);
     const char *vcdPageId = cJSON_GetObjectItem(subsystem, "VCD Page ID")->valuestring;
     cJSON *requirementList = getRequirements(subsystem);
-    cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
+    const cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
 
     cJSON* verificationInformation = parseVerificationInformation(requirements);
 
@@ -87,11 +85,14 @@ void updateVcdPage(command cmd){
     freePageList(&vcdPage);
 
     cJSON_Delete(requirementList);
+    cJSON_Delete(subsystem);
+    cJSON_Delete(verificationInformation);
+    free(pageContent);
     log_message(LOG_DEBUG, "Exiting function updateVcdPage");
     return;
 }
 
-static char* buildVCD(cJSON* verificationInformation, cJSON* requirements, cJSON* subsystem){
+static char* buildVCD(const cJSON* verificationInformation, const cJSON* requirements, const cJSON* subsystem){
     log_message(LOG_DEBUG, "Entering function buildVCD");
 
     int amountOfDifferentDeadlines = cJSON_GetArraySize(verificationInformation);
@@ -109,13 +110,13 @@ static char* buildVCD(cJSON* verificationInformation, cJSON* requirements, cJSON
     return pageContent;
 }
 
-static int parseDeadlineBlock(cJSON* verificationInformation, char** pageContent, char* deadlineItemName, cJSON* requirements, cJSON* subsystem){
+static int parseDeadlineBlock(const cJSON* verificationInformation, char** pageContent, const char* deadlineItemName, const cJSON* requirements, const cJSON* subsystem){
     log_message(LOG_DEBUG, "Entering function parseDeadlineBlock");
     if(!cJSON_HasObjectItem(verificationInformation, deadlineItemName)){
         return 0;
     }
 
-    cJSON* deadlineObject = cJSON_GetObjectItem(verificationInformation, deadlineItemName);
+    const cJSON* deadlineObject = cJSON_GetObjectItem(verificationInformation, deadlineItemName);
     (void)addSectionToPageContent(pageContent, DEADLINE_SUBSECTION_TITLE_TEMPLATE, deadlineObject, "Deadline Name");
 
     (void)appendVcdPieChart(pageContent, deadlineObject);
@@ -130,14 +131,14 @@ static int parseDeadlineBlock(cJSON* verificationInformation, char** pageContent
     return 1;
 }
 
-static int parseStatusBlock(char** pageContent, cJSON* deadlineObject, char* statusName, cJSON* requirements, cJSON* subsystem){
+static int parseStatusBlock(char** pageContent, const cJSON* deadlineObject, const char* statusName, const cJSON* requirements, const cJSON* subsystem){
     log_message(LOG_DEBUG, "Entering function parseStatusBlock");
 
     if(!cJSON_HasObjectItem(deadlineObject, statusName)){
         return 0;
     }
 
-    cJSON* statusObject = cJSON_GetObjectItem(deadlineObject, statusName);
+    const cJSON* statusObject = cJSON_GetObjectItem(deadlineObject, statusName);
     *pageContent = appendToString(*pageContent, STATUS_SUBSUBSECTION_TITLE_TEMPLATE);
 
     *pageContent = replaceWord_Realloc(*pageContent, "$Status Name$", statusName);
@@ -155,14 +156,14 @@ static int parseStatusBlock(char** pageContent, cJSON* deadlineObject, char* sta
     return 1;
 }
 
-static int parseMethodBlock(char** pageContent, cJSON* statusObject, char* methodName, cJSON* requirements, cJSON* subsystem){
+static int parseMethodBlock(char** pageContent, const cJSON* statusObject, const char* methodName, const cJSON* requirements, const cJSON* subsystem){
     log_message(LOG_DEBUG, "Entering function parseMethodBlock");
 
     if(!cJSON_HasObjectItem(statusObject, methodName)){
         return 0;
     }
 
-    cJSON* methodArray = cJSON_GetObjectItem(statusObject, methodName);
+    const cJSON* methodArray = cJSON_GetObjectItem(statusObject, methodName);
     *pageContent = appendToString(*pageContent, METHOD_SUBSUBSUBSECTION_TITLE_TEMPLATE);
     *pageContent = replaceWord_Realloc(*pageContent, "$Method Name$", methodName);
 
@@ -178,7 +179,7 @@ static int parseMethodBlock(char** pageContent, cJSON* statusObject, char* metho
         log_message(LOG_DEBUG, "Looking for requirment ID %s", requirementId);
 
         for(int k = 0; k < requirementsArraySize; k++){
-            cJSON* requirement = cJSON_GetArrayItem(requirements, k);
+            const cJSON* requirement = cJSON_GetArrayItem(requirements, k);
 
             if(cJSON_HasObjectItem(requirement, "ID")
                 && cJSON_IsString(cJSON_GetObjectItem(requirement, "ID"))
@@ -196,7 +197,7 @@ static int parseMethodBlock(char** pageContent, cJSON* statusObject, char* metho
     return 1;
 }
 
-static int parseRequirementBlock(char** pageContent, cJSON* requirement, cJSON* subsystem){
+static int parseRequirementBlock(char** pageContent, const cJSON* requirement, const cJSON* subsystem){
     log_message(LOG_DEBUG, "Entering function parseRequirementBlock");
     (void)addSectionToPageContent(pageContent, VCD_ID_BLOCK_TEMPLATE, requirement, "ID");
     (void)addSectionToPageContent(pageContent, VCD_PAGE_DIRECTORY, subsystem, "Requirement Pages Directory");
@@ -241,7 +242,7 @@ static int getStatusCount(const cJSON* deadlineObject, const char* statusName){
 static int appendVcdPieChart(char** pageContent, const cJSON* deadlineObject){
     log_message(LOG_DEBUG, "Entering function createVcdPieChart");
 
-    char *pieChart = "\n```kroki\nvega\n\n{\n  \"$schema\": \"https://vega.github.io/schema/vega/v5.0.json\",\n  \"width\": 350,\n  \"height\": 350,\n  \"autosize\": \"pad\",\n  \"signals\": [\n    {\"name\": \"startAngle\", \"value\": 0},\n    {\"name\": \"endAngle\", \"value\": 6.29},\n    {\"name\": \"padAngle\", \"value\": 0},\n    {\"name\": \"sort\", \"value\": true},\n    {\"name\": \"strokeWidth\", \"value\": 2},\n    {\n      \"name\": \"selected\",\n      \"value\": \"\",\n      \"on\": [{\"events\": \"mouseover\", \"update\": \"datum\"}]\n    }\n  ],\n  \"data\": [\n    {\n      \"name\": \"table\",\n      \"values\": [\n        {\"continent\": \"Unverified\", \"population\": DefaultUnverifiedPopulation},\n        {\"continent\": \"Partially Verified\", \"population\": DefaultPartiallyVerifiedPopulation},\n        {\"continent\": \"Verified\", \"population\": DefaultVerifiedPopulation}\n      ],\n      \"transform\": [\n        {\n          \"type\": \"pie\",\n          \"field\": \"population\",\n          \"startAngle\": {\"signal\": \"startAngle\"},\n          \"endAngle\": {\"signal\": \"endAngle\"},\n          \"sort\": {\"signal\": \"sort\"}\n        }\n      ]\n    },\n    {\n      \"name\": \"fieldSum\",\n      \"source\": \"table\",\n      \"transform\": [\n        {\n          \"type\": \"aggregate\",\n          \"fields\": [\"population\"],\n          \"ops\": [\"sum\"],\n          \"as\": [\"sum\"]\n        }\n      ]\n    }\n  ],\n  \"legends\": [\n    {\n      \"fill\": \"color\",\n      \"title\": \"Legends\",\n      \"orient\": \"none\",\n      \"padding\": {\"value\": 10},\n      \"encode\": {\n        \"symbols\": {\"enter\": {\"fillOpacity\": {\"value\": 1}}},\n        \"legend\": {\n          \"update\": {\n            \"x\": {\n              \"signal\": \"(width / 2) + if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.1 * 0.8, if(width >= height, height, width) / 2 * 0.8)\",\n              \"offset\": 20\n            },\n            \"y\": {\"signal\": \"(height / 2)\", \"offset\": -50}\n          }\n        }\n      }\n    }\n  ],\n  \"scales\": [\n    {\"name\": \"color\", \"type\": \"ordinal\", \"range\": [\"#cf2608\", \"#ff9900\", \"#67b505\"]}\n  ],\n  \"marks\": [\n    {\n      \"type\": \"arc\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"fill\": {\"scale\": \"color\", \"field\": \"continent\"},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"}\n        },\n        \"update\": {\n          \"startAngle\": {\"field\": \"startAngle\"},\n          \"endAngle\": {\"field\": \"endAngle\"},\n          \"cornerRadius\": {\"value\": 15},\n          \"padAngle\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.015, 0.015)\"\n          },\n          \"innerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 0.45, if(width >= height, height, width) / 2 * 0.5)\"\n          },\n          \"outerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.8, if(width >= height, height, width) / 2 * 0.8)\"\n          },\n          \"opacity\": {\n            \"signal\": \"if(selected && selected.continent !== datum.continent, 1, 1)\"\n          },\n          \"stroke\": {\"signal\": \"scale('color', datum.continent)\"},\n          \"strokeWidth\": {\"signal\": \"strokeWidth\"},\n          \"fillOpacity\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.8, 0.8)\"\n          }\n        }\n      }\n    },\n    {\n      \"type\": \"text\",\n      \"encode\": {\n        \"enter\": {\"fill\": {\"value\": \"#525252\"}, \"text\": {\"value\": \"\"}},\n        \"update\": {\n          \"opacity\": {\"value\": 1},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"},\n          \"fontSize\": {\"signal\": \"if(width >= height, height, width) * 0.05\"},\n          \"text\": {\"value\": \"Verification Status\"}\n        }\n      }\n    },\n    {\n      \"name\": \"mark_population\",\n      \"type\": \"text\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"text\": {\n            \"signal\": \"if(datum['endAngle'] - datum['startAngle'] < 0.3, '', format(datum['population'] / 1, '.0f'))\"\n          },\n          \"x\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"y\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"radius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.65, if(width >= height, height, width) / 2 * 0.65)\"\n          },\n          \"theta\": {\"signal\": \"(datum['startAngle'] + datum['endAngle'])/2\"},\n          \"fill\": {\"value\": \"#FFFFFF\"},\n          \"fontSize\": {\"value\": 12},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"}\n        }\n      }\n    }\n  ]\n}\n\n```\n## {.tabset}\n";
+    const char *pieChart = "\n```kroki\nvega\n\n{\n  \"$schema\": \"https://vega.github.io/schema/vega/v5.0.json\",\n  \"width\": 350,\n  \"height\": 350,\n  \"autosize\": \"pad\",\n  \"signals\": [\n    {\"name\": \"startAngle\", \"value\": 0},\n    {\"name\": \"endAngle\", \"value\": 6.29},\n    {\"name\": \"padAngle\", \"value\": 0},\n    {\"name\": \"sort\", \"value\": true},\n    {\"name\": \"strokeWidth\", \"value\": 2},\n    {\n      \"name\": \"selected\",\n      \"value\": \"\",\n      \"on\": [{\"events\": \"mouseover\", \"update\": \"datum\"}]\n    }\n  ],\n  \"data\": [\n    {\n      \"name\": \"table\",\n      \"values\": [\n        {\"continent\": \"Unverified\", \"population\": DefaultUnverifiedPopulation},\n        {\"continent\": \"Partially Verified\", \"population\": DefaultPartiallyVerifiedPopulation},\n        {\"continent\": \"Verified\", \"population\": DefaultVerifiedPopulation}\n      ],\n      \"transform\": [\n        {\n          \"type\": \"pie\",\n          \"field\": \"population\",\n          \"startAngle\": {\"signal\": \"startAngle\"},\n          \"endAngle\": {\"signal\": \"endAngle\"},\n          \"sort\": {\"signal\": \"sort\"}\n        }\n      ]\n    },\n    {\n      \"name\": \"fieldSum\",\n      \"source\": \"table\",\n      \"transform\": [\n        {\n          \"type\": \"aggregate\",\n          \"fields\": [\"population\"],\n          \"ops\": [\"sum\"],\n          \"as\": [\"sum\"]\n        }\n      ]\n    }\n  ],\n  \"legends\": [\n    {\n      \"fill\": \"color\",\n      \"title\": \"Legends\",\n      \"orient\": \"none\",\n      \"padding\": {\"value\": 10},\n      \"encode\": {\n        \"symbols\": {\"enter\": {\"fillOpacity\": {\"value\": 1}}},\n        \"legend\": {\n          \"update\": {\n            \"x\": {\n              \"signal\": \"(width / 2) + if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.1 * 0.8, if(width >= height, height, width) / 2 * 0.8)\",\n              \"offset\": 20\n            },\n            \"y\": {\"signal\": \"(height / 2)\", \"offset\": -50}\n          }\n        }\n      }\n    }\n  ],\n  \"scales\": [\n    {\"name\": \"color\", \"type\": \"ordinal\", \"range\": [\"#cf2608\", \"#ff9900\", \"#67b505\"]}\n  ],\n  \"marks\": [\n    {\n      \"type\": \"arc\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"fill\": {\"scale\": \"color\", \"field\": \"continent\"},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"}\n        },\n        \"update\": {\n          \"startAngle\": {\"field\": \"startAngle\"},\n          \"endAngle\": {\"field\": \"endAngle\"},\n          \"cornerRadius\": {\"value\": 15},\n          \"padAngle\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.015, 0.015)\"\n          },\n          \"innerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 0.45, if(width >= height, height, width) / 2 * 0.5)\"\n          },\n          \"outerRadius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.8, if(width >= height, height, width) / 2 * 0.8)\"\n          },\n          \"opacity\": {\n            \"signal\": \"if(selected && selected.continent !== datum.continent, 1, 1)\"\n          },\n          \"stroke\": {\"signal\": \"scale('color', datum.continent)\"},\n          \"strokeWidth\": {\"signal\": \"strokeWidth\"},\n          \"fillOpacity\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, 0.8, 0.8)\"\n          }\n        }\n      }\n    },\n    {\n      \"type\": \"text\",\n      \"encode\": {\n        \"enter\": {\"fill\": {\"value\": \"#525252\"}, \"text\": {\"value\": \"\"}},\n        \"update\": {\n          \"opacity\": {\"value\": 1},\n          \"x\": {\"signal\": \"width / 2\"},\n          \"y\": {\"signal\": \"height / 2\"},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"},\n          \"fontSize\": {\"signal\": \"if(width >= height, height, width) * 0.05\"},\n          \"text\": {\"value\": \"Verification Status\"}\n        }\n      }\n    },\n    {\n      \"name\": \"mark_population\",\n      \"type\": \"text\",\n      \"from\": {\"data\": \"table\"},\n      \"encode\": {\n        \"enter\": {\n          \"text\": {\n            \"signal\": \"if(datum['endAngle'] - datum['startAngle'] < 0.3, '', format(datum['population'] / 1, '.0f'))\"\n          },\n          \"x\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"y\": {\"signal\": \"if(width >= height, height, width) / 2\"},\n          \"radius\": {\n            \"signal\": \"if(selected && selected.continent == datum.continent, if(width >= height, height, width) / 2 * 1.05 * 0.65, if(width >= height, height, width) / 2 * 0.65)\"\n          },\n          \"theta\": {\"signal\": \"(datum['startAngle'] + datum['endAngle'])/2\"},\n          \"fill\": {\"value\": \"#FFFFFF\"},\n          \"fontSize\": {\"value\": 12},\n          \"align\": {\"value\": \"center\"},\n          \"baseline\": {\"value\": \"middle\"}\n        }\n      }\n    }\n  ]\n}\n\n```\n## {.tabset}\n";
 
     char unverifiedPopulation[10];
     sprintf(unverifiedPopulation, "%d", getStatusCount(deadlineObject, "uncompleted"));
@@ -262,7 +263,7 @@ static int appendVcdPieChart(char** pageContent, const cJSON* deadlineObject){
     return 1;
 }
 
-static cJSON* getDeadlineObject(cJSON* verificationInformation, char* deadlineName){
+static cJSON* getDeadlineObject(cJSON* verificationInformation, const char* deadlineName){
     log_message(LOG_DEBUG, "Entering function getDeadlineObject");
     int arraySize = cJSON_GetArraySize(verificationInformation);
 
@@ -287,7 +288,7 @@ static cJSON* getDeadlineObject(cJSON* verificationInformation, char* deadlineNa
     return addDeadlineObject(verificationInformation, deadlineName);
 }
 
-static cJSON* addDeadlineObject(cJSON* verificationInformation, char* deadlineName){
+static cJSON* addDeadlineObject(cJSON* verificationInformation, const char* deadlineName){
     log_message(LOG_DEBUG, "Entering function addDeadlineObject");
     int arraySize = cJSON_GetArraySize(verificationInformation);
     int deadlineNumber = arraySize + 1;
@@ -305,7 +306,7 @@ static cJSON* addDeadlineObject(cJSON* verificationInformation, char* deadlineNa
     return deadlineObject;
 }
 
-static cJSON* getMethodArray(cJSON* statusObject, char* methodName){
+static cJSON* getMethodArray(cJSON* statusObject, const char* methodName){
     log_message(LOG_DEBUG, "Entering function getMethodArray");
 
     if(cJSON_HasObjectItem(statusObject, methodName)){
@@ -319,7 +320,7 @@ static cJSON* getMethodArray(cJSON* statusObject, char* methodName){
    return cJSON_GetObjectItem(statusObject, methodName);
 }
 
-static cJSON* getStatusObject(cJSON* deadlineObject, char* statusName){
+static cJSON* getStatusObject(cJSON* deadlineObject, const char* statusName){
     log_message(LOG_DEBUG, "Entering function getStatusObject");
 
     if(cJSON_HasObjectItem(deadlineObject, statusName)){
@@ -356,7 +357,7 @@ static bool verificationDeadlineEmpty(const cJSON* requirement, const char* Json
 }
 
 
-cJSON* parseVerificationInformation(cJSON* requirements){
+static cJSON* parseVerificationInformation(const cJSON* requirements){
     log_message(LOG_DEBUG, "Entering function parseVerificationInformation");
 
     int num_reqs = cJSON_GetArraySize(requirements);
@@ -386,9 +387,9 @@ cJSON* parseVerificationInformation(cJSON* requirements){
                 continue;
             }
 
-            char* deadlineName = cJSON_GetObjectItem(requirement, JsonItemNameDeadline)->valuestring;
-            char* methodName = cJSON_GetObjectItem(requirement, JsonItemNameMethod)->valuestring;
-            char* statusName = cJSON_GetObjectItem(requirement, JsonItemNameStatus)->valuestring;
+            const char* deadlineName = cJSON_GetObjectItem(requirement, JsonItemNameDeadline)->valuestring;
+            const char* methodName = cJSON_GetObjectItem(requirement, JsonItemNameMethod)->valuestring;
+            const char* statusName = cJSON_GetObjectItem(requirement, JsonItemNameStatus)->valuestring;
 
             cJSON* deadlineObject = getDeadlineObject(verificationInformation, deadlineName);
 
