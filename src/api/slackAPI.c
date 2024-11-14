@@ -309,8 +309,8 @@ void sendCompletedStatusMessage(const char *commandName){
     log_message(LOG_DEBUG, "Entering function sendCompletedStatusMessage");
     
 
-    commandStatusMessage->message = duplicate_Malloc(commandName);
-    commandStatusMessage->message = appendToString(commandStatusMessage->message, " finished");
+    commandStatusMessage->message = duplicate_Malloc("Finished ");
+    commandStatusMessage->message = appendToString(commandStatusMessage->message, commandName);
 
     updateSlackMessage(commandStatusMessage);
     

@@ -479,6 +479,28 @@ command** executeCommand(command** commandQueue){
         sendCompletedStatusMessage("createMissingRequirementPages");
     }
 
+    else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "sync") == 0){
+        sendStartingStatusMessage("sync");
+        
+        updateCommandStatusMessage("Starting createMissingRequirementPages");
+        createMissingRequirementPages(**commandQueue);
+        updateCommandStatusMessage("finished createMissingRequirementPages");
+
+        updateCommandStatusMessage("Starting updateDRL");
+        syncDrlToSheet(**commandQueue);
+        updateCommandStatusMessage("finished updateDRL");
+
+        updateCommandStatusMessage("Starting updateReq");
+        updateRequirementPage(**commandQueue);
+        updateCommandStatusMessage("finished updateReq");
+
+        updateCommandStatusMessage("Starting updateVCD");
+        updateVcdPage(**commandQueue);
+        updateCommandStatusMessage("finished updateVCD");
+
+        sendCompletedStatusMessage("sync");
+    }
+
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "help") == 0){
         sendMessageToSlack("Here is a list of commands: ");
         sendMessageToSlack("shutdown");
@@ -502,6 +524,11 @@ command** executeCommand(command** commandQueue){
         sendMessageToSlack("createMissingRequirementPages");
         sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
         sendMessageToSlack("-> example: updateDRL ST");
+        sendMessageToSlack("-----------------");
+        sendMessageToSlack("sync");
+        sendMessageToSlack("-> Description: Fully synchronises all of the requirements by running createMissingRequirementPages, updateDRL, updateReq and updateVCD on its own.");
+        sendMessageToSlack("-> Argument (1) (oligatory): acronym of the subsystem you want to update");
+        sendMessageToSlack("-> example: sync ST");
     }
 
     else{
