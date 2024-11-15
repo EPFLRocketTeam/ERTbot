@@ -220,7 +220,7 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
 
 
     //If received a message which was not sent by bot, breakdown message into command structure and return command
-    if(slackMsg->sender && strcmp(slackMsg->sender, "U06RQCAT0H1") != 0){
+    if(slackMsg->message && slackMsg->timestamp && slackMsg->sender  && strcmp(slackMsg->sender, "U06RQCAT0H1") != 0){
         breakdownCommand(slackMsg->message, &cmd);
         log_message(LOG_DEBUG, "Command broke down");
         *headOfPeriodicCommands_Global = addCommandToQueue(headOfPeriodicCommands_Global, cmd.function, cmd.argument);
@@ -238,14 +238,17 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
 
     if(slackMsg->message){
         free(slackMsg->message);
+        slackMsg->message = NULL;
     }
 
     if(slackMsg->sender){
         free(slackMsg->sender);
+        slackMsg->sender = NULL;
     }
 
     if(slackMsg->timestamp){
         free(slackMsg->timestamp);
+        slackMsg->timestamp = NULL;
     }
 
     if(slackMsg){
@@ -284,7 +287,7 @@ command** checkForCommand(command** headOfCommandQueue_Global, PeriodicCommand**
     log_message(LOG_DEBUG, "Entering function checkForCommand");
 
     headOfCommandQueue_Global = lookForCommandOnSlack(headOfCommandQueue_Global);
-    headOfCommandQueue_Global = checkAndEnqueuePeriodicCommands(headOfCommandQueue_Global, headOfPeriodicCommands_Global);
+    //headOfCommandQueue_Global = checkAndEnqueuePeriodicCommands(headOfCommandQueue_Global, headOfPeriodicCommands_Global);
 
     log_message(LOG_DEBUG, "Exiting function checkForCommand");
     return headOfCommandQueue_Global;
@@ -460,7 +463,7 @@ command** executeCommand(command** commandQueue){
         sendStartingStatusMessage("updateDRL");
 
         syncDrlToSheet(**commandQueue);
-        
+
         sendCompletedStatusMessage("updateDRL");
     }
 
@@ -474,9 +477,9 @@ command** executeCommand(command** commandQueue){
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "updateVCD") == 0){
         sendStartingStatusMessage("updateVCD");
-        
+
         updateVcdPage(**commandQueue);
-        
+
         sendCompletedStatusMessage("updateVCD");
     }
 
@@ -490,7 +493,7 @@ command** executeCommand(command** commandQueue){
 
     else if ((*commandQueue)->function && strcmp((*commandQueue)->function, "sync") == 0){
         sendStartingStatusMessage("sync");
-        
+
         updateCommandStatusMessage("Starting createMissingRequirementPages");
         createMissingRequirementPages(**commandQueue);
         updateCommandStatusMessage("finished createMissingRequirementPages");
