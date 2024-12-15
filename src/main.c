@@ -27,47 +27,39 @@ char *lastPageRefreshCheck;
 command **headOfCommandQueue;
 
 #ifndef TESTING
-int main()
-{
+int main(){
     log_message(LOG_DEBUG, __func__, "\n\nStarting program\n\n");
 
-    // initalise
     initializeApiTokenVariables();
     initialiseSlackCommandStatusMessage();
     lastPageRefreshCheck = getCurrentEDTTimeString();
-    // declare command queue variable
     headOfCommandQueue = (command **)malloc(sizeof(command *));
     *headOfCommandQueue = NULL;
     int cyclesSinceLastCommand = 0; // reduce number of API calls when "Idling"
 
     sendMessageToSlack("Wiki-Toolbox is Online");
 
-    while (1)
-    {
+    while (1){
 
         headOfCommandQueue = checkForCommand(headOfCommandQueue);
         sleep(1);
 
-        if (*headOfCommandQueue)
-        {
+        if (*headOfCommandQueue){
             cyclesSinceLastCommand = 0;
             log_message(LOG_DEBUG, __func__, "command received");
             headOfCommandQueue = executeCommand(headOfCommandQueue);
         }
 
-        else
-        {
+        else{
             cyclesSinceLastCommand++;
             log_message(LOG_DEBUG, __func__, "No command received.");
         }
 
-        if (cyclesSinceLastCommand > 20)
-        {
+        if (cyclesSinceLastCommand > 20){
             sleep(1);
         }
 
-        if (cyclesSinceLastCommand > 200)
-        {
+        if (cyclesSinceLastCommand > 200){
             sleep(28);
         }
     }

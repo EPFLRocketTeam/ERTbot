@@ -21,23 +21,19 @@ char* replaceWord_Malloc(const char* inputString, const char* wordToReplace, con
     size_t newWordLength = strlen(newWord);
     size_t wordToReplaceLength = strlen(wordToReplace);
 
-    // Count occurrences of the word to replace in the input string
     const char *ptr = inputString;
     while ((ptr = strstr(ptr, wordToReplace)) != NULL) {
         cnt++;
         ptr += wordToReplaceLength;
     }
 
-    // Calculate the required length for the result string
     size_t len = strlen(inputString) + cnt * (newWordLength - wordToReplaceLength) + 1;
 
-    // Allocate memory for the result string
     result = (char*)malloc(len);
     if (!result) return NULL;
 
     size_t i = 0;  
 
-    // Copy and replace occurrences of the word
     while (*inputString) {
         const char *match = strstr(inputString, wordToReplace);
         if (match == inputString) {
@@ -68,37 +64,26 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
     size_t newWordLength = strlen(newWord);
     size_t wordToReplaceLength = strlen(wordToReplace);
 
-
-    // Count occurrences of wordToReplace in inputString
     const char *ptr = inputString;
     while ((ptr = strstr(ptr, wordToReplace)) != NULL) {
         cnt++;
         ptr += wordToReplaceLength;
     }
 
-    // Calculate new length needed
     size_t newLength = 1 + strlen(inputString) + cnt * (newWordLength - wordToReplaceLength);
 
-    // Reallocate inputString to new size
     char* resizedString = realloc(inputString, sizeof(char*) * newLength);
     if (resizedString == NULL){
-        return NULL;  // Check if realloc succeeded
+        return NULL;  
     }
     inputString = resizedString;
 
-    // Replace occurrences of wordToReplace with newWord in place
     const char* result = inputString;
     char* pos = strstr(result, wordToReplace);
     while (pos) {
         size_t remainingLength = strlen(pos + wordToReplaceLength);
-        //log_message(LOG_DEBUG, __func__, "replaceWord_Realloc: remainingLength: %zu", remainingLength);
-        // Shift the remaining part of the string to make room for newWord, if needed
-        memmove(pos + newWordLength, pos + wordToReplaceLength, sizeof(char) *remainingLength + 1);  // Include '\0'
-
-        // Copy newWord into the position
+        memmove(pos + newWordLength, pos + wordToReplaceLength, sizeof(char) *remainingLength + 1);
         memcpy(pos, newWord, newWordLength);
-
-        // Move result pointer to next potential position
         result = pos + newWordLength;
         pos = strstr(result, wordToReplace);
     }
@@ -110,13 +95,11 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
 char* replaceParagraph(char* original, char* newSubstring, char* startPtr, char* endPtr) {
     log_function_entry(__func__);
 
-    // Check for null pointers
     if (original == NULL || newSubstring == NULL || startPtr == NULL || endPtr == NULL) {
         log_message(LOG_ERROR, __func__, "Null pointer input original:%ld, newSubstring: %ld, startPtr: %ld, endPtr: %ld", (long)original, (long)newSubstring, (long)startPtr, (long)endPtr);
         return NULL;
     }
 
-    // Check that startPtr and endPtr are within bounds
     if (startPtr < original || endPtr >= original + strlen(original)) {
         log_message(LOG_ERROR, __func__, "startPtr or endPtr out of bounds. startPtr: %ld, endPtr: %ld, original end: %ld", (long)startPtr, (long)endPtr, (long)(original + strlen(original)));
         log_message(LOG_DEBUG, __func__, " startPtr is at: \"%ld\"", (long)startPtr);
@@ -124,7 +107,6 @@ char* replaceParagraph(char* original, char* newSubstring, char* startPtr, char*
         return NULL;
     }
 
-    // Calculate the lengths
     size_t originalLen = strlen(original);
     size_t newSubLen = strlen(newSubstring);
     size_t replaceLen = endPtr - startPtr + 1;
@@ -132,7 +114,6 @@ char* replaceParagraph(char* original, char* newSubstring, char* startPtr, char*
 
     log_message(LOG_DEBUG, __func__, "lengths set");
 
-    // Create a temporary buffer to hold the modified string
     char *temp = malloc(finalLen + 1 * sizeof(char));
     if (temp == NULL) {
         log_message(LOG_ERROR, __func__, "Memory allocation failed");
@@ -141,19 +122,14 @@ char* replaceParagraph(char* original, char* newSubstring, char* startPtr, char*
     memset(temp, 0, finalLen + 1);
     log_message(LOG_DEBUG, __func__, "buffer set");
 
-    // Copy the part before the replaced section
     strncpy(temp, original, startPtr - original);
     log_message(LOG_DEBUG, __func__, "copied first part");
 
-    // Copy the new substring
     strcat(temp, newSubstring);
     log_message(LOG_DEBUG, __func__, "copied new part");
 
-    // Copy the part after the replaced section
     strcat(temp, endPtr + 1);
     log_message(LOG_DEBUG, __func__, "copied end");
-
-    // Copy the modified string back to the original
 
     log_function_exit(__func__);
     return temp;
@@ -162,20 +138,17 @@ char* replaceParagraph(char* original, char* newSubstring, char* startPtr, char*
 char* createCombinedString(const char *str1, const char *str2) {
     log_function_entry(__func__);
 
-    // Calculate the length of str1 and str2
     size_t len1 = strlen(str1);
     size_t len2 = strlen(str2);
     size_t len3 = len1 + len2 + 1;
 
-    // Allocate memory for the combined string
-    char *combined = (char *)malloc(len3); // +1 for the null terminator
+    char *combined = (char *)malloc(len3);
 
     if (combined == NULL) {
         log_message(LOG_ERROR, __func__, "Memory allocation failed");
         exit(1);
     }
 
-    // Copy the contents of str1 and str2 into combined
     strlcpy(combined, str1, len3);
     strcat(combined, str2);
 
@@ -188,38 +161,34 @@ char* extractText(const char *inputString, const char *startDelimiter, const cha
     log_function_entry(__func__);
 
     if (inputString == NULL || startDelimiter == NULL || endDelimiter == NULL) {
-        return NULL; // Invalid parameters
+        return NULL;
     }
 
-    // Find the start of the paragraph based on the start delimiter
     const char *startOfParagraph = strstr(inputString, startDelimiter);
     if (startOfParagraph == NULL) {
-        return NULL; // Start delimiter not found
+        return NULL;
     }
     if (!includeStart) {
         startOfParagraph += strlen(startDelimiter);
     }
 
-    // Find the end of the paragraph based on the end delimiter
     const char *endOfParagraph = strstr(startOfParagraph, endDelimiter);
     if (endOfParagraph == NULL) {
-        return NULL; // End delimiter not found
+        return NULL;
     }
     if (includeEnd) {
         endOfParagraph += strlen(endDelimiter);
     }
 
-    // Calculate the length of the substring to extract
     size_t length = endOfParagraph - startOfParagraph;
     char *substring = (char*)malloc(length + 1);
 
     if (!substring) {
-        return NULL; // Memory allocation failed
+        return NULL;
     }
 
-    // Copy the substring and null-terminate it
     strncpy(substring, startOfParagraph, length);
-    substring[length] = '\0';  // Null-terminate the string
+    substring[length] = '\0';
 
 
     log_function_exit(__func__);
@@ -233,12 +202,10 @@ char* appendToString(char *original, const char *strToAppend) {
         return original; // Nothing to append
     }
 
-    // Calculate the length of original string and the string to append
     size_t lenOriginal = original ? strlen(original) : 0;
     size_t lenAppend = strlen(strToAppend);
     size_t len = lenOriginal + lenAppend + 1;
 
-    // Reallocate memory for the combined string (original + append + null terminator)
     char *combined = realloc(original, len);
 
     if (combined == NULL) {
@@ -246,11 +213,10 @@ char* appendToString(char *original, const char *strToAppend) {
         exit(1);
     }
 
-    // Copy/concatenate the new string
-    strlcpy(combined + lenOriginal, strToAppend, len); // Append strToAppend to the end of original
+    strlcpy(combined + lenOriginal, strToAppend, len);
 
     log_function_exit(__func__);
-    return combined; // Return the reallocated and combined string
+    return combined;
 }
 
 char* duplicate_Malloc(const char *src) {

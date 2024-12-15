@@ -11,7 +11,6 @@ pageList* addPageToList(pageList** head, const char *id, const char *title, cons
         exit(1);
     }
 
-    // Allocate memory and copy the path and id
     newNode->id = NULL;
     newNode->title = NULL;
     newNode->path = NULL;
@@ -28,21 +27,18 @@ pageList* addPageToList(pageList** head, const char *id, const char *title, cons
     allocateAndCopy(&newNode->content, content, "newNode->content");
     allocateAndCopy(&newNode->updatedAt, updatedAt, "newNode->updatedAt");
 
-    newNode->next = NULL;  // New node will be the last node
+    newNode->next = NULL; 
 
-    // If the list is empty, make the new node the first node
     if (*head == NULL) {
         *head = newNode;
         return *head;
     }
 
-    // Traverse the list to find the last node
     pageList* lastNode = *head;
     while (lastNode->next != NULL) {
         lastNode = lastNode->next;
     }
 
-    // Link the new node after the last node
     lastNode->next = newNode;
 
     log_function_exit(__func__);

@@ -52,32 +52,21 @@ void wikiApi(char *query){
     resetChunkResponse();
 
     if (curl) {
-        // Set the API URL
         curl_easy_setopt(curl, CURLOPT_URL, "https://rocket-team.epfl.ch/graphql");
         curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
-        // Set the HTTP method to POST
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
-        // Set the Content-Type header
         headers = curl_slist_append(headers, "Content-Type: application/json");
-        // Set the GraphQL query as the request payload
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, query);
-        // Add Authorization header with the API key
         char auth_header[1024];
         snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s ", WIKI_API_TOKEN);
         headers = curl_slist_append(headers, auth_header);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        // Set the callback function to handle the response
-        // Send all data to this function
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-        /* we pass our 'chunk' struct to the callback function */
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
-        // Perform the HTTP request
         res = curl_easy_perform(curl);
-        // Check for errors
         if (res != CURLE_OK) {
             log_message(LOG_ERROR, __func__, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         }
-        // Check the HTTP status code
         long http_code = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         if (http_code != 200) {
@@ -85,7 +74,6 @@ void wikiApi(char *query){
             log_message(LOG_ERROR, __func__, "chunk.resposnse: %s", chunk.response);
             exit(-1);
         }
-        // Clean up
         curl_easy_cleanup(curl);
         curl_slist_free_all(headers);
     }

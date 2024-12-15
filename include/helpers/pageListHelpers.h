@@ -19,10 +19,6 @@
  *
  * @details This function allocates memory for a new `pageList` node, copies the provided page details into the new node,
  *          and appends it to the end of the linked list. If the list is empty, the new node becomes the head of the list.
- *
- * @note Ensure that the provided strings (`id`, `title`, `path`, `description`, `content`, `updatedAt`, `createdAt`) are
- *       valid and properly formatted. Memory allocated for the new node's strings should be freed when the node is no
- *       longer needed to prevent memory leaks.
  */
 pageList* addPageToList(pageList** head, const char *id, const char *title, const char *path, const char *description, const char *content, const char *updatedAt);
 

@@ -18,9 +18,6 @@
  *          occurrences of `wordToReplace` replaced by `newWord`. It uses `strstr` to locate occurrences and `strcpy`
  *          to copy the new word into the result string. The function handles the memory allocation for the result
  *          string and appends a null terminator at the end.
- *
- * @note The function assumes that the input strings (`inputString`, `wordToReplace`, and `newWord`) are valid and
- *       null-terminated. Memory allocated for the result string should be freed by the caller when it is no longer needed.
  */
 char* replaceWord_Malloc(const char* inputString, const char* wordToReplace, const char* newWord);
 
@@ -42,11 +39,6 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
  *          buffer, and constructs the modified string by concatenating the parts before the section, the new substring,
  *          and the parts after the section. The function returns a pointer to the newly allocated string containing the
  *          modified content.
- *
- * @note The function assumes that `original`, `newSubstring`, `startPtr`, and `endPtr` are valid and properly set up.
- *       Memory allocated for the new string should be freed by the caller when it is no longer needed.
- *
- * @warning Ensure that `startPtr` and `endPtr` are within the bounds of the original string and that `startPtr` <= `endPtr`.
  */
 char* replaceParagraph(char *original, char *newSubstring, char *startPtr, char *endPtr);
 
@@ -64,11 +56,6 @@ char* replaceParagraph(char *original, char *newSubstring, char *startPtr, char 
  *          to hold the combined string including the null terminator, and concatenates the two strings. If memory
  *          allocation fails, the function prints an error message and terminates the program.
  *
- * @note The function assumes that both `str1` and `str2` are valid, null-terminated strings. The allocated memory for
- *       the combined string should be freed by the caller when it is no longer needed.
- *
- * @warning Ensure that `str1` and `str2` are not `NULL`. Memory allocation failure will result in the program exiting
- *          with an error message.
  */
 char* createCombinedString(const char *str1, const char *str2);
 
@@ -90,11 +77,6 @@ char* createCombinedString(const char *str1, const char *str2);
  *          the text starting right after the `startDelimiter` is considered. If `includeEnd` is `true`, the text up to and
  *          including the `endDelimiter` is extracted; otherwise, the text up to but not including the `endDelimiter` is
  *          extracted.
- *
- * @note The function allocates memory for the resulting substring. Ensure to free the allocated memory to avoid memory leaks.
- *
- * @warning Ensure that `inputString`, `startDelimiter`, and `endDelimiter` are not `NULL`. Handle potential memory
- *          allocation failure and check for null pointers in practice.
  */
 char* extractText(const char *inputString, const char *startDelimiter, const char *endDelimiter, bool includeStart, bool includeEnd);
 
@@ -110,11 +92,6 @@ char* extractText(const char *inputString, const char *startDelimiter, const cha
  * @param strToAppend Pointer to the string that will be appended to the original string. If NULL, the original string is returned without changes.
  * @return A pointer to the combined string with `strToAppend` appended to `original`.
  *         The returned string is dynamically allocated and must be freed by the caller.
- *
- * @note The function internally uses `realloc`, so it may change the memory address of the `original` string.
- * @note If memory reallocation fails, the program will log an error and terminate with `exit(1)`.
- *
- * @warning The caller is responsible for freeing the memory of the returned string to avoid memory leaks.
  */
 char* appendToString(char *original, const char *strToAppend);
 

@@ -30,31 +30,18 @@ static int slackPostApi(char* url, char* postFields){
     resetChunkResponse();
 
     if(curl) {
-        // Set the URL for Slack message posting
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
-
-        // Set the POST data (JSON payload)
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postFields);
-
-        // Set the write function to ignore the response
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
-
-        // Add headers
         headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
         headerlist = curl_slist_append(headerlist, "charset: utf-8");
-
         char auth_header[128];
         snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s", SLACK_API_TOKEN);
         headerlist = curl_slist_append(headerlist, auth_header);
-
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-
-        // Perform the request
         res = curl_easy_perform(curl);
-
-        // Clean up
         curl_easy_cleanup(curl);
         curl_slist_free_all(headerlist);
 
@@ -118,35 +105,22 @@ void checkLastSlackMessage() {
     curl = curl_easy_init();
 
     if (curl) {
-        // Set the URL for Slack API conversation history
         char url[256];
         snprintf(url, sizeof(url), "https://slack.com/api/conversations.history?channel=%s&limit=1", SLACK_WIKI_TOOLBOX_CHANNEL);
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
-
-        // Add headers
         headers = curl_slist_append(headers, buf);
         char auth_header[128];
         snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s", SLACK_API_TOKEN);
         headers = curl_slist_append(headers, auth_header);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-        // Set the write callback function
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
-
-        // Perform the HTTP GET request
         curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
-
-        // Perform the HTTP request
         res = curl_easy_perform(curl);
-
-        // Check for errors
         if (res != CURLE_OK) {
             log_message(LOG_ERROR, __func__, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         }
-
-        // Check the HTTP status code
         long http_code = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         if (http_code != 200) {

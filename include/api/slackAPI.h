@@ -16,9 +16,6 @@
  *          The function sets up the necessary HTTP headers, including the authorization token, and sends the request
  *          using libcurl. If the request fails or if the libcurl initialization fails, the function returns 1.
  *          On success, it returns 0.
- *
- * @note The function assumes that the environment variable `SLACK_API_TOKEN` is set with the Slack API token, and that
- *       `SLACK_WIKI_TOOLBOX_CHANNEL` contains the channel ID. The maximum message length is defined by `MAX_MESSAGE_LENGTH`.
  */
 int sendMessageToSlack(char *message);
 
@@ -30,10 +27,6 @@ int sendMessageToSlack(char *message);
  *          is handled by the `writeCallback` function, which stores the result in a memory buffer. The function also
  *          checks for any errors in the HTTP request and verifies the HTTP status code. Resources are cleaned up
  *          after the request is completed.
- *
- * @note The function assumes that the environment variables `SLACK_API_TOKEN` and `SLACK_WIKI_TOOLBOX_CHANNEL`
- *       are set with the appropriate values. The function uses a global variable `chunk` of type `struct memory`
- *       to store the response data.
  */
 void checkLastSlackMessage();
 

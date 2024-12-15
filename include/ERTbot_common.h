@@ -19,10 +19,6 @@ extern char *lastPageRefreshCheck;
  *
  * @var memory::size
  * The size of the data stored in the `response` pointer.
- *
- * @details
- * The `memory` structure is typically used in scenarios where data needs to be accumulated in memory,
- * such as when making HTTP requests and storing the response for further processing.
  */
 typedef struct memory {
     char *response;
@@ -53,10 +49,6 @@ extern memory chunk;
  *
  * @var slackMessage::timestamp
  * Pointer to a string representing the timestamp when the message was sent.
- *
- * @details
- * The `slackMessage` structure is useful for storing and processing messages retrieved from Slack
- * in applications that interact with the Slack API or manage Slack communications.
  */
 typedef struct slackMessage {
   char *message;
@@ -96,11 +88,6 @@ extern slackMessage* commandStatusMessage;
  *
  * @var pageList::next
  * Pointer to the next node in the linked list of pages.
- *
- * @details
- * The `pageList` structure allows for the creation of a linked list where each node contains all the necessary
- * information about a page. This can be used in applications that need to manage or display a collection of pages,
- * such as a content management system or documentation tool.
  */
 typedef struct pageList {
     char *id;
@@ -117,30 +104,12 @@ typedef struct pageList {
 /**
  * @var default_page
  * @brief Externally declared instance of the `pageList` structure representing the default page.
- *
- * This variable is an instance of the `pageList` structure and is declared externally.
- * It is intended to represent a default page with pre-defined or fallback values in the context of the application.
- *
- * @details
- * The `default_page` instance can be used as a template or fallback when no other page is available or
- * when initializing the system with a base set of page properties.
- * The actual definition of `default_page` is expected to be in another source file, making it accessible across multiple files.
  */
 extern pageList default_page;
 
 /**
  * @struct command
- * @brief Represents a command with a function name and up to nine arguments.
- *
- * The `command` structure is used to encapsulate a function name along with a variable number of arguments (up to nine).
- * This structure can be utilized to represent a command that is to be executed, with the arguments specifying the
- * parameters needed by the function.
- *
- * @details
- * - `function`: A string representing the name of the function to be executed.
- * - `argument` to `argument_9`: Strings representing the arguments that are passed to the function.
- *   These fields are optional and may be left NULL if not used.
- * - `next`: A pointer to the next command in a sequence, allowing commands to be chained together.
+ * @brief Represents a command with a function name and the argument.
  */
 typedef struct command {
     char *function;
@@ -153,9 +122,6 @@ extern command** headOfCommandQueue;
 /**
  * @struct wikiFlag
  * @brief Represents a flag in the wiki system that contains a command, pointers, and a link to the next flag.
- *
- * The `wikiFlag` structure is used to manage flags within the wiki system. Each flag contains a command to be executed,
- * two additional pointers for auxiliary data, and a link to the next flag in the sequence.
  *
  * @details
  * - `cmd`: A `command` structure representing the function and its associated arguments.

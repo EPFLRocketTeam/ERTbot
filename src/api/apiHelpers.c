@@ -36,8 +36,8 @@ void initializeApiTokenVariables() {
 size_t writeCallback(const void *data, size_t size, size_t nmemb, void *clientp) {
     log_function_entry(__func__);
 
-    size_t realsize = size * nmemb; // set the size of the chunk of memory
-    struct memory *mem = (struct memory *)clientp; //points to a struct which is the buffer to store data in
+    size_t realsize = size * nmemb;
+    struct memory *mem = (struct memory *)clientp;
 
     char *ptr = realloc(mem->response, mem->size + realsize + 1);
     if(!ptr){

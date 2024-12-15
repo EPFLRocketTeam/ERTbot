@@ -31,30 +31,25 @@ static command* addCommandToQueue(command** head, const char *function, const ch
         exit(1);
     }
 
-    // Initialize all pointers to NULL
     newNode->function = NULL;
     newNode->argument = NULL;
 
-     // Set function and arguments using the helper function
     setCommandArgument(&newNode->function, function, "function");
     setCommandArgument(&newNode->argument, argument, "argument");
 
     log_message(LOG_DEBUG, __func__, "All arguments added to command struct");
     newNode->next = NULL;  // New node will be the last node
 
-    // If the list is empty, make the new node the first node
     if (*head == NULL) {
         *head = newNode;
         return *head;
     }
 
-    // Traverse the list to find the last node
     command* lastNode = *head;
     while (lastNode->next != NULL) {
         lastNode = lastNode->next;
     }
 
-    // Link the new node after the last node
     lastNode->next = newNode;
 
     log_message(LOG_DEBUG, __func__, "Command added to queue");
@@ -69,19 +64,14 @@ void removeFirstCommand(command **head) {
     log_message(LOG_DEBUG, __func__, "About to remove first command");
 
     if (*head == NULL) {
-        // The list is already empty, nothing to remove
         return;
     }
 
     log_message(LOG_DEBUG, __func__, "Creating a temporary pointer to a command");
-    // Save the current head node to free it later
     command* temp = *head;
 
     log_message(LOG_DEBUG, __func__, "Placing the head on to the next command");
-    // Update the head to point to the next node
     *head = (*head)->next;
-
-    // Free the memory of the removed node
 
     if (temp->function && temp->function != NULL){
         free(temp->function);
@@ -173,28 +163,23 @@ void breakdownCommand(const char* sentence, command* cmd) {
     char* token;
     int word_count = 0;
 
-    // Copy the sentence to avoid modifying the original string
     char* sentence_copy = duplicate_Malloc(sentence);
 
-    // Tokenize the sentence
     token = strtok(sentence_copy, " ");
     while (token != NULL && word_count < MAX_ARGUMENTS) {
         words[word_count++] = token;
         token = strtok(NULL, " ");
     }
 
-    // Check if the sentence has more than ten words
     if (word_count > MAX_ARGUMENTS) {
         log_message(LOG_ERROR, __func__, "Error: Sentence contains more than ten words.");
         free(sentence_copy);
         return;
     }
 
-    // Initialize the command struct fields to NULL
     cmd->function = NULL;
     cmd->argument = NULL;
 
-    // Copy words into struct fields
     for (int i = 0; i < word_count; i++) {
         switch (i) {
             case 0:

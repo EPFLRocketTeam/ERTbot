@@ -56,16 +56,6 @@ void batchGetSheet(const char *sheetId, const char *range);
 
 /**
  * @brief Refreshes the OAuth token by sending a POST request to the Google OAuth 2.0 server.
- *
- * @details This function sends a POST request to the Google OAuth 2.0 token endpoint to refresh the access token
- *          using the refresh token. The required client ID, client secret, and refresh token are retrieved from
- *          environment variables (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`).
- *          The response, which includes the new access token, is handled by the `writeCallback` function and stored in a
- *          memory buffer. The function also handles error checking and resource cleanup after the request.
- *
- * @note The function assumes that the environment variables `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and
- *       `GOOGLE_REFRESH_TOKEN` are set. It also assumes the existence of a global variable `chunk` of type
- *       `struct memory` for storing the response, and the presence of the `writeCallback` function to handle the response.
  */
 void refreshOAuthToken();
 

@@ -3,59 +3,13 @@
 
 #include <stddef.h>
 
-/**
- * @brief Global variable which stores the API token for Github.
- *        Declared in api.h, defined in api.c and initialised in
- *        initializeApiTokenVariables.
- */
+
 extern char *GITHUB_API_TOKEN;
-
-/**
- * @brief Global variable which stores the API token for the Wiki.
- *
- * @details Declared in api.h, defined in api.c and initialised in
- *          initializeApiTokenVariables.
- */
 extern char *WIKI_API_TOKEN;
-
-/**
- * @brief Global variable which stores the API token for Slack.
- *
- * @details Declared in api.h, defined in api.c and initialised in
- *          initializeApiTokenVariables.
- */
 extern char *SLACK_API_TOKEN;
-
-/**
- * @brief Global variable which stores the API token for Google Sheet.
- *
- * @details Declared in api.h, defined in api.c and initialised in
- *          refreshOAuthToken.
- */
 extern char *SHEET_API_TOKEN;
-
-/**
- * @brief Global variable which stores the Google Client ID used for OAuth 2.0 Token refresh.
- *
- * @details Declared in api.h, defined in api.c and initialised in
- *          initializeApiTokenVariables.
- */
 extern char *GOOGLE_CLIENT_ID;
-
-/**
- * @brief Global variable which stores the Google Client Secret used for OAuth 2.0 Token refresh.
- *
- * @details Declared in api.h, defined in api.c and initialised in
- *          initializeApiTokenVariables.
- */
 extern char *GOOGLE_CLIENT_SECRET;
-
-/**
- * @brief Global variable which stores the Google Refresh Token used for OAuth 2.0 Token refresh.
- *
- * @details Declared in api.h, defined in api.c and initialised in
- *          initializeApiTokenVariables.
- */
 extern char *GOOGLE_REFRESH_TOKEN;
 
 /**

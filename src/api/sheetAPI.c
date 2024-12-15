@@ -32,31 +32,21 @@ void sheetAPI(char *query, char *url, char *requestType) {
     resetChunkResponse();
 
     if (curl) {
-        // Set the URL for the request
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
-        // Set the HTTP headers
         headers = curl_slist_append(headers, "Content-Type: application/json");
         char auth_header[1024];
         snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s ", SHEET_API_TOKEN);
         headers = curl_slist_append(headers, auth_header);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        // Set the request type to PUT
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, requestType);
-        // Set the query for the request
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, query);
-        // Set the callback function to handle the response
-        // Send all data to this function
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-        /* we pass our 'chunk' struct to the callback function */
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
-        // Perform the request
         res = curl_easy_perform(curl);
-        // Check for errors
         if (res != CURLE_OK) {
             log_message(LOG_ERROR, __func__, "sheetAPI: curl_easy_perform() failed: %s", curl_easy_strerror(res));
         }
-        // Clean up
         curl_easy_cleanup(curl);
         curl_slist_free_all(headers);
     }
@@ -77,7 +67,6 @@ void refreshOAuthToken() {
         return;
     }
 
-    // Set up the data for the POST request
     char postfields[1024];
     snprintf(postfields, sizeof(postfields), "client_id=%s&client_secret=%s&refresh_token=%s&grant_type=refresh_token", GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN);
 
@@ -87,25 +76,13 @@ void refreshOAuthToken() {
     curl = curl_easy_init();
 
     if(curl) {
-        // Set the URL for the token request
         curl_easy_setopt(curl, CURLOPT_URL, "https://oauth2.googleapis.com/token");
         curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
-        // Specify that we want to send a POST request
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
-
-        // Set the POST fields
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postfields);
-
-        // Pass the callback function to handle the response
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-
-        // Pass the memory structure to the callback function
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
-
-        // Perform the request and get the response code
         res = curl_easy_perform(curl);
-
-        // Check for errors
         if(res != CURLE_OK) {
             log_message(LOG_ERROR, __func__, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         } 

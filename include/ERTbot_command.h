@@ -22,9 +22,6 @@ command** executeCommand(command** commandQueue);
  *          It handles up to ten words (one function and nine arguments). If the sentence contains more than ten words,
  *          an error message is printed. All allocated strings in the `command` structure are dynamically allocated and
  *          should be freed by the caller when no longer needed.
- *
- * @note The `MAX_ARGUMENTS` constant should define the maximum number of arguments allowed (including the function name).
- *       The `command` structure should have fields for storing the function and up to nine arguments.
  */
 void breakdownCommand(const char* sentence, command* cmd);
 
