@@ -16,4 +16,6 @@ Suite *wikiAPI_suite(void);
 Suite *requirementHelpers_suite(void);
 
 Suite *updateVcdPage_suite(void);
+
+Suite *errorState_suite(void);
 #endif

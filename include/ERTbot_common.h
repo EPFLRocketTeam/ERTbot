@@ -180,6 +180,36 @@ typedef struct PeriodicCommand {
 
 extern PeriodicCommand** headOfPeriodicCommands;
 
+typedef struct ErrorState {
+    int errorCode;                  // Error code
+    char errorMessage[256];         // Error message
+    const char *functionName;       // Name of the function where the error occurred
+    struct ErrorState *next;        // Pointer to the next error (linked list)
+} ErrorState;
+
+void addError(int code, const char *message, const char *functionName);
+
+ErrorState *getErrorList();
+
+ErrorState *getLatestError();
+
+void clearErrorList();
+
+void removeLastError();
+
+typedef enum {
+    ERROR_UNKNOWN = 1000,
+    ERROR_NULL_POINTER,
+    ERROR_OUT_OF_MEMORY,
+    ERROR_INVALID_ARG,
+    ERROR_BUFFER_OVERFLOW,
+
+    ERROR_FILE_NOT_FOUND = 2000,
+    ERROR_FILE_READ,
+    ERROR_FILE_WRITE,
+    ERROR_FILE_PERMISSION,
+    ERROR_FILE_CORRUPT
+} ErrorCode;
 
 #define LOG_DEBUG 0
 #define LOG_INFO 1

@@ -24,6 +24,7 @@ set(SOURCES
     src/main.c
     src/log.c
     src/command.c
+    src/error.c
     src/api/apiHelpers.c
     src/api/sheetAPI.c
     src/api/slackAPI.c
@@ -89,6 +90,7 @@ set(TEST_SOURCES
     tests/api/test_wikiAPI.c
     tests/features/test_createMissingRequirementPages.c
     tests/helpers/test_requirementHelpers.c
+    tests/test_error.c
 )
 
 # Test executable
