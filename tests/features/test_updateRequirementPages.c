@@ -29,7 +29,7 @@ START_TEST(test_updateRequirementPages_1) {
     checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage1);
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
-        log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
+        log_message(LOG_ERROR, __func__, "%s: %s", checkPage1->title, checkPage1->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage1->title);
     }
     freePageList(&checkPage1);
@@ -38,7 +38,7 @@ START_TEST(test_updateRequirementPages_1) {
     checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage2);
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
-        log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
+        log_message(LOG_ERROR, __func__, "%s: %s", checkPage2->title, checkPage2->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage2->title);
     }
     freePageList(&checkPage2);
@@ -70,7 +70,7 @@ START_TEST(test_updateRequirementPages_2) {
     checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage1);
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
-        log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
+        log_message(LOG_ERROR, __func__, "%s: %s", checkPage1->title, checkPage1->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage1->title);
     }
     freePageList(&checkPage1);
@@ -79,7 +79,7 @@ START_TEST(test_updateRequirementPages_2) {
     checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage2);
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
-        log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
+        log_message(LOG_ERROR, __func__, "%s: %s", checkPage2->title, checkPage2->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage2->title);
     }
     freePageList(&checkPage2);
@@ -111,7 +111,7 @@ START_TEST(test_updateRequirementPages_3) {
     checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage1);
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
-        log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
+        log_message(LOG_ERROR, __func__, "%s: %s", checkPage1->title, checkPage1->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage1->title);
     }
     freePageList(&checkPage1);
@@ -120,7 +120,7 @@ START_TEST(test_updateRequirementPages_3) {
     checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage2);
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
-        log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
+        log_message(LOG_ERROR, __func__, "%s: %s", checkPage2->title, checkPage2->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage2->title);
     }
     freePageList(&checkPage2);
@@ -139,7 +139,7 @@ START_TEST(test_updateRequirementPages_3) {
 END_TEST
 
 START_TEST(test_updateRequirementPages_4) {
-    log_message(LOG_DEBUG, "Entering function test_updateRequirementPages_4");
+    log_function_entry(__func__);
     initializeApiTokenVariables();
     
     refreshOAuthToken();
@@ -152,7 +152,7 @@ START_TEST(test_updateRequirementPages_4) {
     checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage1);
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
-        log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
+        log_message(LOG_ERROR, __func__, "%s: %s", checkPage1->title, checkPage1->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage1->title);
     }
     freePageList(&checkPage1);
@@ -161,7 +161,7 @@ START_TEST(test_updateRequirementPages_4) {
     checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage2);
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
-        log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
+        log_message(LOG_ERROR, __func__, "%s: %s", checkPage2->title, checkPage2->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage2->title);
     }
     freePageList(&checkPage2);
@@ -176,7 +176,7 @@ START_TEST(test_updateRequirementPages_4) {
 
     free(requirementPage1);
     free(requirementPage2);
-    log_message(LOG_DEBUG, "Exiting function test_updateRequirementPages_4");
+    log_function_exit(__func__);
 }
 END_TEST
 
@@ -194,7 +194,7 @@ START_TEST(test_updateRequirementPages_5) {
     checkPage1 = addPageToList(&checkPage1, "1999", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage1);
     if(strcmp(checkPage1->content, "<!--2024_C_SE_PR_REQ_01-->\\n<!--2024_C_SE_PR_REQ_01-->")!=0){
-        log_message(LOG_ERROR, "%s: %s", checkPage1->title, checkPage1->content);
+        log_message(LOG_ERROR, __func__, "%s: %s", checkPage1->title, checkPage1->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage1->title);
     }
     freePageList(&checkPage1);
@@ -203,7 +203,7 @@ START_TEST(test_updateRequirementPages_5) {
     checkPage2 = addPageToList(&checkPage2, "1996", NULL, NULL, NULL, NULL, NULL);
     getPage(&checkPage2);
     if(strcmp(checkPage2->content, "<!--2024_C_SE_PR_REQ_02-->\\n<!--2024_C_SE_PR_REQ_02-->")!=0){
-        log_message(LOG_ERROR, "%s: %s", checkPage2->title, checkPage2->content);
+        log_message(LOG_ERROR, __func__, "%s: %s", checkPage2->title, checkPage2->content);
         ck_abort_msg("%s was not reset properly at last test run", checkPage2->title);
     }
     freePageList(&checkPage2);

@@ -3,7 +3,8 @@
 #include "ERTbot_common.h"
 
 
-void log_message(int level, const char *format, ...) {
+// Function to log messages with different log levels
+void log_message(int level, const char *func, const char *format, ...) {
     FILE *log_file;
     const char *filename;
 
@@ -42,7 +43,10 @@ void log_message(int level, const char *format, ...) {
             tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900,
             tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);
 
-    // Log message
+    // Log the function name
+    fprintf(log_file, "[%s] ", func);
+
+    // Log the message
     va_list args;
     va_start(args, format);
     vfprintf(log_file, format, args);
@@ -50,4 +54,14 @@ void log_message(int level, const char *format, ...) {
 
     fprintf(log_file, "\n");
     fclose(log_file);
+}
+
+// Log entry point of the function
+void log_function_entry(const char *func) {
+    log_message(LOG_DEBUG, func, "Entering function");
+}
+
+// Log exit point of the function
+void log_function_exit(const char *func) {
+    log_message(LOG_DEBUG, func, "Exiting function");
 }

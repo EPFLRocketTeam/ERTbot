@@ -9,7 +9,7 @@
 #include "pageListHelpers.h"
 
 void createMissingRequirementPages(command cmd){
-    log_message(LOG_DEBUG, "Entering function createMissingRequirementPages");
+    log_function_entry(__func__);
 
     pageList* requirementPagesHead = NULL;
 
@@ -26,7 +26,7 @@ void createMissingRequirementPages(command cmd){
     // Get the requirements array from the requirementList object
     const cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
-        log_message(LOG_ERROR, "Error: requirements is not a JSON array");
+        log_message(LOG_ERROR, __func__, "Error: requirements is not a JSON array");
     }
 
     // Iterate over each requirement object in the requirements array
@@ -37,7 +37,7 @@ void createMissingRequirementPages(command cmd){
         const cJSON *requirement = cJSON_GetArrayItem(requirements, i);
 
         if (!cJSON_IsObject(requirement)) {
-            log_message(LOG_ERROR, "Error: requirement is not a JSON object");
+            log_message(LOG_ERROR, __func__, "Error: requirement is not a JSON object");
             continue;
         }
 
@@ -46,16 +46,16 @@ void createMissingRequirementPages(command cmd){
         pageList* currentReqPage = requirementPagesHead;
         int foundPage = 0;
 
-        log_message(LOG_DEBUG, "Looking for page corresponding to requiremet: %s", id->valuestring);
+        log_message(LOG_DEBUG, __func__, "Looking for page corresponding to requiremet: %s", id->valuestring);
 
         if(!strstr(id->valuestring, "2024_")){
-            log_message(LOG_DEBUG, "Found a group, skipping");
+            log_message(LOG_DEBUG, __func__, "Found a group, skipping");
             continue;
         }
 
         while(currentReqPage){
             if (cJSON_IsString(id) && id->valuestring && strcmp(id->valuestring, currentReqPage->title) == 0){
-                log_message(LOG_DEBUG, "Found %s, breaking", currentReqPage->title);
+                log_message(LOG_DEBUG, __func__, "Found %s, breaking", currentReqPage->title);
                 foundPage = 1;
                 break;
             }
@@ -73,7 +73,7 @@ void createMissingRequirementPages(command cmd){
             reqContent = appendToString(reqContent, "<!--");
             reqContent = appendToString(reqContent, id->valuestring);
             reqContent = appendToString(reqContent, "-->");
-            log_message(LOG_DEBUG, "About to create new page path:%s\nTitle:%s", reqPath, id->valuestring);
+            log_message(LOG_DEBUG, __func__, "About to create new page path:%s\nTitle:%s", reqPath, id->valuestring);
             
             updateCommandStatusMessage("creating a new page");
             createPageMutation(reqPath, reqContent, id->valuestring);
@@ -89,6 +89,6 @@ void createMissingRequirementPages(command cmd){
     cJSON_Delete(subsystem);
     freePageList(&requirementPagesHead);
 
-    log_message(LOG_DEBUG, "Exiting function createMissingRequirementPages");
+    log_function_exit(__func__);
     return;
 }

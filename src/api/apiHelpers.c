@@ -18,7 +18,7 @@ char *GOOGLE_CLIENT_SECRET;
 char *GOOGLE_REFRESH_TOKEN;
 
 void initializeApiTokenVariables() {
-    log_message(LOG_DEBUG, "Entering function initializeApiTokenVariables");
+    log_function_entry(__func__);
 
     GITHUB_API_TOKEN = getenv("GITHUB_API_TOKEN");
     WIKI_API_TOKEN = getenv("WIKI_API_TOKEN");
@@ -28,13 +28,13 @@ void initializeApiTokenVariables() {
     GOOGLE_REFRESH_TOKEN = getenv("GOOGLE_REFRESH_TOKEN");
 
 
-    log_message(LOG_DEBUG, "Exiting function initializeApiTokenVAriables");
+    log_function_exit(__func__);
     return;
 }
 
 
 size_t writeCallback(const void *data, size_t size, size_t nmemb, void *clientp) {
-    log_message(LOG_DEBUG, "Entering function writeCallback");
+    log_function_entry(__func__);
 
     size_t realsize = size * nmemb; // set the size of the chunk of memory
     struct memory *mem = (struct memory *)clientp; //points to a struct which is the buffer to store data in
@@ -50,16 +50,16 @@ size_t writeCallback(const void *data, size_t size, size_t nmemb, void *clientp)
     mem->response[mem->size] = 0;
 
 
-    log_message(LOG_DEBUG, "Exiting function writeCallback");
+    log_function_exit(__func__);
     return realsize;
 }
 
 char *jsonParserGetStringValue(const char *json, char *key) {
-    log_message(LOG_DEBUG, "Entering function jsonParserGetStringValue");
+    log_function_entry(__func__);
 
     const char *start = strstr(json, key);
     if (start == NULL) {
-        log_message(LOG_ERROR, "Error: Key '%s' not found in JSON", key);
+        log_message(LOG_ERROR, __func__, "Error: Key '%s' not found in JSON", key);
         return NULL;
     }
 
@@ -75,7 +75,7 @@ char *jsonParserGetStringValue(const char *json, char *key) {
         end = strchr(start, '"');
     }
     if (end == NULL) {
-        log_message(LOG_ERROR, "Error: Malformed JSON");
+        log_message(LOG_ERROR, __func__, "Error: Malformed JSON");
         return NULL;
     }
 
@@ -85,18 +85,18 @@ char *jsonParserGetStringValue(const char *json, char *key) {
     strncpy(value, start, length);
     value[length] = '\0';
 
-    log_message(LOG_DEBUG, "Value for key: %s is: %s", key, value);
-    log_message(LOG_DEBUG, "Exiting function jsonParserGetStringValue");
+    log_message(LOG_DEBUG, __func__, "Value for key: %s is: %s", key, value);
+    log_function_exit(__func__);
     return value;
 }
 
 char *jsonParserGetIntValue(const char *json, char *key) {
-    log_message(LOG_DEBUG, "Entering function jsonParserGetIntValue");
+    log_function_entry(__func__);
 
     // Find the key in the JSON string
     const char *start = strstr(json, key);
     if (start == NULL) {
-        log_message(LOG_ERROR, "Error: Key '%s' not found in JSON", key);
+        log_message(LOG_ERROR, __func__, "Error: Key '%s' not found in JSON", key);
         return NULL;  // Return error code
     }
 
@@ -106,7 +106,7 @@ char *jsonParserGetIntValue(const char *json, char *key) {
     // Find the end of the integer value (assume it ends at a comma or closing brace)
     const char *end = strpbrk(start, ",}");
     if (end == NULL) {
-        log_message(LOG_ERROR, "Error: Malformed JSON");
+        log_message(LOG_ERROR, __func__, "Error: Malformed JSON");
         return NULL;  // Return error code
     }
 
@@ -114,7 +114,7 @@ char *jsonParserGetIntValue(const char *json, char *key) {
     size_t length = end - start;
     char *valueStr = malloc(length + 1);
     if (valueStr == NULL) {
-        log_message(LOG_ERROR, "Error: Memory allocation failed");
+        log_message(LOG_ERROR, __func__, "Error: Memory allocation failed");
         return NULL;  // Return error code
     }
 
@@ -123,7 +123,7 @@ char *jsonParserGetIntValue(const char *json, char *key) {
 
     // Convert the extracted string to an integer
 
-    log_message(LOG_DEBUG, "Exiting function jsonParserGetIntValue");
+    log_function_exit(__func__);
     return valueStr;  // Return success
 }
 

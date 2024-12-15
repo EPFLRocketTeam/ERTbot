@@ -17,7 +17,7 @@ slackMessage* commandStatusMessage;
 #define MAX_MESSAGE_LENGTH 100000
 
 static int slackPostApi(char* url, char* postFields){
-    log_message(LOG_DEBUG, "Entering function slackPostApi");
+    log_function_entry(__func__);
 
     CURL *curl;
     CURLcode res;
@@ -59,18 +59,18 @@ static int slackPostApi(char* url, char* postFields){
         curl_slist_free_all(headerlist);
 
         if(res != CURLE_OK) {
-            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, __func__, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             return 1;
         }
     }
     else {
-        log_message(LOG_ERROR, "Failed to initialize libcurl");
+        log_message(LOG_ERROR, __func__, "Failed to initialize libcurl");
         return 1;
     }
 
     curl_global_cleanup();
 
-    log_message(LOG_DEBUG, "Exiting function slackPostApi");
+    log_function_exit(__func__);
     return 0;
 }
 
@@ -94,7 +94,7 @@ int updateSlackMessage(slackMessage* slackMessage) {
 }
 
 int sendMessageToSlack(char *message) {
-    log_message(LOG_DEBUG, "Entering function sendMessageToSlack");
+    log_function_entry(__func__);
 
     int returnValue = sendMessageToSlackAPI(message);
 
@@ -104,7 +104,7 @@ int sendMessageToSlack(char *message) {
 }
 
 void checkLastSlackMessage() {
-    log_message(LOG_DEBUG, "Entering function checkLastSlackMessage");
+    log_function_entry(__func__);
 
     CURL *curl;
     CURLcode res;
@@ -143,15 +143,15 @@ void checkLastSlackMessage() {
 
         // Check for errors
         if (res != CURLE_OK) {
-            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, __func__, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         }
 
         // Check the HTTP status code
         long http_code = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         if (http_code != 200) {
-            log_message(LOG_ERROR, "checkLastSlackMessage: HTTP request failed with status code %ld", http_code);
-            log_message(LOG_ERROR, "chunk.resposnse: %s", chunk.response);
+            log_message(LOG_ERROR, __func__, "checkLastSlackMessage: HTTP request failed with status code %ld", http_code);
+            log_message(LOG_ERROR, __func__, "chunk.resposnse: %s", chunk.response);
         }
 
         // Clean up
@@ -161,11 +161,11 @@ void checkLastSlackMessage() {
 
     curl_global_cleanup();
 
-    log_message(LOG_DEBUG, "Exiting function checkLastSlackMessage");
+    log_function_exit(__func__);
 }
 
 slackMessage* getSlackMessage(slackMessage* slackMsg) {
-    log_message(LOG_DEBUG, "Entering function getSlackMessage");
+    log_function_entry(__func__);
 
     checkLastSlackMessage();
 
@@ -175,17 +175,17 @@ slackMessage* getSlackMessage(slackMessage* slackMsg) {
 
     freeChunkResponse();
 
-    log_message(LOG_DEBUG, "Exiting function getSlackMessage");
+    log_function_exit(__func__);
 
     return slackMsg;
 }
 
 slackMessage* sendUpdatedableSlackMessage(slackMessage* slackMsg) {
-    log_message(LOG_DEBUG, "Entering function sendUpdatedableSlackMessage");
+    log_function_entry(__func__);
 
     sendMessageToSlackAPI(slackMsg->message);
 
-    log_message(LOG_DEBUG, "chunk.response: %s", chunk.response);
+    log_message(LOG_DEBUG, __func__, "chunk.response: %s", chunk.response);
 
     if(slackMsg->timestamp){
         free(slackMsg->timestamp);
@@ -196,13 +196,13 @@ slackMessage* sendUpdatedableSlackMessage(slackMessage* slackMsg) {
 
     freeChunkResponse();
 
-    log_message(LOG_DEBUG, "Exiting function sendUpdatedableSlackMessage");
+    log_function_exit(__func__);
 
     return slackMsg;
 }
 
 void sendLoadingBar(const int currentValue, const int totalValue){
-    log_message(LOG_DEBUG, "Entering function sendLoadingBar");
+    log_function_entry(__func__);
     
 
 #ifndef TESTING
@@ -241,7 +241,7 @@ void sendLoadingBar(const int currentValue, const int totalValue){
 #endif
 
     
-    log_message(LOG_DEBUG, "Exiting function sendLoadingBar");
+    log_function_exit(__func__);
     return;
 }
 
@@ -254,7 +254,7 @@ void updateCommandStatusMessage(char *newStatusMessage){
 
 void initialiseSlackCommandStatusMessage(){
 
-    log_message(LOG_DEBUG, "Entering function initialiseSlackCommandStatusMessage");
+    log_function_entry(__func__);
     
     commandStatusMessage = (slackMessage*)malloc(sizeof(slackMessage));
 
@@ -263,13 +263,13 @@ void initialiseSlackCommandStatusMessage(){
     commandStatusMessage->sender = NULL;
 
     
-    log_message(LOG_DEBUG, "Exiting function initialiseSlackCommandStatusMessage");
+    log_function_exit(__func__);
 
     return ;
 }
 
 void freeSlackCommandStatusMessageVariables(){
-    log_message(LOG_DEBUG, "Entering function freeSlackCommandStatusMessageVariables");
+    log_function_entry(__func__);
     
     
     if(commandStatusMessage->message){
@@ -288,12 +288,12 @@ void freeSlackCommandStatusMessageVariables(){
     }
     
     
-    log_message(LOG_DEBUG, "Exiting function freeSlackCommandStatusMessageVariables");
+    log_function_exit(__func__);
     return;
 }
 
 void sendStartingStatusMessage(const char *commandName){
-    log_message(LOG_DEBUG, "Entering function sendStartingStatusMessage");
+    log_function_entry(__func__);
 
     commandStatusMessage->message = duplicate_Malloc("Starting ");
     commandStatusMessage->message = appendToString(commandStatusMessage->message, commandName);
@@ -304,13 +304,13 @@ void sendStartingStatusMessage(const char *commandName){
     commandStatusMessage->message = NULL;
 
     
-    log_message(LOG_DEBUG, "Exiting function sendStartingStatusMessage");
+    log_function_exit(__func__);
 
     return;
 }
 
 void sendCompletedStatusMessage(const char *commandName){
-    log_message(LOG_DEBUG, "Entering function sendCompletedStatusMessage");
+    log_function_entry(__func__);
     
 
     commandStatusMessage->message = duplicate_Malloc("Finished ");
@@ -321,6 +321,6 @@ void sendCompletedStatusMessage(const char *commandName){
     freeSlackCommandStatusMessageVariables();
 
     
-    log_message(LOG_DEBUG, "Exiting function sendCompletedStatusMessage");
+    log_function_exit(__func__);
     return;
 }

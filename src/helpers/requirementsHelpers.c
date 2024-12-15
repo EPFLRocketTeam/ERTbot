@@ -11,19 +11,19 @@
 static cJSON* parseSheet(const cJSON* values_array);
 
 cJSON* parseArrayIntoJSONRequirementList(const char *input_str) {
-    log_message(LOG_DEBUG, "Entering function parseArrayIntoJSONRequirementList");
+    log_function_entry(__func__);
 
     // Parse the input string as JSON
     cJSON *input_json = cJSON_Parse(input_str);
     if (!input_json) {
-        log_message(LOG_ERROR, "Error parsing input string as JSON object");
+        log_message(LOG_ERROR, __func__, "Error parsing input string as JSON object");
         return NULL;
     }
 
     // Extract the "values" array from the JSON object
     const cJSON *values_array = cJSON_GetObjectItemCaseSensitive(input_json, "values");
     if (!cJSON_IsArray(values_array)) {
-        log_message(LOG_ERROR, "Error: values is not a JSON array");
+        log_message(LOG_ERROR, __func__, "Error: values is not a JSON array");
         cJSON_Delete(input_json);
         return NULL;
     }
@@ -32,7 +32,7 @@ cJSON* parseArrayIntoJSONRequirementList(const char *input_str) {
     // Create a JSON object to hold the requirements
     cJSON *json = cJSON_CreateObject();
     if (!json) {
-        log_message(LOG_ERROR, "Error creating JSON object");
+        log_message(LOG_ERROR, __func__, "Error creating JSON object");
         cJSON_Delete(input_json);
         return NULL;
     }
@@ -40,7 +40,7 @@ cJSON* parseArrayIntoJSONRequirementList(const char *input_str) {
     // Create a JSON array to hold the requirement objects
     cJSON *requirements = parseSheet(values_array);
     if (!requirements) {
-        log_message(LOG_ERROR, "Error creating JSON array");
+        log_message(LOG_ERROR, __func__, "Error creating JSON array");
         cJSON_Delete(json);
         cJSON_Delete(input_json);
         cJSON_Delete(requirements);
@@ -49,7 +49,7 @@ cJSON* parseArrayIntoJSONRequirementList(const char *input_str) {
 
     cJSON_AddItemToObject(json, "requirements", requirements);
 
-    log_message(LOG_DEBUG, "Exiting function parseArrayIntoJSONRequirementList");
+    log_function_exit(__func__);
 
     freeChunkResponse();
 
@@ -59,20 +59,20 @@ cJSON* parseArrayIntoJSONRequirementList(const char *input_str) {
 }
 
 cJSON* getSubsystemInfo(const char* acronym){
-    log_message(LOG_DEBUG, "Entering function getSubsystemInfo");
+    log_function_entry(__func__);
 
     batchGetSheet("1iB1yl2Nre95kD1g6TFDYvvLe0g5QzghtAHdnxNTD4tg", "INFO!A2:H30");
 
     cJSON *input_json = cJSON_Parse(chunk.response);
     if (!input_json) {
-        log_message(LOG_ERROR, "Error parsing input string as JSON object");
+        log_message(LOG_ERROR, __func__, "Error parsing input string as JSON object");
         return NULL;
     }
 
     // Extract the "values" array from the JSON object
     const cJSON *values_array = cJSON_GetObjectItemCaseSensitive(input_json, "values");
     if (!cJSON_IsArray(values_array)) {
-        log_message(LOG_ERROR, "Error: values is not a JSON array");
+        log_message(LOG_ERROR, __func__, "Error: values is not a JSON array");
         cJSON_Delete(input_json);
         return NULL;
     }
@@ -90,17 +90,17 @@ cJSON* getSubsystemInfo(const char* acronym){
             cJSON_Delete(input_json);
             cJSON_Delete(subsystemsInfo);
 
-            log_message(LOG_DEBUG, "Exiting function getSubsystemInfo");
+            log_function_exit(__func__);
             return result;
         }
     }
 
-    log_message(LOG_ERROR, "Subsystem was not found");
+    log_message(LOG_ERROR, __func__, "Subsystem was not found");
     exit(1);
 }
 
 static cJSON* parseSheet(const cJSON* values_array){
-    log_message(LOG_DEBUG, "Entering function parseSheet");
+    log_function_entry(__func__);
 
     int numberOfRows = cJSON_GetArraySize(values_array);
     const cJSON *headerRow = cJSON_GetArrayItem(values_array, 0);
@@ -115,14 +115,14 @@ static cJSON* parseSheet(const cJSON* values_array){
         cJSON* parsedSheetRow = cJSON_CreateObject();
 
         if (numberOfColumnsInHeader < numberOfColumnsInRow){
-            log_message(LOG_ERROR, "parseSheet: You have are missing header values in your sheet");
+            log_message(LOG_ERROR, __func__, "parseSheet: You have are missing header values in your sheet");
             return NULL;
         }
 
         for(int j = 0; j < numberOfColumnsInRow; j++){
             const cJSON *headerItem = cJSON_GetArrayItem(headerRow, j);
             if(strcmp(headerItem->valuestring,"")==0){
-                log_message(LOG_ERROR, "parseSheet: One of your header values is empty");
+                log_message(LOG_ERROR, __func__, "parseSheet: One of your header values is empty");
                 cJSON_Delete(parsedSheetRow);
                 return NULL;
             }
@@ -135,19 +135,19 @@ static cJSON* parseSheet(const cJSON* values_array){
     }
 
 
-    log_message(LOG_DEBUG, "Exiting function parseSheet");
+    log_function_exit(__func__);
     return parsedSheet;
 }
 
 cJSON* getRequirements(const cJSON* subsystem){
-    log_message(LOG_DEBUG, "Entering function getRequirements");
+    log_function_entry(__func__);
 
     const char *sheetId = cJSON_GetObjectItem(subsystem, "Req_DB Sheet Acronym and Range")->valuestring;
     const char *reqDbId = cJSON_GetObjectItem(subsystem, "Req_DB Spreadsheet ID")->valuestring;
 
     batchGetSheet(reqDbId, sheetId);
 
-    log_message(LOG_DEBUG, "Exiting function getRequirements");
+    log_function_exit(__func__);
     return parseArrayIntoJSONRequirementList(chunk.response);
 }
 
@@ -158,17 +158,17 @@ char* addDollarSigns(const char* characteristic){
 }
 
 int addSectionToPageContent(char** pageContent, const char* template, const cJSON* object, const char* item){
-    log_message(LOG_DEBUG, "Entering function addSectionToPageContent");
+    log_function_entry(__func__);
 
     if(!cJSON_HasObjectItem(object, item)){
-        log_message(LOG_DEBUG, "addSectionToPageContent: characteristic does not exist");
+        log_message(LOG_DEBUG, __func__, "addSectionToPageContent: characteristic does not exist");
         return 0;
     }
 
     const cJSON* jsonCharacteristic = cJSON_GetObjectItem(object, item);
 
     if(!cJSON_IsString(jsonCharacteristic) || strcmp(jsonCharacteristic->valuestring, "") == 0 || strcmp(jsonCharacteristic->valuestring, "N/A") == 0 || strcmp(jsonCharacteristic->valuestring, "TBD")==0){
-        log_message(LOG_DEBUG, "addSectionToPageContent: Characteristic has no value");
+        log_message(LOG_DEBUG, __func__, "addSectionToPageContent: Characteristic has no value");
         return 0;
     }
     
@@ -183,25 +183,25 @@ int addSectionToPageContent(char** pageContent, const char* template, const cJSO
     free(newSection);
 
 
-    log_message(LOG_DEBUG, "Exiting function addSectionToPageContent");
+    log_function_exit(__func__);
     return 1;
 }
 
 int addVerificationSectionToPageContent(char** pageContent, const char* template, const cJSON* object, const char* itemName, const int verificationNumber, const int verificationCount){
-    log_message(LOG_DEBUG, "Entering function addVerificationSectionToPageContent");
+    log_function_entry(__func__);
 
     char item[1024];
     snprintf(item, sizeof(item), "%s %d", itemName, verificationNumber);
 
     if(!cJSON_HasObjectItem(object, item)){
-        log_message(LOG_DEBUG, "addVerificationSectionToPageContent: characteristic does not exist");
+        log_message(LOG_DEBUG, __func__, "addVerificationSectionToPageContent: characteristic does not exist");
         return 0;
     }
 
     const cJSON* jsonCharacteristic = cJSON_GetObjectItem(object, item);
 
     if(!cJSON_IsString(jsonCharacteristic) || strcmp(jsonCharacteristic->valuestring, "") == 0 || strcmp(jsonCharacteristic->valuestring, "N/A") == 0 || strcmp(jsonCharacteristic->valuestring, "TBD")==0){
-        log_message(LOG_DEBUG, "addVerificationSectionToPageContent: Characteristic has no value");
+        log_message(LOG_DEBUG, __func__, "addVerificationSectionToPageContent: Characteristic has no value");
         return 0;
     }
     
@@ -228,7 +228,7 @@ int addVerificationSectionToPageContent(char** pageContent, const char* template
     free(wordToReplace);
     free(newSection);
 
-    log_message(LOG_DEBUG, "Exiting function addVerificationSectionToPageContent");
+    log_function_exit(__func__);
     return 1;
 }
 

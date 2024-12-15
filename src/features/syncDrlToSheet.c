@@ -43,7 +43,7 @@ static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const
 
 
 void syncDrlToSheet(command cmd){
-    log_message(LOG_DEBUG, "Entering function syncDrlToSheet");
+    log_function_entry(__func__);
 
     updateCommandStatusMessage("fetching subsystem info");
     cJSON* subsystem = getSubsystemInfo(cmd.argument);
@@ -72,17 +72,17 @@ void syncDrlToSheet(command cmd){
     cJSON_Delete(subsystem);
 
     free(DRL);
-    log_message(LOG_DEBUG, "Exiting function syncDrlToSheet");
+    log_function_exit(__func__);
     return;
 }
 
 static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const cJSON* subsystem){
-    log_message(LOG_DEBUG, "Entering function buildDrlFromJSONRequirementList");
+    log_function_entry(__func__);
 
     // Get the requirements array from the requirementList object
     const cJSON *requirements = cJSON_GetObjectItemCaseSensitive(requirementList, "requirements");
     if (!cJSON_IsArray(requirements)) {
-        log_message(LOG_ERROR, "Error: requirements is not a JSON array");
+        log_message(LOG_ERROR, __func__, "Error: requirements is not a JSON array");
         char *DRL = duplicate_Malloc("There was an error when parsing the requirements, you might be missing a header value.");
 
         return DRL;
@@ -99,12 +99,12 @@ static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const
     for (int i = 0; i < num_reqs; i++) {
         const cJSON *requirement = cJSON_GetArrayItem(requirements, i);
         if (!cJSON_IsObject(requirement)) {
-            log_message(LOG_ERROR, "Error: requirement is not a JSON object");
+            log_message(LOG_ERROR, __func__, "Error: requirement is not a JSON object");
             continue;
         }
         
         if(!cJSON_HasObjectItem(requirement, "ID") || !cJSON_IsString(cJSON_GetObjectItem(requirement, "ID"))||strlen(cJSON_GetObjectItem(requirement, "ID")->valuestring) < 2){
-            log_message(LOG_DEBUG, "ID is smaller than one, breaking");
+            log_message(LOG_DEBUG, __func__, "ID is smaller than one, breaking");
             break;
         }
 
@@ -139,7 +139,7 @@ static char *buildDrlFromJSONRequirementList(const cJSON *requirementList, const
     DRL = replaceWord_Realloc(DRL, "\n", "\\\\n");
     DRL = replaceWord_Realloc(DRL, "\"", "\\\\\\\"");
 
-    log_message(LOG_DEBUG, "Exiting function buildDrlFromJSONRequirementList");
+    log_function_exit(__func__);
 
     return DRL;
 }

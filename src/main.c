@@ -31,7 +31,7 @@ command** headOfCommandQueue;
 
 #ifndef TESTING
 int main(){
-    log_message(LOG_DEBUG, "\n\nStarting program\n\n");
+    log_message(LOG_DEBUG, __func__, "\n\nStarting program\n\n");
 
     //initalise
     initializeApiTokenVariables();
@@ -52,13 +52,13 @@ int main(){
 
         if(*headOfCommandQueue){
             cyclesSinceLastCommand = 0;
-            log_message(LOG_DEBUG, "command received");
+            log_message(LOG_DEBUG, __func__, "command received");
             headOfCommandQueue = executeCommand(headOfCommandQueue);
         }
 
         else{
             cyclesSinceLastCommand ++;
-            log_message(LOG_DEBUG, "No command received.");
+            log_message(LOG_DEBUG, __func__, "No command received.");
         }
 
         if(cyclesSinceLastCommand>20){

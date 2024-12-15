@@ -61,7 +61,7 @@ static void updateRequirementPageContent(pageList* reqPage, const cJSON *require
 static void addVerificationInformationToPageContent(char** pageContent, const cJSON* requirement);
 
 void updateRequirementPage(command cmd){
-    log_message(LOG_DEBUG, "Entering function updateRequirementPages");
+    log_function_entry(__func__);
 
     updateCommandStatusMessage("fetching subsystem info");
     cJSON* subsystem = getSubsystemInfo(cmd.argument);
@@ -79,7 +79,7 @@ void updateRequirementPage(command cmd){
 
 
     if (!cJSON_IsArray(requirements)) {
-        log_message(LOG_ERROR, "Error: requirements is not a JSON array");
+        log_message(LOG_ERROR, __func__, "Error: requirements is not a JSON array");
     }
 
     updateCommandStatusMessage("updating requirement pages");
@@ -90,7 +90,7 @@ void updateRequirementPage(command cmd){
             const cJSON *requirement = cJSON_GetArrayItem(requirements, i);
 
             if (!cJSON_IsObject(requirement)) {
-                log_message(LOG_ERROR, "Error: requirement is not a JSON object");
+                log_message(LOG_ERROR, __func__, "Error: requirement is not a JSON object");
                 continue;
             }
 
@@ -115,7 +115,7 @@ void updateRequirementPage(command cmd){
     cJSON_Delete(subsystem);
     freePageList(&requirementPagesHead);
 
-    log_message(LOG_DEBUG, "Exiting function updateRequirementPage");
+    log_function_exit(__func__);
     return;
 }
 
@@ -156,7 +156,7 @@ static void updateRequirementPageContent(pageList* reqPage, const cJSON *require
         reqPage->content = NULL;
         free(importedRequirementInformation);
         free(flag);
-        log_message(LOG_DEBUG, "updateRequirementPageContent: Requirement Page is already up to date.");
+        log_message(LOG_DEBUG, __func__, "updateRequirementPageContent: Requirement Page is already up to date.");
         return;
     }
 
@@ -184,22 +184,22 @@ static void updateRequirementPageContent(pageList* reqPage, const cJSON *require
 }
 
 static char* buildRequirementPageFromJSONRequirementList(const cJSON *requirement){
-    log_message(LOG_DEBUG, "Entering function buildRequirementPageFromJSONRequirementList");
+    log_function_entry(__func__);
 
     char* pageContent = duplicate_Malloc("");
 
     char* requirement_print = cJSON_Print(requirement);
-    log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: requirement: %s", requirement_print);
+    log_message(LOG_DEBUG, __func__, "buildRequirementPageFromJSONRequirementList: requirement: %s", requirement_print);
     free(requirement_print);
 
 
-    log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: starting to append standard block");
+    log_message(LOG_DEBUG, __func__, "buildRequirementPageFromJSONRequirementList: starting to append standard block");
 
     (void)addSectionToPageContent(&pageContent, ID_BLOCK_TEMPLATE, requirement, "ID");
     (void)addSectionToPageContent(&pageContent, TITLE_BLOCK_TEMPLATE, requirement, "Title");
     (void)addSectionToPageContent(&pageContent, DESCRIPTION_BLOCK_TEMPLATE, requirement, "Description");
 
-    log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: Description finished");
+    log_message(LOG_DEBUG, __func__, "buildRequirementPageFromJSONRequirementList: Description finished");
 
     int hasSource = addSectionToPageContent(&pageContent, SOURCE_BLOCK_TEMPLATE, requirement, "Source");
     int hasAuthor = addSectionToPageContent(&pageContent, AUTHOR_BLOCK_TEMPLATE, requirement, "Author");
@@ -209,25 +209,25 @@ static char* buildRequirementPageFromJSONRequirementList(const cJSON *requiremen
         pageContent = appendToString(pageContent, "{.is-info}\n");
     }
 
-    log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: Assignee finished");
+    log_message(LOG_DEBUG, __func__, "buildRequirementPageFromJSONRequirementList: Assignee finished");
 
     (void)addSectionToPageContent(&pageContent, JUSTIFICATION_BLOCK_TEMPLATE, requirement, "Justification");
     (void)addSectionToPageContent(&pageContent, COMPLIANCE_BLOCK_TEMPLATE, requirement, "Compliance");
     (void)addSectionToPageContent(&pageContent, CRITICALITY_BLOCK_TEMPLATE, requirement, "Criticality");
 
-    log_message(LOG_DEBUG, "buildRequirementPageFromJSONRequirementList: Criticality finished");
+    log_message(LOG_DEBUG, __func__, "buildRequirementPageFromJSONRequirementList: Criticality finished");
 
-    log_message(LOG_DEBUG, "Going to start filling in the verification section");
+    log_message(LOG_DEBUG, __func__, "Going to start filling in the verification section");
 
     addVerificationInformationToPageContent(&pageContent, requirement);
 
-    log_message(LOG_DEBUG, "Exiting function buildRequirementPageFromJSONRequirementList");
+    log_function_exit(__func__);
 
     return pageContent;
 }
 
 static void addVerificationInformationToPageContent(char** pageContent, const cJSON* requirement){
-    log_message(LOG_DEBUG, "Enter function addVerificationInformationToPageContent");
+    log_function_entry(__func__);
 
     //VERIFICAITON
     bool verificationTitleAdded = false;
@@ -254,5 +254,5 @@ static void addVerificationInformationToPageContent(char** pageContent, const cJ
         (void)addVerificationSectionToPageContent(pageContent, VERIFICATION_STATUS_BLOCK_TEMPLATE, requirement, "Verification Status", verificationNumber, verificationCount);
     }
 
-    log_message(LOG_DEBUG, "Exiting function addVerificationInformationToPageContent");
+    log_function_exit(__func__);
 }

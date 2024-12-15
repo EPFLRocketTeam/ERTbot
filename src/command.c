@@ -23,7 +23,7 @@
 static void setCommandArgument(char** dest, const char* src, const char* argName);
 
 static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicCommands_Global, command* command, int period) {
-    log_message(LOG_DEBUG, "Entering function addPeriodicCommand");
+    log_function_entry(__func__);
 
     PeriodicCommand* newCommand = (PeriodicCommand*)malloc(sizeof(PeriodicCommand));
     newCommand->command = command;  // Duplicate the command string
@@ -45,13 +45,13 @@ static PeriodicCommand* addPeriodicCommand(PeriodicCommand** headOfPeriodicComma
 
     // Link the new node after the last node
     lastNode->next = newCommand;
-    log_message(LOG_DEBUG, "Exiting function addPeriodicCommand");
+    log_function_exit(__func__);
 
     return *headOfPeriodicCommands_Global;
 }
 
 static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands_Global, command* command, const char* time_str) {
-    log_message(LOG_DEBUG, "Entering function scheduleDailyCommand");
+    log_function_entry(__func__);
 
     int hours;
     int minutes;
@@ -95,17 +95,17 @@ static PeriodicCommand* addDailyCommand(PeriodicCommand** headOfPeriodicCommands
     // Link the new node after the last node
     lastNode->next = newCommand;
 
-    log_message(LOG_DEBUG, "Exiting function scheduleDailyCommand");
+    log_function_exit(__func__);
 
     return *headOfPeriodicCommands_Global;
 }
 
 static command* addCommandToQueue(command** head, const char *function, const char *argument) {
-    log_message(LOG_DEBUG, "Entering function addCommandToQueue");
+    log_function_entry(__func__);
 
     command* newNode = (command *)malloc(sizeof(command));
     if (!newNode) {
-        log_message(LOG_ERROR, "Memory allocation error");
+        log_message(LOG_ERROR, __func__, "Memory allocation error");
         exit(1);
     }
 
@@ -117,7 +117,7 @@ static command* addCommandToQueue(command** head, const char *function, const ch
     setCommandArgument(&newNode->function, function, "function");
     setCommandArgument(&newNode->argument, argument, "argument");
 
-    log_message(LOG_DEBUG, "All arguments added to command struct");
+    log_message(LOG_DEBUG, __func__, "All arguments added to command struct");
     newNode->next = NULL;  // New node will be the last node
 
     // If the list is empty, make the new node the first node
@@ -135,27 +135,27 @@ static command* addCommandToQueue(command** head, const char *function, const ch
     // Link the new node after the last node
     lastNode->next = newNode;
 
-    log_message(LOG_DEBUG, "Command added to queue");
+    log_message(LOG_DEBUG, __func__, "Command added to queue");
 
-    log_message(LOG_DEBUG, "Exiting function addCommandToQueue");
+    log_function_exit(__func__);
     return *head;
 }
 
 void removeFirstCommand(command **head) {
-    log_message(LOG_DEBUG, "Entering function removeFirstCommand");
+    log_function_entry(__func__);
 
-    log_message(LOG_DEBUG, "About to remove first command");
+    log_message(LOG_DEBUG, __func__, "About to remove first command");
 
     if (*head == NULL) {
         // The list is already empty, nothing to remove
         return;
     }
 
-    log_message(LOG_DEBUG, "Creating a temporary pointer to a command");
+    log_message(LOG_DEBUG, __func__, "Creating a temporary pointer to a command");
     // Save the current head node to free it later
     command* temp = *head;
 
-    log_message(LOG_DEBUG, "Placing the head on to the next command");
+    log_message(LOG_DEBUG, __func__, "Placing the head on to the next command");
     // Update the head to point to the next node
     *head = (*head)->next;
 
@@ -169,30 +169,30 @@ void removeFirstCommand(command **head) {
         free(temp->argument);
     }
 
-    log_message(LOG_DEBUG, "freed all variables");
+    log_message(LOG_DEBUG, __func__, "freed all variables");
 
     free(temp);
 
-    log_message(LOG_DEBUG, "freed struct");
+    log_message(LOG_DEBUG, __func__, "freed struct");
 
-    log_message(LOG_DEBUG, "Exiting function removeFirstCommand");
+    log_function_exit(__func__);
 }
 
 static command** checkAndEnqueuePeriodicCommands(command** commandQueue, PeriodicCommand** headOfPeriodicCommands_Global) {
-    log_message(LOG_DEBUG, "Entering function checkAndEnqueuePeriodicCommands");
+    log_function_entry(__func__);
 
     time_t currentTime = time(NULL);
     PeriodicCommand* periodicCommand = (*headOfPeriodicCommands_Global);
 
     while (periodicCommand != NULL) {
-        log_message(LOG_DEBUG, "checking if it is time to queue:%s", periodicCommand->command->function);
+        log_message(LOG_DEBUG, __func__, "checking if it is time to queue:%s", periodicCommand->command->function);
 
         if (periodicCommand->next_time <= currentTime) {
             // Enqueue the command into the commandQueue
             command cmd = *periodicCommand->command;
             *commandQueue = addCommandToQueue(commandQueue, cmd.function, cmd.argument);
 
-            log_message(LOG_DEBUG, "Periodic command added to queue:%s", cmd.function);
+            log_message(LOG_DEBUG, __func__, "Periodic command added to queue:%s", cmd.function);
 
             // Update the next execution time
             periodicCommand->next_time = currentTime + periodicCommand->period;
@@ -200,12 +200,12 @@ static command** checkAndEnqueuePeriodicCommands(command** commandQueue, Periodi
         periodicCommand = periodicCommand->next;
     }
 
-    log_message(LOG_DEBUG, "Exiting function checkAndEnquePeriodicCommands");
+    log_function_exit(__func__);
     return commandQueue;
 }
 
 static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
-    log_message(LOG_DEBUG, "Entering function lookForCommandonSlack");
+    log_function_entry(__func__);
 
     command cmd;
     slackMessage* slackMsg = (slackMessage*)malloc(sizeof(slackMessage));
@@ -222,14 +222,14 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
     //If received a message which was not sent by bot, breakdown message into command structure and return command
     if(slackMsg->message && slackMsg->timestamp && slackMsg->sender  && strcmp(slackMsg->sender, "U06RQCAT0H1") != 0){
         breakdownCommand(slackMsg->message, &cmd);
-        log_message(LOG_DEBUG, "Command broke down");
+        log_message(LOG_DEBUG, __func__, "Command broke down");
         *headOfPeriodicCommands_Global = addCommandToQueue(headOfPeriodicCommands_Global, cmd.function, cmd.argument);
-        log_message(LOG_INFO, "Received a %s command on slack", cmd.function);
-        log_message(LOG_DEBUG, "Command added to queue");
+        log_message(LOG_INFO, __func__, "Received a %s command on slack", cmd.function);
+        log_message(LOG_DEBUG, __func__, "Command added to queue");
     }
 
     //If last message was sent by bot, free allocated memory and return emtpy command
-    else{log_message(LOG_DEBUG, "No commands sent on slack"); }//log.info
+    else{log_message(LOG_DEBUG, __func__, "No commands sent on slack"); }//log.info
 
     if (chunk.response) {
         chunk.response = NULL;
@@ -256,45 +256,45 @@ static command** lookForCommandOnSlack(command** headOfPeriodicCommands_Global){
     }
 
 
-    log_message(LOG_DEBUG, "Exiting function lookForCommandOnSlack");
+    log_function_exit(__func__);
     return headOfPeriodicCommands_Global;
 
 }
 
 static command** lookForNewlyUpdatedPages(command** commandQueue){
-    log_message(LOG_DEBUG, "Entering function lookForNewlyUpdatedPages");
+    log_function_entry(__func__);
 
     pageList* updatedPages = NULL;
-    log_message(LOG_DEBUG, "Last Page refresh check happened at: %s", lastPageRefreshCheck);
+    log_message(LOG_DEBUG, __func__, "Last Page refresh check happened at: %s", lastPageRefreshCheck);
     updatedPages = populatePageList(&updatedPages, "time", lastPageRefreshCheck);
     pageList* updatedPagesHead = updatedPages;
 
     while(updatedPages){
 
         *commandQueue = addCommandToQueue(commandQueue, "onPageUpdate", updatedPages->id);
-        log_message(LOG_INFO, "onPageUpdate command has been added to queue for page id: %s", updatedPages->id);
+        log_message(LOG_INFO, __func__, "onPageUpdate command has been added to queue for page id: %s", updatedPages->id);
         updatedPages = updatedPages->next;
     }
 
     freePageList(&updatedPagesHead);
     lastPageRefreshCheck = getCurrentEDTTimeString();
 
-    log_message(LOG_DEBUG, "Exiting function lookForNewlyUpdatedPages");
+    log_function_exit(__func__);
     return commandQueue;
 }
 
 command** checkForCommand(command** headOfCommandQueue_Global, PeriodicCommand** headOfPeriodicCommands_Global){
-    log_message(LOG_DEBUG, "Entering function checkForCommand");
+    log_function_entry(__func__);
 
     headOfCommandQueue_Global = lookForCommandOnSlack(headOfCommandQueue_Global);
     //headOfCommandQueue_Global = checkAndEnqueuePeriodicCommands(headOfCommandQueue_Global, headOfPeriodicCommands_Global);
 
-    log_message(LOG_DEBUG, "Exiting function checkForCommand");
+    log_function_exit(__func__);
     return headOfCommandQueue_Global;
 }
 
 PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicCommands_Global){
-    log_message(LOG_DEBUG, "Entering function initializePeriodicCommands");
+    log_function_entry(__func__);
 
     command* getRyansHomePage = (command*)malloc(sizeof(command));
     breakdownCommand("updateStatsPage", getRyansHomePage);
@@ -399,12 +399,12 @@ PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicComm
     *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateDRL_AV, "06:00");
     *headOfPeriodicCommands_Global = addDailyCommand(headOfPeriodicCommands_Global, updateDRL_PL, "06:00");
 
-    log_message(LOG_DEBUG, "Exiting function initializePeriodicCommands");
+    log_function_exit(__func__);
     return headOfPeriodicCommands_Global;
 }
 
 void breakdownCommand(const char* sentence, command* cmd) {
-    log_message(LOG_DEBUG, "Entering function breakdownCommand");
+    log_function_entry(__func__);
 
     char* words[MAX_ARGUMENTS];
     char* token;
@@ -422,7 +422,7 @@ void breakdownCommand(const char* sentence, command* cmd) {
 
     // Check if the sentence has more than ten words
     if (word_count > MAX_ARGUMENTS) {
-        log_message(LOG_ERROR, "Error: Sentence contains more than ten words.");
+        log_message(LOG_ERROR, __func__, "Error: Sentence contains more than ten words.");
         free(sentence_copy);
         return;
     }
@@ -447,11 +447,11 @@ void breakdownCommand(const char* sentence, command* cmd) {
 
     free(sentence_copy);
 
-    log_message(LOG_DEBUG, "Exiting function breakdownCommand");
+    log_function_exit(__func__);
 }
 
 command** executeCommand(command** commandQueue){
-    log_message(LOG_DEBUG, "Entering function executeCommand");
+    log_function_entry(__func__);
 
     if((*commandQueue)->function && strcmp((*commandQueue)->function, "shutdown") == 0){ //works
         sendMessageToSlack("Shutting down");
@@ -550,20 +550,20 @@ command** executeCommand(command** commandQueue){
     removeFirstCommand(commandQueue);
 
 
-    log_message(LOG_DEBUG, "Exiting function executeCommand");
+    log_function_exit(__func__);
     return commandQueue;
 
 }
 
 static void setCommandArgument(char** dest, const char* src, const char* argName) {
     if (src && src[0] != '\0') {
-        log_message(LOG_DEBUG, "%s added to command", argName);
+        log_message(LOG_DEBUG, __func__, "%s added to command", argName);
         size_t len = strlen(src) + 1;
         *dest = malloc(len);
         if (*dest) {
             strlcpy(*dest, src, len);
         } else {
-            log_message(LOG_ERROR, "Memory allocation failed for %s", argName);
+            log_message(LOG_ERROR, __func__, "Memory allocation failed for %s", argName);
         }
     }
 }

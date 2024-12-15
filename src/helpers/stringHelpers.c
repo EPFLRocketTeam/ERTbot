@@ -12,7 +12,7 @@
 
 
 char* replaceWord_Malloc(const char* inputString, const char* wordToReplace, const char* newWord) {
-    log_message(LOG_DEBUG, "Entering function replaceWord_Malloc");
+    log_function_entry(__func__);
 
     if (!inputString || !wordToReplace || !newWord) return NULL;
 
@@ -52,13 +52,13 @@ char* replaceWord_Malloc(const char* inputString, const char* wordToReplace, con
 
     result[i] = '\0'; 
 
-    log_message(LOG_DEBUG, "Exiting function replaceWord_Malloc");
+    log_function_exit(__func__);
     return result;
 }
 
 
 char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const char* newWord) {
-    log_message(LOG_DEBUG, "Entering function replaceWord_Realloc");
+    log_function_entry(__func__);
 
     if (!inputString || !wordToReplace || !newWord){ 
         return NULL;
@@ -91,7 +91,7 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
     char* pos = strstr(result, wordToReplace);
     while (pos) {
         size_t remainingLength = strlen(pos + wordToReplaceLength);
-        //log_message(LOG_DEBUG, "replaceWord_Realloc: remainingLength: %zu", remainingLength);
+        //log_message(LOG_DEBUG, __func__, "replaceWord_Realloc: remainingLength: %zu", remainingLength);
         // Shift the remaining part of the string to make room for newWord, if needed
         memmove(pos + newWordLength, pos + wordToReplaceLength, sizeof(char) *remainingLength + 1);  // Include '\0'
 
@@ -103,24 +103,24 @@ char* replaceWord_Realloc(char* inputString, const char* wordToReplace, const ch
         pos = strstr(result, wordToReplace);
     }
 
-    log_message(LOG_DEBUG, "Exiting function replaceWord_Realloc");
+    log_function_exit(__func__);
     return inputString;
 }
 
 char* replaceParagraph(char* original, char* newSubstring, char* startPtr, char* endPtr) {
-    log_message(LOG_DEBUG, "Entering function replaceParagraph");
+    log_function_entry(__func__);
 
     // Check for null pointers
     if (original == NULL || newSubstring == NULL || startPtr == NULL || endPtr == NULL) {
-        log_message(LOG_ERROR, "Null pointer input original:%ld, newSubstring: %ld, startPtr: %ld, endPtr: %ld", (long)original, (long)newSubstring, (long)startPtr, (long)endPtr);
+        log_message(LOG_ERROR, __func__, "Null pointer input original:%ld, newSubstring: %ld, startPtr: %ld, endPtr: %ld", (long)original, (long)newSubstring, (long)startPtr, (long)endPtr);
         return NULL;
     }
 
     // Check that startPtr and endPtr are within bounds
     if (startPtr < original || endPtr >= original + strlen(original)) {
-        log_message(LOG_ERROR, "startPtr or endPtr out of bounds. startPtr: %ld, endPtr: %ld, original end: %ld", (long)startPtr, (long)endPtr, (long)(original + strlen(original)));
-        log_message(LOG_DEBUG, " startPtr is at: \"%ld\"", (long)startPtr);
-        log_message(LOG_DEBUG, " endPtr is at: \"%ld\"", (long)endPtr);
+        log_message(LOG_ERROR, __func__, "startPtr or endPtr out of bounds. startPtr: %ld, endPtr: %ld, original end: %ld", (long)startPtr, (long)endPtr, (long)(original + strlen(original)));
+        log_message(LOG_DEBUG, __func__, " startPtr is at: \"%ld\"", (long)startPtr);
+        log_message(LOG_DEBUG, __func__, " endPtr is at: \"%ld\"", (long)endPtr);
         return NULL;
     }
 
@@ -130,37 +130,37 @@ char* replaceParagraph(char* original, char* newSubstring, char* startPtr, char*
     size_t replaceLen = endPtr - startPtr + 1;
     size_t finalLen = originalLen - replaceLen + newSubLen;
 
-    log_message(LOG_DEBUG, "lengths set");
+    log_message(LOG_DEBUG, __func__, "lengths set");
 
     // Create a temporary buffer to hold the modified string
     char *temp = malloc(finalLen + 1 * sizeof(char));
     if (temp == NULL) {
-        log_message(LOG_ERROR, "Memory allocation failed");
+        log_message(LOG_ERROR, __func__, "Memory allocation failed");
         return NULL;
     }
     memset(temp, 0, finalLen + 1);
-    log_message(LOG_DEBUG, "buffer set");
+    log_message(LOG_DEBUG, __func__, "buffer set");
 
     // Copy the part before the replaced section
     strncpy(temp, original, startPtr - original);
-    log_message(LOG_DEBUG, "copied first part");
+    log_message(LOG_DEBUG, __func__, "copied first part");
 
     // Copy the new substring
     strcat(temp, newSubstring);
-    log_message(LOG_DEBUG, "copied new part");
+    log_message(LOG_DEBUG, __func__, "copied new part");
 
     // Copy the part after the replaced section
     strcat(temp, endPtr + 1);
-    log_message(LOG_DEBUG, "copied end");
+    log_message(LOG_DEBUG, __func__, "copied end");
 
     // Copy the modified string back to the original
 
-    log_message(LOG_DEBUG, "Exiting function replaceParagraph");
+    log_function_exit(__func__);
     return temp;
 }
 
 char* createCombinedString(const char *str1, const char *str2) {
-    log_message(LOG_DEBUG, "Entering function createCombinedString");
+    log_function_entry(__func__);
 
     // Calculate the length of str1 and str2
     size_t len1 = strlen(str1);
@@ -171,7 +171,7 @@ char* createCombinedString(const char *str1, const char *str2) {
     char *combined = (char *)malloc(len3); // +1 for the null terminator
 
     if (combined == NULL) {
-        log_message(LOG_ERROR, "Memory allocation failed");
+        log_message(LOG_ERROR, __func__, "Memory allocation failed");
         exit(1);
     }
 
@@ -180,12 +180,12 @@ char* createCombinedString(const char *str1, const char *str2) {
     strcat(combined, str2);
 
 
-    log_message(LOG_DEBUG, "Exiting function createCombinedString");
+    log_function_exit(__func__);
     return combined;
 }
 
 char* extractText(const char *inputString, const char *startDelimiter, const char *endDelimiter, bool includeStart, bool includeEnd) {
-    log_message(LOG_DEBUG, "Entering function extractText");
+    log_function_entry(__func__);
 
     if (inputString == NULL || startDelimiter == NULL || endDelimiter == NULL) {
         return NULL; // Invalid parameters
@@ -222,12 +222,12 @@ char* extractText(const char *inputString, const char *startDelimiter, const cha
     substring[length] = '\0';  // Null-terminate the string
 
 
-    log_message(LOG_DEBUG, "Exiting function extractText");
+    log_function_exit(__func__);
     return substring;
 }
 
 char* appendToString(char *original, const char *strToAppend) {
-    log_message(LOG_DEBUG, "Entering function appendToString");
+    log_function_entry(__func__);
 
     if (strToAppend == NULL) {
         return original; // Nothing to append
@@ -242,14 +242,14 @@ char* appendToString(char *original, const char *strToAppend) {
     char *combined = realloc(original, len);
 
     if (combined == NULL) {
-        log_message(LOG_ERROR, "Memory reallocation failed");
+        log_message(LOG_ERROR, __func__, "Memory reallocation failed");
         exit(1);
     }
 
     // Copy/concatenate the new string
     strlcpy(combined + lenOriginal, strToAppend, len); // Append strToAppend to the end of original
 
-    log_message(LOG_DEBUG, "Exiting function appendToString");
+    log_function_exit(__func__);
     return combined; // Return the reallocated and combined string
 }
 
@@ -290,7 +290,7 @@ void allocateAndCopy(char **destination, const char *source, const char *field_n
         if (*destination) {
             strlcpy(*destination, source, len);
         } else {
-            log_message(LOG_ERROR, "Memory allocation failed for %s", field_name);
+            log_message(LOG_ERROR, __func__, "Memory allocation failed for %s", field_name);
         }
     }
 }

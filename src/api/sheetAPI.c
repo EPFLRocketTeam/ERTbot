@@ -20,7 +20,7 @@ char *template_batch_update_query = "{\"valueInputOption\": \"USER_ENTERED\",\"d
 //char *query = "{\"valueInputOption\": \"USER_ENTERED\",\"data\": [{\"range\": \"Sheet1!A1:C4\",\"majorDimension\": \"ROWS\",\"values\": [[\"Item\", \"Cost\", \"Review\"],[\"Coffee\", 2.50, 5]]}],\"includeValuesInResponse\": true,\"responseValueRenderOption\": \"FORMATTED_VALUE\",\"responseDateTimeRenderOption\": \"SERIAL_NUMBER\"}";
 
 void sheetAPI(char *query, char *url, char *requestType) {
-    log_message(LOG_DEBUG, "Entering function sheetAPI");
+    log_function_entry(__func__);
 
     CURL *curl;
     CURLcode res;
@@ -54,7 +54,7 @@ void sheetAPI(char *query, char *url, char *requestType) {
         res = curl_easy_perform(curl);
         // Check for errors
         if (res != CURLE_OK) {
-            log_message(LOG_ERROR, "sheetAPI: curl_easy_perform() failed: %s", curl_easy_strerror(res));
+            log_message(LOG_ERROR, __func__, "sheetAPI: curl_easy_perform() failed: %s", curl_easy_strerror(res));
         }
         // Clean up
         curl_easy_cleanup(curl);
@@ -63,17 +63,17 @@ void sheetAPI(char *query, char *url, char *requestType) {
 
     curl_global_cleanup();
 
-    log_message(LOG_DEBUG, "Exiting function sheetAPI");
+    log_function_exit(__func__);
 }
 
 void refreshOAuthToken() {
-    log_message(LOG_DEBUG, "Entering function refreshOAuthToken");
+    log_function_entry(__func__);
 
     CURL *curl;
     CURLcode res;
 
     if (GOOGLE_CLIENT_ID == NULL || GOOGLE_CLIENT_SECRET == NULL || GOOGLE_REFRESH_TOKEN == NULL) {
-        log_message(LOG_ERROR, "Environment variables not set.");
+        log_message(LOG_ERROR, __func__, "Environment variables not set.");
         return;
     }
 
@@ -107,7 +107,7 @@ void refreshOAuthToken() {
 
         // Check for errors
         if(res != CURLE_OK) {
-            log_message(LOG_ERROR, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            log_message(LOG_ERROR, __func__, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         } 
         else {
             //Yes the key value has an extra : compared to when the same function is called in wikiAPI functions
@@ -127,12 +127,12 @@ void refreshOAuthToken() {
 
     curl_global_cleanup();
 
-    log_message(LOG_DEBUG, "Exiting function refreshOAuthToken");
+    log_function_exit(__func__);
     return;
 }
 
 void batchUpdateSheet(const char *sheetId, const char *range, const char *values){
-    log_message(LOG_DEBUG, "Entering function batchUpdateSheet");
+    log_function_entry(__func__);
 
     char *requestType = "POST";
     char *modified_url = duplicate_Malloc(template_batch_update_url); // Make a copy to modify
@@ -147,11 +147,11 @@ void batchUpdateSheet(const char *sheetId, const char *range, const char *values
     free(modified_query);
     free(modified_url);
 
-    log_message(LOG_DEBUG, "Exiting function batchUpdateSheet");
+    log_function_exit(__func__);
 }
 
 void batchGetSheet(const char *sheetId, const char *range){
-    log_message(LOG_DEBUG, "Entering function batchGetSheet");
+    log_function_entry(__func__);
 
     refreshOAuthToken();
 
@@ -165,6 +165,6 @@ void batchGetSheet(const char *sheetId, const char *range){
 
     free(modified_url);
 
-    log_message(LOG_DEBUG, "Exiting function batchGetSheet");
+    log_function_exit(__func__);
     return;
 }

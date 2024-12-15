@@ -4,7 +4,7 @@
 
 
 int main(void) {
-    log_message(LOG_DEBUG, "\n\nStarting Tests\n\n");
+    log_message(LOG_DEBUG, __func__, "\n\nStarting Tests\n\n");
 
     int number_failed;
     Suite *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8;

@@ -215,6 +215,9 @@ typedef enum {
 #define LOG_INFO 1
 #define LOG_ERROR 2
 
-void log_message(int level, const char *format, ...);
+void log_message(int level, const char *func, const char *format, ...);
+
+void log_function_entry(const char *func);
+void log_function_exit(const char *func);
 
 #endif

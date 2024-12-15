@@ -5,7 +5,7 @@
 #include "ERTbot_common.h"
 
 char* getCurrentEDTTimeString() {
-    log_message(LOG_DEBUG, "Entering function getCurrentEDTTimeString");
+    log_function_entry(__func__);
 
     // Allocate static memory for the ISO 8601 string
     static char iso8601[26];  // Size 26 for "YYYY-MM-DDTHH:MM:SS-04:00\0"
@@ -30,12 +30,12 @@ char* getCurrentEDTTimeString() {
     }
 
 
-    log_message(LOG_DEBUG, "Exiting function getCurrentEDTTimeString");
+    log_function_exit(__func__);
     return iso8601;
 }
 
 int compareTimes(const char* time1, const char* time2) {
-    log_message(LOG_DEBUG, "Entering function compareTimes");
+    log_function_entry(__func__);
 
     struct tm tm1;
     struct tm tm2;
@@ -60,17 +60,17 @@ int compareTimes(const char* time1, const char* time2) {
 
     // Compare time_t values
     if (time1_t < time2_t){
-        log_message(LOG_DEBUG, "Exiting function compareTimes");
+        log_function_exit(__func__);
         return -1;
     }
     else if (time1_t > time2_t){
 
-        log_message(LOG_DEBUG, "Exiting function compareTimes");
+        log_function_exit(__func__);
         return 1;
     }
     else{
 
-        log_message(LOG_DEBUG, "Exiting function compareTimes");
+        log_function_exit(__func__);
         return 0;
     }
 }
