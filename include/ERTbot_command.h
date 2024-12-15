@@ -4,9 +4,7 @@
 #include "ERTbot_common.h"
 
 
-command** checkForCommand(command** commandQueue, PeriodicCommand** headOfPeriodicCommands);
-
-PeriodicCommand** initalizePeriodicCommands(PeriodicCommand** headOfPeriodicCommands);
+command** checkForCommand(command** commandQueue);
 
 command** executeCommand(command** commandQueue);
 

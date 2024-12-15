@@ -170,16 +170,6 @@ typedef struct wikiFlag {
     struct wikiFlag* next;
 }wikiFlag;
 
-
-typedef struct PeriodicCommand {
-    struct command* command;      // Command to be executed
-    int period;         // Period in seconds
-    time_t next_time;   // Next time to execute the command
-    struct PeriodicCommand* next;  // Next periodic command in the list
-} PeriodicCommand;
-
-extern PeriodicCommand** headOfPeriodicCommands;
-
 typedef struct ErrorState {
     int errorCode;                  // Error code
     char errorMessage[256];         // Error message

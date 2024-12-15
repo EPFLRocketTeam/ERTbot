@@ -4,7 +4,7 @@
  * @brief Contains the program initalisation and loop functions
  *
  * @details Goal of this file is to initalise the program, search for incoming commands (from slack chat,
- *          inline commands on wiki and periodic commands), recognise the command, call the appropriate
+ *          inline commands on wiki), recognise the command, call the appropriate
  *          function in the features.c file.
  *
  * @warning replaceWord function is still causing memory leaks (responsible for 1/3 of memory leaks)
@@ -18,54 +18,56 @@
 #include "timeHelpers.h"
 #include "slackAPI.h"
 
-
 memory chunk;
 
 pageList default_page = {"DefaultID", "DefaultTitle", "DefaultPath", "DefaultDescription", "DefaultContent", "DefaultUpdatedAt", NULL};
 
 char *lastPageRefreshCheck;
 
-PeriodicCommand** headOfPeriodicCommands;
-
-command** headOfCommandQueue;
+command **headOfCommandQueue;
 
 #ifndef TESTING
-int main(){
+int main()
+{
     log_message(LOG_DEBUG, __func__, "\n\nStarting program\n\n");
 
-    //initalise
+    // initalise
     initializeApiTokenVariables();
     initialiseSlackCommandStatusMessage();
     lastPageRefreshCheck = getCurrentEDTTimeString();
-    headOfPeriodicCommands = initalizePeriodicCommands(headOfPeriodicCommands);
-    //declare command queue variable
-    headOfCommandQueue = (command**)malloc(sizeof(command*));
+    // declare command queue variable
+    headOfCommandQueue = (command **)malloc(sizeof(command *));
     *headOfCommandQueue = NULL;
-    int cyclesSinceLastCommand = 0; //reduce number of API calls when "Idling"
+    int cyclesSinceLastCommand = 0; // reduce number of API calls when "Idling"
 
     sendMessageToSlack("Wiki-Toolbox is Online");
 
-    while(1){
+    while (1)
+    {
 
-        headOfCommandQueue = checkForCommand(headOfCommandQueue, headOfPeriodicCommands);
+        headOfCommandQueue = checkForCommand(headOfCommandQueue);
         sleep(1);
 
-        if(*headOfCommandQueue){
+        if (*headOfCommandQueue)
+        {
             cyclesSinceLastCommand = 0;
             log_message(LOG_DEBUG, __func__, "command received");
             headOfCommandQueue = executeCommand(headOfCommandQueue);
         }
 
-        else{
-            cyclesSinceLastCommand ++;
+        else
+        {
+            cyclesSinceLastCommand++;
             log_message(LOG_DEBUG, __func__, "No command received.");
         }
 
-        if(cyclesSinceLastCommand>20){
+        if (cyclesSinceLastCommand > 20)
+        {
             sleep(1);
         }
 
-        if(cyclesSinceLastCommand>200){
+        if (cyclesSinceLastCommand > 200)
+        {
             sleep(28);
         }
     }
