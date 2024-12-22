@@ -22,9 +22,9 @@ jobs:
       - name: Run Custom Build Script
         run: ./scripts/build_and_run.sh --rebuild --run-tests
 
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+      - name: Test Summary
+        uses: test-summary/action@v2
         if: always()
         with:
-          files: |
-            test-results.xml
+          paths: |
+            test-results.tap
