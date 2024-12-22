@@ -20,7 +20,7 @@ jobs:
           cp ~/ERTbot_source_files/ERTbot/build_and_run.sh ./scripts/build_and_run.sh
 
       - name: Run Custom Build Script
-        run: ./scripts/build_and_test.sh --rebuild --run-tests
+        run: ./scripts/build_and_run.sh --rebuild --run-tests
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
