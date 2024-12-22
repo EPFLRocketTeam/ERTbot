@@ -20,8 +20,8 @@ jobs:
       - name: Run Custom Build Script
         run: ./scripts/build_and_test.sh --rebuild --run-tests
 
-      - name: Upload Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2.18.0
         if: always()
         with:
           files: |
