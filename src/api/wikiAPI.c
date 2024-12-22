@@ -164,7 +164,7 @@ pageList* getPage(pageList** head){
 }
 
 // Function to filter and parse the JSON string into a Node linked list
-static pageList* parseJSON(pageList** head, const char* jsonString, const char* filterType, const char* filterCondition) {
+pageList* parseJSON(pageList** head, const char* jsonString, const char* filterType, const char* filterCondition) {
     log_function_entry(__func__);
 
     if (strstr(filterCondition, "\\") != NULL) {

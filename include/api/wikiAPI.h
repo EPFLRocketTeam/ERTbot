@@ -71,6 +71,7 @@ pageList* populatePageList(pageList** head, const char *filterType, const char *
 
 void createPageMutation(const char* path, const char* content, const char* title);
 
+pageList* parseJSON(pageList** head, const char* jsonString, const char* filterType, const char* filterCondition);
 
 char *fetchAndModifyPageContent(const char* pageId, const char* newPageContent, char* outputString);
 
