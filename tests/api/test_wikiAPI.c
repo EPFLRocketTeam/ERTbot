@@ -98,7 +98,7 @@ START_TEST(test_parseJSON_valid_filter_path) {
                 break;
             case 1:
                 ck_assert_str_eq(head->path, "about/acronyms");
-                ck_assert_str_eq(head->title, "Acronmys");
+                ck_assert_str_eq(head->title, "Acronyms");
                 ck_assert_str_eq(head->id, "382");
                 ck_assert_str_eq(head->updatedAt, "2024-11-13T16:37:30.844Z");
                 break;
@@ -126,8 +126,8 @@ START_TEST(test_parseJSON_valid_filter_path) {
                 ck_assert_str_eq(head->id, "1178");
                 ck_assert_str_eq(head->updatedAt, "2024-09-16T05:50:01.554Z");
                 break;
-            head = head->next;
         }
+        head = head->next;
     }
 }
 END_TEST
@@ -192,8 +192,8 @@ START_TEST(test_parseJSON_filter_by_time) {
                 ck_assert_str_eq(head->id, "1995");
                 ck_assert_str_eq(head->updatedAt, "2024-12-22T12:14:28.720Z");
                 break;
-            head = head->next;
         }
+        head = head->next;
     }
 }
 END_TEST
@@ -207,7 +207,7 @@ START_TEST(test_parseJSON_exact_path_match) {
 
     ck_assert_ptr_nonnull(head);
     ck_assert_str_eq(head->path, "about/acronyms");
-    ck_assert_str_eq(head->title, "Acronmys");
+    ck_assert_str_eq(head->title, "Acronyms");
     ck_assert_str_eq(head->id, "382");
     ck_assert_str_eq(head->updatedAt, "2024-11-13T16:37:30.844Z");
 
