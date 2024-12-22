@@ -28,3 +28,4 @@ jobs:
         with:
           paths: |
             test-results.tap
+          show: "all"
