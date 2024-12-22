@@ -14,8 +14,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Ensure Script is Available
-        run: cp ~/ERTbot_source_files/ERTbot/build_and_run.sh ./scripts/build_and_run.sh
+      - name: Ensure directory exists and copy script
+        run: |
+          mkdir -p ./scripts  # Ensure relative path exists
+          cp ~/ERTbot_source_files/ERTbot/build_and_run.sh ./scripts/build_and_run.sh
 
       - name: Run Custom Build Script
         run: ./scripts/build_and_test.sh --rebuild --run-tests
