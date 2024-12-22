@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Ensure Script is Available
-        run: cp ~/ERTbot_source_files/ERTbot/build_and_run.sh /home/runner/work/ERTbot/scripts/build_and_run.sh
+        run: cp ~/ERTbot_source_files/ERTbot/build_and_run.sh ./scripts/build_and_run.sh
 
       - name: Run Custom Build Script
         run: ./scripts/build_and_test.sh --rebuild --run-tests
